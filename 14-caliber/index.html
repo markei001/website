@@ -77,7 +77,7 @@ h1 em,h2.t em{color:var(--brass2);font-style:italic}
 #ld path{fill:none;stroke:var(--brass);stroke-width:1;opacity:.55}
 #ld circle{fill:var(--bg);stroke:var(--brass);stroke-width:1.2}
 .layer{transition:opacity .5s}
-.layer.dim{opacity:.2}
+.layer.dim{opacity:.34}
 .rail{position:absolute;right:0;top:0;width:150px;height:100%;list-style:none;pointer-events:none}
 .rail li{position:absolute;right:14px;transform:translateY(-50%);pointer-events:auto}
 .rail button{display:flex;align-items:center;gap:8px;padding:5px 9px;background:var(--bg);border:1px solid var(--hair);color:var(--mute);font:400 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;transition:color .3s,border-color .3s}
@@ -98,7 +98,7 @@ h1 em,h2.t em{color:var(--brass2);font-style:italic}
   .stage{order:-1}
   .panel{padding:6px 16px 16px}
   .js .step{left:16px;right:16px}
-  #wm{width:100%;top:34px;height:calc(100% - 34px)}
+  #wm{width:100%;top:30px;height:calc(100% - 74px)}
   .rail{width:30px;right:2px}.rail li{right:0}
   .rail button{padding:3px 0;width:26px;justify-content:center}
   .rail button span{display:none}
@@ -119,7 +119,7 @@ section.sec{position:relative;padding:clamp(72px,11vw,150px) clamp(18px,5vw,76px
 .sec h2{font-weight:400;font-size:clamp(1.9rem,3.6vw,3.2rem);line-height:1.06;max-width:22ch}
 .sec h2 em{color:var(--brass2)}
 .sec .lead{margin-top:20px;max-width:46rem;color:#c7c3b6;font-size:1.08rem}
-@media(max-width:760px){.grid{grid-template-columns:1fr}.lab b{font-size:3rem;display:inline-block;margin-right:12px}}
+@media(max-width:760px){.grid{grid-template-columns:minmax(0,1fr)}.lab b{font-size:3rem;display:inline-block;margin-right:12px}}
 
 .tbl{margin-top:44px;border-top:1px solid var(--line);font:400 12.5px var(--mono);font-variant-numeric:tabular-nums}
 .tr{display:grid;grid-template-columns:1.5fr .8fr 1.1fr 1fr 1.5fr;gap:10px;padding:14px 0;border-bottom:1px solid var(--hair);align-items:baseline}
@@ -175,13 +175,13 @@ footer .brand{font-size:18px}
       <div class="kick">N&deg; 01 &middot; Mainplate</div>
       <h2 class="t">The floor everything <em>agrees</em> on</h2>
       <p>A disc of brass, 0.9 mm thick, bored for twenty-one pivots to within two microns. Every other layer is only as accurate as the holes in this one. The grain is perlage: overlapping circles cut by a spinning peg, each a small record of where the tool had been.</p>
-      <div class="spec">&Oslash; <b>31.0</b> mm &middot; <b>21</b> bores &middot; perlage, rhodium-free</div>
+      <div class="spec">&Oslash; <b>31.0</b> mm &middot; <b>21</b> bores &middot; perlage grain</div>
     </article>
     <article class="step" data-i="2">
       <div class="kick">N&deg; 02 &middot; Going train</div>
       <h2 class="t">Four meshes between a spring and a <em>heartbeat</em></h2>
       <p>The barrel turns once in eight hours. Pinions of 8, 8, 8 and 6 leaves multiply that: once an hour at the centre, once a minute at the fourth, ten times a minute at the escape wheel. 8 &times; 8 &times; 7.5 &times; 10 is 4,800 to one.</p>
-      <div class="spec"><b>64:8</b> &middot; <b>64:8</b> &middot; <b>60:8</b> &middot; <b>60:6</b> &middot; module 2.8</div>
+      <div class="spec"><b>64:8</b> &middot; <b>64:8</b> &middot; <b>60:8</b> &middot; <b>60:6</b> &middot; module 3.0, scaled</div>
     </article>
     <article class="step" data-i="3">
       <div class="kick">N&deg; 03 &middot; Escapement</div>
@@ -247,7 +247,7 @@ footer .brand{font-size:18px}
   <div class="lab"><b>I</b>The reduction</div>
   <div>
     <h2>Four meshes turn a slow spring into a <em>fast</em> beat</h2>
-    <p class="lead">Each wheel drives the next one's pinion, so each turns faster than the last. The numbers on the right are counted live from the angles of the gears you were just looking at, since this page loaded.</p>
+    <p class="lead">Each wheel drives the next one's pinion, so each turns faster than the last. The last column is counted live from the angles of the gears you were just looking at, since this page loaded.</p>
     <div class="tbl" role="table" aria-label="Gear train">
       <div class="tr h" role="row"><span>Wheel</span><span>Teeth</span><span class="opt">Drives</span><span>Turns / h</span><span>Since you arrived</span></div>
       <div class="tr" role="row"><span class="n">Barrel</span><span>64</span><span class="opt">centre pinion 8</span><span>0.125</span><span class="live" id="cBarrel">0.0000 rev</span></div>
@@ -255,7 +255,7 @@ footer .brand{font-size:18px}
       <div class="tr" role="row"><span class="n">Third</span><span>60</span><span class="opt">fourth pinion 8</span><span>8</span><span class="live" id="cThird">0.000 rev</span></div>
       <div class="tr" role="row"><span class="n">Fourth</span><span>60</span><span class="opt">escape pinion 6</span><span>60</span><span class="live" id="cFourth">0.00 rev</span></div>
       <div class="tr" role="row"><span class="n">Escape</span><span>24</span><span class="opt">pallet fork</span><span>600</span><span class="live" id="cEsc">0.0 rev</span></div>
-      <div class="tr" role="row"><span class="n">Balance</span><span class="opt">&mdash;</span><span class="opt">hairspring</span><span class="sap">14,400 swings</span><span class="live" id="cBal">0 swings</span></div>
+      <div class="tr" role="row"><span class="n">Balance</span><span class="opt">&mdash;</span><span class="opt">hairspring</span><span class="sap">14,400 cycles</span><span class="live" id="cBal">0 cycles</span></div>
     </div>
     <p class="eq"><b>64/8 &times; 64/8 &times; 60/8 &times; 60/6</b> = 8 &times; 8 &times; 7.5 &times; 10 = <b>4,800</b>. One barrel turn in 8 h gives 600 escape-wheel turns an hour: 10 a minute, 24 teeth, 240 teeth a minute, 8 beats a second at half a tooth each.</p>
   </div>
@@ -269,7 +269,7 @@ footer .brand{font-size:18px}
     <h2>One oscillation is <em>two</em> ticks</h2>
     <p class="lead">The balance swings through centre twice per cycle, and every passage flips the fork. The brass trace is the balance angle, the blue trace the fork. Notice the fork only moves while the balance is near zero: a watch spends most of its life doing nothing, very precisely.</p>
     <div class="scope">
-      <svg id="scp" viewBox="0 0 720 230" role="img" aria-label="Oscilloscope trace of balance angle and pallet fork over the last second and a half"></svg>
+      <svg id="scp" viewBox="0 0 720 252" role="img" aria-label="Oscilloscope trace of balance angle and pallet fork over the last second and a half"></svg>
       <div class="row">
         <label for="amp">Amplitude <input id="amp" type="range" min="180" max="310" value="270" step="1"><output id="ampO" for="amp">270&deg;</output></label>
         <span class="legend"><i style="background:#d4a84f"></i>balance <i style="background:#5b9cf6;margin-left:14px"></i>fork</span>
@@ -290,7 +290,7 @@ footer .brand{font-size:18px}
       <div><dt>Power reserve</dt><dd>40 h</dd></div><div><dt>Jewels</dt><dd>21</dd></div>
       <div><dt>Diameter</dt><dd>31.0 mm</dd></div><div><dt>Height</dt><dd>3.9 mm</dd></div>
       <div><dt>Barrel</dt><dd>64 t, 1 turn / 8 h</dd></div><div><dt>Escape wheel</dt><dd>24 t, 10 rpm</dd></div>
-      <div><dt>Gear module</dt><dd>2.8 (scaled)</dd></div><div><dt>Pressure angle</dt><dd>20&deg;</dd></div>
+      <div><dt>Gear module</dt><dd>3.0 (scaled)</dd></div><div><dt>Pressure angle</dt><dd>20&deg;</dd></div>
       <div><dt>Escapement</dt><dd>Swiss lever, sapphire pallets</dd></div><div><dt>Finishing</dt><dd>perlage, polished chamfers</dd></div>
     </dl>
   </div>
@@ -397,9 +397,9 @@ function build(){
    +screw([BAL[0]-122,BAL[1]-86],10,6)+screw([BAL[0]-58,BAL[1]+112],70,6)+screw([Bq[0]-70,Bq[1]-50],30,6.5));
   // L4 dial
   let dl=`<circle r="374" fill="none" stroke="#0b1429" stroke-width="46"/><circle r="352" fill="none" stroke="#d4a84f" stroke-opacity=".7" stroke-width="1.4"/><circle r="397" fill="none" stroke="#d4a84f" stroke-opacity=".7" stroke-width="1.4"/><circle r="359" fill="none" stroke="#d4a84f" stroke-opacity=".3"/>`;
-  for(let i=0;i<60;i++){const a=i*6*D2R,big=i%5===0;dl+=`<path d="M${pt(big?380:386,a-Math.PI/2)}L${pt(393,a-Math.PI/2)}" stroke="${big?'#f0d08a':'#a49266'}" stroke-width="${big?2.4:1}"/>`}
-  dl+='<g font-family="Bodoni Moda,serif" font-style="italic" fill="#ece5d3" text-anchor="middle" font-size="21" aria-hidden="true">';
-  for(let i=0;i<12;i++){const a=(i*30-90)*D2R,x=367*Math.cos(a),y=367*Math.sin(a);dl+=`<text x="${f2(x)}" y="${f2(y+7)}" ${i===0?'fill="#f0d08a"':''}>${roman[i]}</text>`}
+  for(let i=0;i<60;i++){const a=i*6*D2R,big=i%5===0;dl+=`<path d="M${pt(big?383:388,a-Math.PI/2)}L${pt(394,a-Math.PI/2)}" stroke="${big?'#f0d08a':'#a49266'}" stroke-width="${big?2.4:1}"/>`}
+  dl+='<g font-family="Bodoni Moda,serif" font-style="italic" fill="#ece5d3" text-anchor="middle" font-size="18" aria-hidden="true">';
+  for(let i=0;i<12;i++){const a=(i*30-90)*D2R,x=365*Math.cos(a),y=365*Math.sin(a);dl+=`<text x="${f2(x)}" y="${f2(y+6)}" ${i===0?'fill="#f0d08a"':''}>${roman[i]}</text>`}
   dl+='</g>';
   const RV=[158,-168];
   dl+=`<g transform="translate(${RV[0]} ${RV[1]})"><circle r="46" fill="#081022" stroke="#d4a84f" stroke-opacity=".7"/>`;
@@ -435,7 +435,7 @@ const balDeg=x=>-AMP*Math.sin(Math.PI*x);
 const BOUNDS=[.13,.26,.39,.52,.65,.78,.89];
 const NAMES=['Mainplate','Going train','Escapement','Bridges','Skeleton dial','Hands'];
 const ANCH=[[-322,24],[Bq[0],Bq[1]],[BAL[0],BAL[1]],[50,14],[264,-264],[0,0]];
-const GAP=72,SQ0=.42;
+const GAP=84,SQ0=.48;
 let pTarget=0,eDisp=0,step=0,act=[0,0,0,0,0,0],lastStep=-1,reserve=1,scene=$('#scene'),stageVis=true;
 function sceneP(){const r=scene.getBoundingClientRect(),tot=r.height-innerHeight;return clamp(-r.top/tot,0,1)}
 function readScroll(){
@@ -452,7 +452,7 @@ const steps=[...document.querySelectorAll('.step')];
 
 /* projection of the stack */
 function layout(e){
-  const rz=-32*e,sq=1-(1-SQ0)*e,shift=176*e,hk=[];
+  const rz=-32*e,sq=1-(1-SQ0)*e,shift=226*e,hk=[];
   for(let k=0;k<6;k++)hk.push((k*GAP+act[k]*20)*e);
   return{rz,sq,shift,hk};
 }
@@ -526,30 +526,30 @@ function readouts(r){
   const tt=Math.floor(T)%86400;
   clk.textContent=pad(Math.floor(tt/3600))+':'+pad(Math.floor(tt%3600/60))+':'+pad(tt%60)+(speed!==1?'  ×'+(speed<1?'⅛':speed):'');
   roBeat.textContent=((Math.floor(r.x)%8)+1)+' / 8'+(fast?'  (time-lapse)':'');
-  roBal.textContent=(fast?'±'+AMP:f2(-r.bd).toFixed(0)+'°')+'  @ 4 Hz';
+  roBal.textContent=(fast?'±'+AMP+'°':Math.abs(r.bd).toFixed(0)+'°')+'  @ 4 Hz';
   roEsc.textContent='24 teeth, 10 rpm, '+(fast?'continuous':'steps of 7.5°');
   if(cntVis&&T0){
     const q=(x,y)=>Math.abs(x-y)/TAU;
     cnt.b.textContent=q(r.a.tb,T0.tb).toFixed(4)+' rev';cnt.c.textContent=q(r.a.tc,T0.tc).toFixed(4)+' rev';
     cnt.t.textContent=q(r.a.t3,T0.t3).toFixed(3)+' rev';cnt.f.textContent=q(r.th4,T0.th4).toFixed(2)+' rev';
     cnt.e.textContent=q(r.a.te,T0.te).toFixed(1)+' rev';
-    cnt.s.textContent=Math.max(0,Math.floor((r.x-x0)/2)).toLocaleString('en-US')+' swings';
+    cnt.s.textContent=Math.max(0,Math.floor((r.x-x0)/2)).toLocaleString('en-US')+' cycles';
   }
 }
 
 /* ===== scope ===== */
 const scp=el('scp');
-scp.innerHTML=`<g stroke="#9aa4b8" stroke-opacity=".16" stroke-width="1">${[0,1,2,3,4,5,6].map(i=>`<path d="M${i*120} 0V230"/>`).join('')}<path d="M0 78H720M0 190H720"/></g>
+scp.innerHTML=`<g stroke="#9aa4b8" stroke-opacity=".16" stroke-width="1">${[0,1,2,3,4,5,6].map(i=>`<path d="M${i*120} 0V252"/>`).join('')}<path d="M0 78H720M0 208H720"/></g>
 <path d="M0 78H720" stroke="#d4a84f" stroke-opacity=".25" stroke-dasharray="2 6"/>
 <path id="trB" fill="none" stroke="#d4a84f" stroke-width="2"/><path id="trF" fill="none" stroke="#5b9cf6" stroke-width="2"/>
-<g font-family="JetBrains Mono,monospace" font-size="10.5" fill="#9aa4b8"><text x="6" y="14">+AMP</text><text x="6" y="150">-AMP</text><text x="6" y="226">FORK</text><text x="714" y="226" text-anchor="end">now</text><text x="6" y="72">0&#176;</text></g>`;
+<g font-family="JetBrains Mono,monospace" font-size="10.5" fill="#9aa4b8"><text x="6" y="14">+AMP</text><text x="6" y="150">-AMP</text><text x="6" y="172">FORK</text><text x="714" y="246" text-anchor="end">now</text><text x="6" y="72">0&#176;</text></g>`;
 const trB=el('trB'),trF=el('trF'),scNote=el('scNote');
 function scope(){
   const W=1.5,N=300,st=fast?performance.now()/1000:T;let b='',f='';
   for(let i=0;i<=N;i++){
     const t=st-W+W*i/N,x=t*8,X=i*720/N;
     b+=(i?'L':'M')+f2(X)+' '+f2(78-balDeg(x)/320*70);
-    f+=(i?'L':'M')+f2(X)+' '+f2(190-forkDeg(x)/DELTA*28);
+    f+=(i?'L':'M')+f2(X)+' '+f2(208-forkDeg(x)/DELTA*30);
   }
   trB.setAttribute('d',b);trF.setAttribute('d',f);
   scNote.textContent='window 1.5 s '+(fast?'(real time, movement is in time-lapse)':'')+'';
