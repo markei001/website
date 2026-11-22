@@ -1,0 +1,840 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PRESS GANG — riso zine &amp; print collective · Issue #7</title>
+<meta name="description" content="Press Gang is a risograph zine and print collective. Issue #7, The Overprint Issue, is out now: flip through it, then print your own two-ink flyer and drag the layers out of register.">
+<meta name="theme-color" content="#f3ead2">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f3ead2'/%3E%3Ccircle cx='13' cy='14' r='10' fill='%23ff48b0'/%3E%3Ccircle cx='20' cy='19' r='10' fill='%230078bf' style='mix-blend-mode:multiply'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+@property --m{syntax:'<number>';inherits:true;initial-value:1}
+:root{
+  --paper:#f3ead2;--paper2:#e8dcbb;--card:#f9f3e2;--navy:#15184f;--muted:#42446a;
+  --pink:#ff48b0;--blue:#0078bf;--blue-d:#00649f;--teal:#00838a;--yellow:#ffe800;--orange:#ff6c2f;
+  --jx:3;--jy:2;
+  --display:"Bagel Fat One","Arial Rounded MT Bold",system-ui,sans-serif;
+  --type:"Special Elite","Courier New",Courier,monospace;
+  --tooth:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='t' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='9'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .1 -1.6 0 0 0 .78'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23t)'/%3E%3C/svg%3E");
+  --speck:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='s' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -11 0 0 0 9.9'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23s)'/%3E%3C/svg%3E");
+}
+*{box-sizing:border-box;margin:0;padding:0}
+@media(prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+html{scroll-padding-top:4rem;overflow-x:clip}
+body{background:var(--paper);color:var(--navy);font:400 1.0625rem/1.6 var(--type);overflow-x:hidden}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:300;background:var(--tooth);opacity:.55}
+h1,h2,h3,h4{font-family:var(--display);font-weight:400;line-height:.95}
+a{color:inherit}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--navy);outline-offset:3px;box-shadow:0 0 0 6px var(--yellow)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:absolute;left:-999px;top:0;background:var(--yellow);padding:.6rem 1rem;z-index:999}
+.skip:focus{left:0}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(1rem,5vw,3rem)}
+
+/* ---------- ink system ---------- */
+.ink{mix-blend-mode:multiply}
+.ip{fill:var(--pink);color:var(--pink)}.ib{fill:var(--blue);color:var(--blue)}.iy{fill:var(--yellow);color:var(--yellow)}
+/* global jitter (scroll + pointer driven), used on hero + headings only */
+.jp{transform:translate(calc(var(--jx)*var(--m)*1px),calc(var(--jy)*var(--m)*.6px))}
+.jb{transform:translate(calc(var(--jx)*var(--m)*-1px),calc(var(--jy)*var(--m)*-.6px))}
+.jy{transform:translate(calc(var(--jy)*var(--m)*.9px),calc(var(--jx)*var(--m)*-.7px))}
+/* static jitter, hover only */
+.sp{transform:translate(calc(var(--m)*1.6px),calc(var(--m)*1px))}
+.sb{transform:translate(calc(var(--m)*-1.6px),calc(var(--m)*-1px))}
+.sy{transform:translate(calc(var(--m)*-.6px),calc(var(--m)*1.4px))}
+.hov{transition:--m .35s cubic-bezier(.3,1.6,.5,1)}
+.hov:hover,.hov:focus-within{--m:3}
+.art{isolation:isolate;background:var(--paper);display:block;width:100%;height:auto;overflow:visible}
+.card .art{background:var(--card)}
+.grain{-webkit-mask-image:var(--speck);mask-image:var(--speck);-webkit-mask-size:220px;mask-size:220px}
+.rough{filter:url(#rough)}.rough2{filter:url(#rough2)}.duo>.rough2{will-change:transform}
+/* two-ink headline */
+.duo{position:relative;display:inline-block;isolation:isolate;color:var(--blue)}
+.duo.js{color:inherit}
+.duo>span{mix-blend-mode:multiply;display:block}
+.duo .d1{color:var(--blue)}
+.duo .d2{position:absolute;inset:0;color:var(--pink)}
+.duo.alt .d1{color:var(--pink)}.duo.alt .d2{color:var(--blue)}
+.duo.js:not(.in){--m:6}
+.duo.js{transition:--m 1.3s cubic-bezier(.2,1.4,.4,1)}
+.hero .duo.in{--m:2.3}.logo .duo.in{--m:.3}footer .duo.in{--m:2}
+.on-dark .duo>span{mix-blend-mode:screen}
+.on-dark .duo .d1{color:var(--pink)}.on-dark .duo .d2{color:#4cb8ff}
+
+/* ---------- stock pieces ---------- */
+.tape{position:absolute;width:112px;height:30px;background:repeating-linear-gradient(90deg,rgba(255,232,0,.62) 0 9px,rgba(255,232,0,.45) 9px 18px);mix-blend-mode:multiply;clip-path:polygon(0 0,100% 0,98% 25%,100% 50%,98% 75%,100% 100%,0 100%,2% 75%,0 50%,2% 25%);z-index:6;pointer-events:none}
+.tape.pk{background:repeating-linear-gradient(135deg,rgba(255,72,176,.55) 0 7px,rgba(255,72,176,.38) 7px 14px)}
+.tape.bl{background:rgba(0,120,191,.45)}
+.dots{--c:var(--pink);background:radial-gradient(circle,var(--c) 0 27%,transparent 30%) 0 0/9px 9px,radial-gradient(circle,var(--c) 0 27%,transparent 30%) 4.5px 4.5px/9px 9px}
+.btn{display:inline-block;background:var(--yellow);color:var(--navy);border:3px solid var(--navy);padding:.6em 1.15em;text-decoration:none;cursor:pointer;font-size:1rem;box-shadow:5px 5px 0 var(--pink);transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--blue)}
+.btn:active{transform:translate(5px,5px);box-shadow:0 0 0 var(--blue)}
+.btn.alt{background:var(--paper)}
+.btn[disabled]{opacity:.45;cursor:not-allowed;box-shadow:none}
+.btn.sm{padding:.4em .8em;font-size:.9rem;box-shadow:3px 3px 0 var(--pink)}
+mark{background:var(--yellow);color:var(--navy);padding:.05em .4em;mix-blend-mode:multiply}
+.lab{font-size:.8rem;letter-spacing:.14em;text-transform:uppercase}
+.cbar{display:flex;height:11px;width:150px;border:1px solid var(--navy)}
+.cbar i{flex:1}
+.reg{position:absolute;width:34px;height:34px;pointer-events:none;z-index:4}
+.reg svg{position:absolute;inset:0;width:100%;height:100%;mix-blend-mode:multiply;overflow:visible}
+
+/* ---------- top bar ---------- */
+.bar{display:flex;align-items:center;justify-content:space-between;gap:.5rem 1.4rem;flex-wrap:wrap;padding:.6rem clamp(1rem,4vw,3rem);background:var(--paper);border-bottom:3px solid var(--navy);position:relative;z-index:50}
+@media(min-width:900px){.bar{position:sticky;top:0}}
+.logo{font:1.7rem/1 var(--display);text-decoration:none}
+.bar nav{display:flex;gap:.3rem 1.2rem;flex-wrap:wrap;font-size:.95rem}
+.bar nav a{text-decoration:none;background:linear-gradient(var(--yellow),var(--yellow)) 0 92%/0 .5em no-repeat;transition:background-size .25s}
+.bar nav a:hover{background-size:100% .5em}
+.regsw{border:0;display:flex;align-items:center;gap:.5rem}
+.regsw legend{float:left;margin-right:.5rem}
+.seg{display:inline-flex;border:3px solid var(--navy);background:var(--paper);flex-wrap:wrap}
+.seg label{position:relative}
+.seg input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer;width:100%;height:100%}
+.seg span{display:block;padding:.25em .65em;font-size:.85rem;white-space:nowrap}
+.seg input:checked+span{background:var(--navy);color:var(--paper)}
+.seg input:focus-visible+span{outline:3px solid var(--blue);outline-offset:2px}
+
+/* ---------- hero ---------- */
+.hero{position:relative;display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:1.5rem 3rem;align-items:center;padding:clamp(2rem,5vw,4rem) clamp(1rem,5vw,4.5rem) 4.5rem;max-width:1500px;margin:0 auto}
+.hero h1{font-size:clamp(4.2rem,15.2vw,12.4rem);margin:.15em 0 .1em;letter-spacing:-.005em}
+.hero h1 .duo{display:block;width:fit-content}
+.kick{display:flex;flex-wrap:wrap;gap:.4rem .9rem;align-items:center;font-size:.9rem;letter-spacing:.1em}
+.lede{max-width:34rem;font-size:1.12rem}
+.lede b{background:linear-gradient(transparent 55%,var(--yellow) 55% 92%,transparent 92%);font-weight:400}
+.cta{display:flex;flex-wrap:wrap;gap:1rem 1.4rem;margin:1.6rem 0 1.4rem}
+.runnote{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;font-size:.85rem;color:var(--muted)}
+.printwrap{position:relative;transform:rotate(1.6deg);justify-self:center;width:min(100%,560px)}
+.printcard{position:relative;background:var(--card);padding:clamp(.6rem,2vw,1.1rem) clamp(.6rem,2vw,1.1rem) 2.6rem;box-shadow:0 2px 0 rgba(21,24,79,.15),8px 14px 0 rgba(21,24,79,.12);isolation:isolate}
+.stack{position:relative;aspect-ratio:1;background:var(--card);isolation:isolate;overflow:hidden}
+.lay{position:absolute;inset:0;width:100%;height:100%;mix-blend-mode:multiply;will-change:transform}
+.printcard figcaption{position:absolute;left:1.1rem;right:1.1rem;bottom:.7rem;font-size:.8rem;color:var(--muted)}
+.stk{position:absolute;z-index:8;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.stk.lift{cursor:grabbing;filter:drop-shadow(6px 8px 0 rgba(21,24,79,.2))}
+.stk.round{width:112px;height:112px;right:-26px;top:-28px;rotate:8deg}
+.stk.round svg{width:100%;height:100%;animation:spin 40s linear infinite}
+.stk.burst{left:-34px;bottom:64px;width:118px;height:118px;rotate:-9deg;background:var(--yellow);clip-path:polygon(50% 0,60% 14%,76% 6%,78% 23%,95% 24%,88% 40%,100% 50%,88% 60%,95% 76%,78% 77%,76% 94%,60% 86%,50% 100%,40% 86%,24% 94%,22% 77%,5% 76%,12% 60%,0 50%,12% 40%,5% 24%,22% 23%,24% 6%,40% 14%);display:grid;place-items:center;text-align:center;font:1.15rem/1 var(--display);color:var(--navy);mix-blend-mode:multiply}
+.stk.burst small{display:block;font:.7rem/1.1 var(--type);margin-top:.15rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero .reg.a{left:clamp(.5rem,2vw,1.5rem);top:.5rem}.hero .reg.b{right:clamp(.5rem,2vw,1.5rem);bottom:1rem}
+.hero .cbar{position:absolute;left:clamp(1rem,5vw,4.5rem);bottom:1.2rem}
+@media(max-width:860px){.hero h1{font-size:min(23vw,9.5rem)}.stk.burst{left:-6px}.stk.round{right:-8px}.hero{grid-template-columns:1fr}.printwrap{margin-top:1.5rem;width:min(92%,480px)}.hero .cbar{display:none}}
+@media(prefers-reduced-motion:no-preference){
+  .land{animation:land .9s cubic-bezier(.2,.8,.3,1) both}
+  .hero .duo .d1{animation:land .8s .1s both}.hero .duo .d2{animation:land .8s .55s both}
+  .lay.iy{animation:land .9s .2s both}.lay.ip{animation:land .9s .75s both}.lay.ib{animation:land .9s 1.3s both}
+}
+@keyframes land{from{opacity:0;translate:0 -22px}}
+
+/* ---------- band ---------- */
+.bandwrap{overflow:hidden;padding:1.2rem 0 1.6rem;margin-top:-1rem}
+.band{background:var(--pink);color:var(--navy);width:106%;margin-left:-3%;transform:rotate(-1.4deg);padding:1.1rem 0 1.5rem;font:clamp(1.3rem,3.2vw,2rem)/1 var(--display);white-space:nowrap}
+.track{display:flex;width:max-content;animation:roll 34s linear infinite}
+.track span{padding-right:1.4rem}
+@keyframes roll{to{transform:translateX(-50%)}}
+
+/* ---------- sections ---------- */
+section{position:relative}
+.sec{padding:clamp(4rem,8vw,6.5rem) 0}
+.sec h2{font-size:clamp(2.8rem,8.5vw,6.6rem);margin-bottom:.35em}
+.sec h2 .duo{max-width:100%}
+.flood-pink{background:var(--pink)}
+.flood-blue{background:var(--blue-d);color:#fffaf0}
+.flood-yellow{background:var(--yellow)}
+.flood-teal{background:var(--teal)}
+.flood-pink,.flood-blue,.flood-yellow,.flood-teal{isolation:isolate}
+.flood-pink::before,.flood-blue::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(circle,rgba(255,255,255,.16) 0 26%,transparent 29%) 0 0/11px 11px;-webkit-mask-image:linear-gradient(120deg,transparent 30%,#000);mask-image:linear-gradient(120deg,transparent 30%,#000)}
+.flood-pink::before{background-image:radial-gradient(circle,rgba(21,24,79,.13) 0 26%,transparent 29%)}
+
+/* inside */
+.inside{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,.8fr);gap:2.5rem 4rem;align-items:start}
+.toc{list-style:none}
+.toc button{all:unset;box-sizing:border-box;display:flex;align-items:baseline;gap:.8rem;width:100%;padding:.62rem .3rem;cursor:pointer;transition:background .2s,padding .2s}
+.toc button:hover,.toc button:focus-visible{background:linear-gradient(90deg,var(--yellow),transparent);padding-left:.9rem}
+.toc .pn{font:1.5rem/1 var(--display);min-width:2.2ch;color:var(--blue)}
+.toc .tt{font-size:1.18rem}
+.toc .dl{flex:1;min-width:1rem;height:.5em;background:radial-gradient(circle,var(--navy) 0 28%,transparent 32%) 0 50%/8px 8px repeat-x;opacity:.55}
+.toc .ds{font-size:.82rem;color:var(--muted);text-align:right;max-width:13rem}
+.toc .cover .tt{font-weight:700}
+.note{position:relative;background:var(--yellow);padding:1.6rem 1.4rem 1.4rem;rotate:2.2deg;margin-top:1rem;mix-blend-mode:multiply;font-size:.98rem}
+.note p+p{margin-top:.7em}
+.note s{text-decoration-color:var(--pink);text-decoration-thickness:3px}
+@media(max-width:820px){.inside{grid-template-columns:1fr}.toc .ds{display:none}}
+
+/* zine */
+.mat{background-color:var(--teal);background-image:linear-gradient(rgba(255,255,255,.2) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.2) 1px,transparent 1px),linear-gradient(rgba(255,255,255,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.1) 1px,transparent 1px);background-size:160px 160px,160px 160px,32px 32px,32px 32px}
+.mat .duo>span,.tool .duo>span{mix-blend-mode:normal}.mat .duo .d1,.tool .duo .d1{color:var(--yellow)}.mat .duo .d2,.tool .duo .d2{color:#fffaf0;z-index:-1}
+.tag{display:inline-block;background:var(--paper);color:var(--navy);padding:.5rem .9rem;rotate:-1deg;max-width:36rem;font-size:.98rem;box-shadow:4px 4px 0 var(--navy)}
+.stage{margin:2.2rem 0 1.5rem;display:flex;justify-content:center;overflow:hidden;padding:1.5rem 0 2rem}
+.book{--pw:min(40vw,420px);--ph:calc(var(--pw)*1.4);position:relative;width:calc(var(--pw)*2);height:var(--ph);perspective:2400px;transition:transform .9s cubic-bezier(.5,.05,.2,1);outline-offset:14px}
+.book::before{content:"";position:absolute;left:3%;right:3%;bottom:-18px;height:30px;background:rgba(0,0,0,.28);filter:blur(14px);border-radius:50%}
+.leaf{position:absolute;left:50%;top:0;width:var(--pw);height:var(--ph);transform-origin:left center;transform-style:preserve-3d;transition:transform .95s cubic-bezier(.55,.06,.25,1)}
+.leaf.flip{transform:rotateY(-180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;background:var(--paper);container-type:inline-size;box-shadow:0 0 0 1px rgba(21,24,79,.12)}
+.face.back{transform:rotateY(180deg)}
+.face::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(21,24,79,.2),transparent 12%)}
+.face.back::after{background:linear-gradient(270deg,rgba(21,24,79,.2),transparent 12%)}
+.face::before{content:"";position:absolute;inset:0;z-index:5;pointer-events:none;background:linear-gradient(90deg,rgba(21,24,79,.4),transparent 70%);opacity:0}
+.leaf.turn .face::before{animation:shade .95s ease-in-out}
+@keyframes shade{50%{opacity:.8}}
+.book.single{--pw:min(86vw,360px);width:var(--pw)}
+.book.single .leaf{left:0}
+.bk-ctl{display:flex;justify-content:center;align-items:center;gap:1rem 1.4rem;flex-wrap:wrap}
+.bk-ctl output{background:var(--paper);color:var(--navy);padding:.3em .8em;min-width:14ch;text-align:center;font-size:.9rem}
+.pg{height:100%;position:relative;padding:8% 8.5% 11%;display:flex;flex-direction:column;gap:.55em;font-size:max(12.5px,3.45cqw);line-height:1.42;color:var(--navy)}
+.pg::after{content:attr(data-n);position:absolute;bottom:3.6%;font-size:.8em}
+.pg[data-side="r"]::after{right:8.5%}.pg[data-side="l"]::after{left:8.5%}
+.pg h3{font-size:2.1em;line-height:.92}
+.pg h3 em{font-style:normal;color:var(--blue)}
+.pg p{margin:0}
+.pg .sm{font-size:.82em;color:var(--muted)}
+.pg .art{width:100%}
+.pg .qa b{font-weight:400;background:var(--yellow);padding:0 .25em;mix-blend-mode:multiply}
+.pg ol{padding-left:1.3em}.pg ol li{margin-bottom:.35em}
+.cells{display:grid;grid-template-columns:1fr 1fr;gap:.7em .9em}
+.cells h4{font-size:1.15em;margin-top:.2em}
+.ads{display:grid;gap:.55em}
+.ad{border:2px dashed var(--navy);padding:.4em .6em}
+.ad:nth-child(2){rotate:-1.2deg;background:linear-gradient(transparent,transparent)}
+.ad:nth-child(3){rotate:.8deg;margin-left:6%}
+.ad:nth-child(4){rotate:-.5deg;margin-right:4%}
+.ad.hl{background:var(--yellow);mix-blend-mode:multiply}
+.bars{display:flex;height:3.2em;align-items:stretch;gap:2px;margin-top:auto}.bars i{background:var(--navy)}
+.hint{font-size:.85rem;color:var(--navy);background:var(--paper);width:fit-content;max-width:calc(100% - 2rem);padding:.3rem .8rem;text-align:center;margin:1.2rem auto 0}
+
+/* passes */
+.passes{list-style:none;display:grid;grid-template-columns:repeat(4,1fr);gap:1.6rem;counter-reset:p;align-items:start}
+.passes li{position:relative;padding-top:.5rem}
+.passes li:nth-child(2){margin-top:2.2rem}.passes li:nth-child(3){margin-top:.8rem}.passes li:nth-child(4){margin-top:3rem}
+.passes .n{font:clamp(4rem,9vw,6.5rem)/.85 var(--display)}
+.passes h3{font-size:1.6rem;margin:.3rem 0 .4rem}
+.passes p{font-size:.98rem}
+.passes .chip{height:34px;width:100%;margin-bottom:.9rem;border:2px solid var(--navy)}
+@media(max-width:820px){.passes{grid-template-columns:1fr 1fr}.passes li{margin-top:0!important}}
+@media(max-width:520px){.passes{grid-template-columns:1fr}}
+
+/* tool */
+.tool-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:2.5rem clamp(1.5rem,4vw,4rem);align-items:start}
+.panel{background:var(--card);color:var(--navy);padding:1.5rem 1.3rem 1.3rem;position:relative;box-shadow:7px 8px 0 rgba(21,24,79,.35)}
+.panel fieldset,.panel .fld{border:0;margin-bottom:1.1rem}
+.panel legend,.panel .fld>label{display:block;margin-bottom:.35rem}
+.panel input[type=text]{width:100%;border:0;border-bottom:3px solid var(--navy);background:transparent;padding:.3rem .1rem;font-size:1.05rem;border-radius:0}
+.panel input[type=text]:focus-visible{background:var(--yellow);outline:none;box-shadow:none}
+.swatches{display:flex;flex-wrap:wrap;gap:.45rem}
+.swatches label{position:relative}
+.swatches input{position:absolute;inset:0;opacity:0;margin:0;width:100%;height:100%;cursor:pointer}
+.swatches span.c{display:block;width:34px;height:34px;border-radius:50%;border:2px solid var(--navy)}
+.swatches input:checked+span.c{box-shadow:0 0 0 3px var(--card),0 0 0 6px var(--navy)}
+.swatches input:focus-visible+span.c{outline:3px solid var(--blue);outline-offset:6px}
+.acts{display:flex;flex-wrap:wrap;gap:.7rem 1rem;margin-top:.4rem}
+.read{margin-top:1.1rem;border-top:3px dashed var(--navy);padding-top:.8rem;display:flex;justify-content:space-between;gap:.5rem 1rem;flex-wrap:wrap;align-items:baseline}
+.read b{font:1.9rem/1 var(--display);color:var(--blue)}
+.fly{position:relative;justify-self:center;width:min(100%,420px);rotate:-1.4deg}
+.sheet{position:relative;aspect-ratio:400/520;background:var(--stock,#f3ead2);isolation:isolate;overflow:hidden;box-shadow:8px 10px 0 rgba(0,0,0,.28);cursor:grab;touch-action:none;transition:background .3s}
+.sheet.drag{cursor:grabbing}
+.sheet .lay{will-change:transform}
+.sheet svg{overflow:visible}
+.sheet:focus-visible{outline:4px solid var(--yellow);outline-offset:4px;box-shadow:8px 10px 0 rgba(0,0,0,.28)}
+.flyhelp{font-size:.88rem;margin-top:1rem;color:#fffaf0;max-width:26rem}
+.hlayer{position:absolute;inset:0;background:transparent}
+@media(max-width:900px){.tool-grid{grid-template-columns:1fr}.flyc{order:-1}}
+
+/* crew */
+.crew h2 .duo .d1{color:var(--navy)}.crew h2 .duo>span{mix-blend-mode:normal}.crew h2 .duo .d2{color:#fffaf0;z-index:-1}
+.crewgrid{display:grid;grid-template-columns:repeat(12,1fr);gap:2.2rem 1.8rem;align-items:start;margin-top:2rem}
+.card{position:relative;background:var(--card);padding:1rem 1rem 1.3rem;box-shadow:6px 8px 0 rgba(21,24,79,.22);color:var(--navy)}
+.card h3{font-size:1.9rem;margin:.7rem 0 .15rem}
+.card .role{font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem}
+.card p{font-size:.98rem}
+.c1{grid-column:1/5;rotate:-2deg}.c2{grid-column:5/9;rotate:1.6deg;margin-top:2.6rem}.c3{grid-column:9/13;rotate:-.8deg;margin-top:-.6rem}
+.c4{grid-column:3/11;rotate:.5deg;display:grid;grid-template-columns:minmax(0,200px) 1fr;gap:1.4rem;align-items:center;margin-top:.5rem}
+.c4 h3{margin-top:0}
+@media(max-width:900px){.c1{grid-column:1/7}.c2{grid-column:7/13;margin-top:1.8rem}.c3{grid-column:1/8}.c4{grid-column:1/13}}
+@media(max-width:600px){.crewgrid{display:flex;flex-direction:column}.c4{grid-template-columns:110px 1fr}}
+
+/* visit */
+.visit-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:2.5rem 4rem;align-items:start}
+.visit h2 .duo .d1{color:var(--navy)}.visit h2 .duo>span{mix-blend-mode:normal}.visit h2 .duo .d2{color:var(--pink);mix-blend-mode:multiply}
+.ledger{list-style:none;margin-top:1.4rem}
+.ledger li{display:grid;grid-template-columns:9.6rem 1fr;gap:.2rem 1rem;padding:.7rem 0;border-top:2px solid var(--navy)}
+.ledger li:last-child{border-bottom:2px solid var(--navy)}
+.ledger b{font:1.25rem/1 var(--display)}
+.ledger .tbc{text-decoration:line-through;text-decoration-color:var(--pink);text-decoration-thickness:3px}
+.ticket{overflow:hidden;position:relative;background:var(--card);padding:1.8rem 1.4rem 1.4rem;rotate:1.4deg;box-shadow:6px 8px 0 rgba(21,24,79,.25);-webkit-mask:radial-gradient(circle 9px at 0 50%,transparent 98%,#000) left/51% 100% no-repeat,radial-gradient(circle 9px at 100% 50%,transparent 98%,#000) right/51% 100% no-repeat;mask:radial-gradient(circle 9px at 0 50%,transparent 98%,#000) left/51% 100% no-repeat,radial-gradient(circle 9px at 100% 50%,transparent 98%,#000) right/51% 100% no-repeat}
+.ticket h3{font-size:2.1rem;margin-bottom:.6rem}
+.ticket label.l{display:block;margin:.9rem 0 .2rem}
+.ticket input[type=email]{width:100%;border:3px solid var(--navy);background:#fffaf0;padding:.55rem .7rem;border-radius:0}
+.ticket .chk{display:flex;gap:.6rem;align-items:flex-start;margin:1rem 0;font-size:.95rem}
+.ticket .chk input{margin-top:.35rem;width:1.1rem;height:1.1rem;accent-color:var(--navy)}
+.err{color:#a0124f;font-size:.9rem;min-height:1.4em;margin-top:.4rem}
+.stamp{position:absolute;right:6%;top:30%;rotate:-12deg;border:5px double var(--pink);color:var(--pink);font:2.4rem/1 var(--display);padding:.15em .4em;mix-blend-mode:multiply;pointer-events:none;opacity:0;scale:1.8}
+.stamp.on{opacity:.92;scale:1;transition:scale .25s cubic-bezier(.3,1.8,.5,1),opacity .1s}
+.ticket .done{display:none}.ticket.sent .done{display:block}.ticket.sent form{opacity:.35}
+.ticket .done{margin-top:.8rem;font-size:.95rem}
+@media(max-width:820px){.visit-grid{grid-template-columns:1fr}}
+
+/* footer */
+footer{background:var(--navy);color:#f3ead2;padding:5rem 0 2.5rem;position:relative;overflow:hidden}
+footer .big{font-size:min(13vw,10.5rem);line-height:.82;margin-bottom:2rem;display:block;white-space:nowrap}
+.colo{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2rem;font-size:.95rem}
+.colo h4{font-size:1.25rem;margin-bottom:.5rem;color:var(--yellow)}
+.colo a{text-decoration-thickness:2px;text-underline-offset:3px}
+.colo a:focus-visible{outline-color:var(--yellow);box-shadow:none}
+.fine{margin-top:2.5rem;display:flex;flex-wrap:wrap;gap:1rem 2rem;justify-content:space-between;align-items:center;font-size:.82rem;opacity:.9}
+.ring{position:absolute;right:6%;top:3rem;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,transparent 58%,rgba(255,108,47,.35) 60%,transparent 66%);pointer-events:none;rotate:20deg}
+@media(max-width:760px){.colo{grid-template-columns:1fr}}
+.ns{padding:1.5rem;background:var(--yellow);color:var(--navy);font-family:"Courier New",monospace;border-bottom:3px solid var(--navy)}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .duo.js:not(.in){--m:1}
+  .track{width:auto;flex-wrap:wrap;justify-content:center}.track span+span{display:none}
+  .band{white-space:normal;text-align:center}
+  .land,.hero .duo>span,.lay{opacity:1!important}
+}
+</style>
+</head>
+<body>
+<noscript><div class="ns"><b>PRESS GANG</b> prints itself with JavaScript, and yours is off. Short version: we are a four-person-and-one-machine risograph collective in Ketterby. Issue #7, The Overprint Issue (24 pages, two inks, £4) is out now. Print nights are Tuesdays, 7pm, Unit 4, Mangle Yard. hello@pressgang.example</div></noscript>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="rough" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="2" seed="3" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <filter id="rough2" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency=".05" numOctaves="2" seed="8" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <symbol id="rm" viewBox="-17 -17 34 34"><circle r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M-16 0H16M0 -16V16" stroke="currentColor" stroke-width="2"/></symbol>
+  </defs>
+</svg>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="bar">
+  <a class="logo" href="#top" aria-label="Press Gang, back to top"><span class="duo" data-dm>PRESS GANG</span></a>
+  <nav aria-label="Sections">
+    <a href="#inside">Inside #7</a><a href="#zine">Read it</a><a href="#press">Print a flyer</a><a href="#crew">The gang</a><a href="#visit">Print nights</a>
+  </nav>
+  <fieldset class="regsw">
+    <legend class="lab">Registration</legend>
+    <div class="seg" role="radiogroup" aria-label="How far out of register the inks sit">
+      <label><input type="radio" name="reg" value="tight"><span>tight</span></label>
+      <label><input type="radio" name="reg" value="loose" checked><span>loose</span></label>
+      <label><input type="radio" name="reg" value="wild"><span>wild</span></label>
+    </div>
+  </fieldset>
+</header>
+
+<main id="main">
+<section class="hero" id="top">
+  <div class="reg a"><svg class="jp" style="color:var(--pink)"><use href="#rm"/></svg><svg class="jb" style="color:var(--blue)"><use href="#rm"/></svg></div>
+  <div class="reg b"><svg class="jp" style="color:var(--pink)"><use href="#rm"/></svg><svg class="jb" style="color:var(--blue)"><use href="#rm"/></svg></div>
+  <div class="hcopy">
+    <p class="kick"><mark>ISSUE #7</mark><span>THE OVERPRINT ISSUE · AUTUMN 2026</span></p>
+    <h1><span class="duo" data-hero>PRESS</span><span class="duo alt" data-hero>GANG</span></h1>
+    <p class="lede">A print collective in Ketterby: four people and one temperamental duplicator, making zines, flyers and mistakes <b>two colours at a time</b>. Issue #7 is about what happens when one ink sits on another and neither gives way. It is late. It is also very pink.</p>
+    <div class="cta">
+      <a class="btn" href="#zine">Flip through #7</a>
+      <a class="btn alt" href="#press">Print your own flyer</a>
+    </div>
+    <p class="runnote"><span class="cbar" aria-hidden="true"><i style="background:var(--pink)"></i><i style="background:var(--blue)"></i><i style="background:var(--yellow)"></i><i style="background:var(--teal)"></i><i style="background:var(--orange)"></i><i style="background:var(--navy)"></i></span><span>Run of 150, hand-numbered. 87 gone, 63 left.</span></p>
+  </div>
+
+  <figure class="printwrap hov" id="heroart">
+    <div class="tape" style="left:8%;top:-14px;rotate:-6deg"></div>
+    <div class="tape pk" style="right:10%;top:-12px;rotate:5deg"></div>
+    <div class="printcard">
+      <div class="stack" role="img" aria-label="Illustration: a grinning sun in sunglasses with its tongue out, printed in yellow, pink and blue ink and slightly out of register.">
+        <svg class="lay iy jy rough grain" viewBox="0 0 640 640" aria-hidden="true">
+          <defs>
+            <clipPath id="cSun"><circle cx="318" cy="332" r="214"/></clipPath>
+            <clipPath id="cB1"><polygon points="72,58 156,34 124,128 182,122 58,262 92,152 38,158"/></clipPath>
+            <clipPath id="cDot"><circle cx="112" cy="536" r="78"/></clipPath>
+            <mask id="mTongue"><rect width="640" height="640" fill="#fff"/><path d="M304 428 L380 420 C392 472 378 516 344 516 C314 516 298 474 304 428Z" fill="#000"/></mask>
+            <mask id="mLens"><rect width="640" height="640" fill="#fff"/><path d="M204 288 L232 288 L206 346 L196 346Z M246 288 L258 288 L232 346 L222 346Z M360 288 L388 288 L362 346 L352 346Z M402 288 L414 288 L388 346 L378 346Z" fill="#000"/></mask>
+          </defs>
+          <g mask="url(#mTongue)"><polygon data-burst="318,332,306,262,22"/></g>
+          <circle cx="534" cy="104" r="54"/>
+          <circle cx="598" cy="204" r="14"/><circle cx="62" cy="420" r="11"/>
+          </svg>
+        <svg class="lay ip jp rough grain" viewBox="0 0 640 640" aria-hidden="true">
+          <path data-ht="sphere,10,15" data-box="104,118,428,428" clip-path="url(#cSun)"/>
+          <path d="M306 430 L378 422 C390 470 376 512 344 512 C316 512 300 472 306 430Z"/>
+          <path d="M520 330 l7 -22 l7 22 l22 7 l-22 7 l-7 22 l-7 -22 l-22 -7Z M110 150 l5 -16 l5 16 l16 5 l-16 5 l-5 16 l-5 -16 l-16 -5Z" transform="translate(0 0)"/>
+          <path d="M560 470 l9 -26 l9 26 l26 9 l-26 9 l-9 26 l-9 -26 l-26 -9Z"/>
+          <circle cx="560" cy="580" r="10"/><circle cx="590" cy="560" r="6"/>
+        </svg>
+        <svg class="lay ib jb rough grain" viewBox="0 0 640 640" aria-hidden="true">
+          <g mask="url(#mLens)">
+            <path d="M180 286 Q180 276 192 276 L296 276 Q306 276 304 290 L296 340 Q290 366 262 366 L224 366 Q196 366 190 340Z"/>
+            <path d="M456 286 Q456 276 444 276 L340 276 Q330 276 332 290 L340 340 Q346 366 374 366 L412 366 Q440 366 446 340Z"/>
+          </g>
+          <g fill="none" stroke="currentColor" stroke-linecap="round">
+            <path d="M300 294 Q318 280 336 294" stroke-width="12"/>
+            <path d="M182 292 L130 274 M454 292 L506 274" stroke-width="10"/>
+            <path d="M205 395 Q318 484 431 395" stroke-width="15"/>
+            <path d="M194 250 Q238 222 292 246 M444 250 Q400 222 346 246" stroke-width="12"/>
+            <path d="M205 395 l-14 -10 M431 395 l14 -10" stroke-width="9"/>
+            <polygon points="72,58 156,34 124,128 182,122 58,262 92,152 38,158" stroke-width="6" stroke-linejoin="round"/>
+            <polygon points="72,58 156,34 124,128 182,122 58,262 92,152 38,158" stroke-width="6" stroke-linejoin="round" transform="rotate(180 320 320)"/>
+          </g>
+          <path data-ht="ry,8,75" data-box="38,34,144,228" clip-path="url(#cB1)"/>
+          <path data-ht="ry,8,75" data-box="38,34,144,228" clip-path="url(#cB1)" transform="rotate(180 320 320)"/>
+          <path data-ht="rad,8,45" data-box="34,458,156,156" clip-path="url(#cDot)"/>
+          <path d="M520 150 l5 -18 l5 18 l18 5 l-18 5 l-5 18 l-5 -18 l-18 -5Z M600 330 l4 -14 l4 14 l14 4 l-14 4 l-4 14 l-4 -14 l-14 -4Z"/>
+        </svg>
+      </div>
+      <figcaption>Fig. 1. Sun, grinning. Three inks, one slip of the hand. Hover to nudge the drums.</figcaption>
+    </div>
+    <div class="stk round" aria-hidden="true"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="58" fill="#ff48b0"/><circle cx="60" cy="60" r="54" fill="none" stroke="#15184f" stroke-width="1.5" stroke-dasharray="3 3"/><path id="tp" d="M60 60 m-41 0 a41 41 0 1 1 82 0 a41 41 0 1 1 -82 0" fill="none"/><text font-size="12.5" fill="#15184f" font-family="Special Elite, monospace"><textPath href="#tp" textLength="252" lengthAdjust="spacing">HAND-FED · NO ROBOTS · TWO INKS ·</textPath></text><path d="M60 40 l5 13 l14 1 l-11 9 l4 14 l-12 -8 l-12 8 l4 -14 l-11 -9 l14 -1Z" fill="#ffe800" stroke="#15184f" stroke-width="2"/></svg></div>
+    <div class="stk burst" aria-hidden="true"><span>£4<small>24pp<br>2 inks</small></span></div>
+  </figure>
+</section>
+
+<div class="bandwrap" aria-hidden="true"><div class="band" data-torn="tb"><div class="track" id="track"><span>FLUORESCENT PINK ● BLUE ● YELLOW ● NO RIGHT WAY UP ● FEED IT BY HAND ● DRIFT IS A FEATURE ● SLIGHTLY OFF ● </span></div></div></div>
+
+<section class="sec" id="inside">
+  <div class="wrap">
+    <h2><span class="duo">INSIDE #7</span></h2>
+    <div class="inside">
+      <div>
+        <p style="max-width:34rem;margin-bottom:1.4rem">Twenty-four pages, two inks, one staple that was not supposed to be there. We are letting you read eight of them. Press a line to open the zine at that page.</p>
+        <ol class="toc">
+          <li><button type="button" data-page="0" class="cover"><span class="pn">01</span><span class="tt">The cover</span><span class="dl"></span><span class="ds">a 7 leaning on its shadow</span></button></li>
+          <li><button type="button" data-page="1"><span class="pn">02</span><span class="tt">Hello, this is late</span><span class="dl"></span><span class="ds">editor's letter + errata</span></button></li>
+          <li><button type="button" data-page="2"><span class="pn">03</span><span class="tt">Ink is a verb</span><span class="dl"></span><span class="ds">three circles, six colours</span></button></li>
+          <li><button type="button" data-page="3"><span class="pn">04</span><span class="tt">Field guide to misregistration</span><span class="dl"></span><span class="ds">drift, kiss, ghost, divorce</span></button></li>
+          <li><button type="button" data-page="4"><span class="pn">05</span><span class="tt">Brenda answers your questions</span><span class="dl"></span><span class="ds">she is not okay</span></button></li>
+          <li><button type="button" data-page="5"><span class="pn">06</span><span class="tt">A sunset from two inks</span><span class="dl"></span><span class="ds">a recipe, not a lie</span></button></li>
+          <li><button type="button" data-page="6"><span class="pn">07</span><span class="tt">Classifieds</span><span class="dl"></span><span class="ds">one pigeon stencil, lightly used</span></button></li>
+          <li><button type="button" data-page="7"><span class="pn">08</span><span class="tt">Next: the Cold Issue</span><span class="dl"></span><span class="ds">back cover</span></button></li>
+        </ol>
+      </div>
+      <aside class="note hov"><div class="tape pk" style="left:30%;top:-14px;rotate:-3deg"></div>
+        <p><b>Contributors' note.</b> Cover by Mina. Inside art also by Mina, mostly. The wobbly bits are Dez's thumb.</p>
+        <p>Pages 9 to 24 are <s>for subscribers</s> in the shop, on paper, because paper is the whole point.</p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section class="sec mat flood-teal" id="zine" data-torn="t" style="padding-top:5.5rem">
+  <div class="wrap">
+    <h2><span class="duo">READ IT</span></h2>
+    <p class="tag">Pages 1 to 8 of 24, scanned off the actual copies. Arrow keys turn the page. Hover the book and the inks drift.</p>
+    <div class="stage">
+      <div class="book hov" id="book" tabindex="0" role="group" aria-roledescription="zine" aria-label="Press Gang issue 7, pages 1 to 8"></div>
+    </div>
+    <div class="bk-ctl">
+      <button class="btn sm" id="prev" type="button">&larr; Back</button>
+      <output id="pos" aria-live="polite">Cover</output>
+      <button class="btn sm" id="next" type="button">Turn &rarr;</button>
+    </div>
+    <p class="hint">Tap the right side of a page to turn it, the left to go back.</p>
+  </div>
+</section>
+
+<section class="sec" id="passes" style="padding-bottom:5rem">
+  <div class="wrap">
+    <h2><span class="duo">TWO PASSES</span></h2>
+    <ol class="passes">
+      <li><span class="n"><span class="duo">1</span></span><div class="chip" style="background:linear-gradient(90deg,#15184f 0 50%,transparent 50%) 0 0/16px 100%"></div><h3>Separate</h3><p>The artwork is split into one layer per ink. Each layer is plain black and white. The colour is a decision for later.</p></li>
+      <li><span class="n"><span class="duo alt">2</span></span><div class="chip dots" style="--c:var(--navy);background-size:7px 7px,7px 7px;background-position:0 0,3.5px 3.5px"></div><h3>Burn</h3><p>Brenda burns each layer into a thin master wrapped round a drum. No plates. A smell like warm crayons.</p></li>
+      <li><span class="n"><span class="duo">3</span></span><div class="chip dots" style="--c:var(--pink)"></div><h3>Pass one</h3><p>Paper through for pink. Fast ink, slow dry. We wait. We eat toast. Do not touch the toast near the paper.</p></li>
+      <li><span class="n"><span class="duo alt">4</span></span><div class="chip dots" style="--c:var(--blue)"></div><h3>Pass two</h3><p>Back through for blue, fed by hand and lined up by eye. The eye is wrong by about a millimetre. That millimetre is the whole point.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="sec flood-blue tool" id="press" data-torn="tb">
+  <div class="wrap">
+    <h2><span class="duo">PRINT YOUR OWN</span></h2>
+    <div class="tool-grid">
+      <div class="panel" id="panel">
+        <div class="tape bl" style="left:38%;top:-14px;rotate:2deg"></div>
+        <div class="fld"><label class="lab" for="fHead">Headline</label><input id="fHead" type="text" maxlength="18" value="JAM NIGHT" autocomplete="off"></div>
+        <div class="fld"><label class="lab" for="fSmall">Small print</label><input id="fSmall" type="text" maxlength="30" value="FRI 4 DEC · MANGLE YARD · £3" autocomplete="off"></div>
+        <fieldset><legend class="lab">Drawing</legend><div class="seg" id="artSeg"></div></fieldset>
+        <fieldset><legend class="lab">Ink one (the drawing)</legend><div class="swatches" id="swA"></div></fieldset>
+        <fieldset><legend class="lab">Ink two (the words)</legend><div class="swatches" id="swB"></div></fieldset>
+        <fieldset><legend class="lab">Paper</legend><div class="seg" id="stockSeg"></div></fieldset>
+        <fieldset><legend class="lab">Layer you are dragging</legend><div class="seg" id="moveSeg"></div></fieldset>
+        <div class="acts">
+          <button class="btn sm" id="pull" type="button">Pull a print</button>
+          <button class="btn sm alt" id="snap" type="button">Snap to register</button>
+          <button class="btn sm alt" id="worse" type="button">Make it worse</button>
+        </div>
+        <div class="read"><span class="lab">Off register</span><b><span id="mm">0.0</span> mm</b><span id="grade" role="status" style="flex-basis:100%"></span></div>
+      </div>
+      <div class="flyc">
+        <div class="fly">
+          <div class="tape" style="left:12%;top:-14px;rotate:-8deg"></div>
+          <div class="tape pk" style="right:8%;top:-14px;rotate:6deg"></div>
+          <div class="sheet" id="sheet" tabindex="0" role="application" aria-label="Flyer preview. Drag, or use the arrow keys, to move the chosen ink layer. Shift moves by more." aria-describedby="flyhelp">
+            <svg class="lay" id="layA" viewBox="0 0 400 520" aria-hidden="true"></svg>
+            <svg class="lay" id="layB" viewBox="0 0 400 520" aria-hidden="true"></svg>
+          </div>
+        </div>
+        <p class="flyhelp" id="flyhelp">Drag the print, or focus it and use arrow keys, to slide one ink off the other. The crosshairs in the corners are registration marks: when they line up, so does everything else.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec flood-pink crew" id="crew" data-torn="t">
+  <div class="wrap">
+    <h2><span class="duo">THE GANG</span></h2>
+    <div class="crewgrid" id="crewgrid">
+      <article class="card c1 hov"><div class="tape" style="left:34%;top:-15px;rotate:-4deg"></div><div data-av="dolores"></div><h3>Dolores Pike</h3><p class="role">Editor, ink-fingers</p><p>Writes the letters, loses the receipts. Believes the em dash is a structural element and will not be argued with before 10am.</p></article>
+      <article class="card c2 hov"><div class="tape pk" style="left:30%;top:-15px;rotate:3deg"></div><div data-av="dez"></div><h3>Dez Amadi</h3><p class="role">Drum whisperer</p><p>Can hear when a master is about to tear. Has opinions about glossy stock which are not repeatable in print.</p></article>
+      <article class="card c3 hov"><div class="tape bl" style="left:40%;top:-15px;rotate:-2deg"></div><div data-av="mina"></div><h3>Mina Hollis</h3><p class="role">Illustration</p><p>Draws everything in two layers, then argues with both of them. Responsible for the sun on the front of this site.</p></article>
+      <article class="card c4 hov"><div class="tape" style="left:6%;top:-15px;rotate:-5deg"></div><div data-av="brenda"></div><div><h3>Brenda</h3><p class="role">Duplicator, 1998. Not a person.</p><p>Does about 130 sheets a minute when she feels like it. Jams on Tuesdays and on any sheet Dez describes as "fine". Rated for a lifetime of ten thousand masters; we are on about nine thousand, and we are not discussing it.</p></div></article>
+    </div>
+  </div>
+</section>
+
+<section class="sec flood-yellow visit" id="visit" data-torn="tb">
+  <div class="wrap visit-grid">
+    <div>
+      <h2><span class="duo">PRINT NIGHTS</span></h2>
+      <p style="max-width:34rem">Tuesdays, 7 until we run out of paper. Unit 4, Mangle Yard, Ketterby, behind the laundrette (the door with the pink handprint). Bring a file on a USB stick or a bad idea on a napkin. £5 covers ink and tea. Lift: broken. Stairs: honest.</p>
+      <ul class="ledger">
+        <li><b>Tue 24 Nov</b><span>Beginners: your first two-colour print</span></li>
+        <li><b>Tue 1 Dec</b><span>Open night. Bring fluorescents, we are low</span></li>
+        <li><b>Fri 4 Dec</b><span>Jam night. See the flyer you just made</span></li>
+        <li><b>Sat 5 Dec</b><span>Issue #7 launch + zine swap (bring your own)</span></li>
+        <li><b>Tue 15 Dec</b><span>Seasonal cards, <span class="tbc">elegant</span> panic edition</span></li>
+      </ul>
+    </div>
+    <div class="ticket" id="ticket">
+      <h3>Reserve a copy</h3>
+      <p>£4, pay at the launch or the next print night. We will email once, when #8 is dry, and not before.</p>
+      <form id="form" novalidate>
+        <label class="l lab" for="em">Your email</label>
+        <input id="em" name="email" type="email" required autocomplete="email" placeholder="you@somewhere.example" aria-describedby="err">
+        <label class="chk"><input type="checkbox" id="rsv" checked><span>Put a copy of #7 aside for me</span></label>
+        <button class="btn" type="submit">Join the gang</button>
+        <p class="err" id="err" role="alert"></p>
+      </form>
+      <p class="done" id="done" role="status" tabindex="-1"></p>
+      <div class="stamp" id="stamp" aria-hidden="true">RECEIVED</div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="on-dark">
+  <div class="ring" aria-hidden="true"></div>
+  <div class="wrap">
+    <span class="big"><span class="duo" data-dm style="font-family:var(--display)">PRESS GANG</span></span>
+    <div class="colo">
+      <div><h4>Colophon</h4><p>Set in Bagel Fat One and Special Elite. Printed on Brenda with fluorescent pink and blue soy ink on 100gsm recycled stock. Registration by eye, and it shows.</p></div>
+      <div><h4>Find us</h4><p>Unit 4, Mangle Yard<br>Ketterby<br><a href="mailto:hello@pressgang.example">hello@pressgang.example</a></p></div>
+      <div><h4>Small print</h4><p>No tracking, no cookies, no robots. Every image on this page was drawn in code, then printed a bit wrong on purpose.</p></div>
+    </div>
+    <div class="fine"><span class="cbar" aria-hidden="true"><i style="background:var(--pink)"></i><i style="background:var(--blue)"></i><i style="background:var(--yellow)"></i><i style="background:var(--teal)"></i><i style="background:var(--orange)"></i><i style="background:#f3ead2"></i></span><span>Press Gang is a fictional collective. Issue #7, copy no. 088.</span><a href="#top">Back to the top</a></div>
+  </div>
+</footer>
+
+<script>
+(()=>{
+'use strict';
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const root=document.documentElement;
+const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const rng=s=>()=>((s=Math.imul(s^s>>>15,s|1),s^=s+Math.imul(s^s>>>7,s|61),((s^s>>>14)>>>0)/4294967296));
+
+/* ---------- halftone ---------- */
+const FN={
+  sphere:(u,v)=>Math.pow(clamp(.1+1.05*Math.hypot(u-.36,v-.3)/.85,0,1),1.15),
+  rx:u=>u,rix:u=>1-u,ry:(u,v)=>v,riy:(u,v)=>1-v,
+  rad:(u,v)=>clamp(1.12-Math.hypot(u-.5,v-.5)*2.2,0,1),
+  rl:(u,v)=>.12+.55*(1-v),flat8:()=>.8,flat5:()=>.5
+};
+function ht(x0,y0,w,h,step,ang,fn){
+  const a=ang*Math.PI/180,c=Math.cos(a),s=Math.sin(a),cx=x0+w/2,cy=y0+h/2,R=Math.hypot(w,h)/2;let d='';
+  for(let i=-R;i<=R;i+=step)for(let j=-R;j<=R;j+=step){
+    const x=cx+i*c-j*s,y=cy+i*s+j*c;
+    if(x<x0||x>x0+w||y<y0||y>y0+h)continue;
+    const v=fn((x-x0)/w,(y-y0)/h);if(v<.04)continue;
+    const r=Math.min(1,Math.sqrt(v))*step*.74,f=n=>n.toFixed(1);
+    d+=`M${f(x-r)} ${f(y)}a${f(r)} ${f(r)} 0 1 0 ${f(2*r)} 0a${f(r)} ${f(r)} 0 1 0 ${f(-2*r)} 0`;
+  }
+  return d;
+}
+function initArt(scope){
+  $$('[data-ht]',scope).forEach(el=>{
+    if(el.getAttribute('d'))return;
+    const [fn,st,an]=el.dataset.ht.split(',');const vb=el.ownerSVGElement.viewBox.baseVal;
+    const b=el.dataset.box?el.dataset.box.split(',').map(Number):[0,0,vb.width,vb.height];
+    el.setAttribute('d',ht(b[0],b[1],b[2],b[3],+st,+an,FN[fn]));
+  });
+  $$('[data-burst]',scope).forEach(el=>{
+    const [cx,cy,ro,ri,n]=el.dataset.burst.split(',').map(Number),r=rng(n+7);let p='';
+    for(let i=0;i<n*2;i++){const a=i*Math.PI/n,R=(i%2?ri:ro)*(1+(r()-.5)*.07);p+=(cx+Math.cos(a)*R).toFixed(1)+','+(cy+Math.sin(a)*R).toFixed(1)+' '}
+    el.setAttribute('points',p);
+  });
+}
+initArt(document);
+
+/* ---------- two-ink headlines ---------- */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.2});
+$$('.duo').forEach(el=>{
+  const t=el.textContent;el.textContent='';
+  const a=document.createElement('span'),b=document.createElement('span');
+  a.className='d1';b.className='d2 jb';a.textContent=b.textContent=t;b.setAttribute('aria-hidden','true');
+  a.classList.add('jp');
+  if(el.hasAttribute('data-hero')||el.hasAttribute('data-dm')){a.classList.add('rough2');b.classList.add('rough2')}
+  a.classList.add('grain');b.classList.add('grain');
+  el.append(a,b);el.classList.add('js');
+  if(el.closest('.hero'))setTimeout(()=>el.classList.add('in'),60);else io.observe(el);
+});
+
+/* ---------- torn paper ---------- */
+$$('[data-torn]').forEach((el,k)=>{
+  const r=rng(k*31+5),sides=el.dataset.torn;
+  const edge=(flip)=>{const pts=[];for(let i=0;i<=63;i++){const x=i*100/63,y=3+r()*(r()>.85?15:8);pts.push([x,y])}return pts};
+  let p=[];
+  if(sides.includes('t'))p=p.concat(edge().map(([x,y])=>`${x.toFixed(1)}% ${y.toFixed(1)}px`));else p=['0 0','100% 0'];
+  if(sides.includes('b'))p=p.concat(edge().reverse().map(([x,y])=>`${x.toFixed(1)}% calc(100% - ${y.toFixed(1)}px)`));else p=p.concat(['100% 100%','0 100%']);
+  el.style.clipPath=`polygon(${p.join(',')})`;
+});
+
+/* ---------- registration engine ---------- */
+const AMP={tight:.35,loose:1,wild:2.5};let mode='loose';
+let px=0,py=0,cx=3,cy=2,vel=0,lastY=scrollY,raf=0;
+function paint(){root.style.setProperty('--jx',cx.toFixed(2));root.style.setProperty('--jy',cy.toFixed(2))}
+function tick(){
+  raf=0;const y=scrollY;vel=vel*.86+(y-lastY)*.3;lastY=y;const A=AMP[mode],v=clamp(vel,-40,40);
+  const K=clamp(innerWidth/1300,.4,1),tx=K*A*(3+5*Math.sin(y/240)+px*6+v*.25),ty=K*A*(2+4*Math.cos(y/330)+py*4+v*.12);
+  cx+=(tx-cx)*.2;cy+=(ty-cy)*.2;paint();
+  if(Math.abs(tx-cx)>.05||Math.abs(ty-cy)>.05||Math.abs(vel)>.3)raf=requestAnimationFrame(tick);
+}
+const kick=()=>{if(RM){const K=clamp(innerWidth/1300,.4,1);cx=K*AMP[mode]*3;cy=K*AMP[mode]*2;paint();return}if(!raf)raf=requestAnimationFrame(tick)};
+addEventListener('scroll',kick,{passive:true});
+addEventListener('pointermove',e=>{px=e.clientX/innerWidth-.5;py=e.clientY/innerHeight-.5;kick()},{passive:true});
+$$('input[name=reg]').forEach(r=>r.addEventListener('change',()=>{mode=r.value;kick()}));
+kick();
+
+/* ---------- stickers ---------- */
+$$('.stk').forEach(el=>{
+  let sx=0,sy=0,ox=0,oy=0,on=false;
+  el.addEventListener('pointerdown',e=>{on=true;sx=e.clientX-ox;sy=e.clientY-oy;el.setPointerCapture(e.pointerId);el.classList.add('lift')});
+  el.addEventListener('pointermove',e=>{if(!on)return;ox=e.clientX-sx;oy=e.clientY-sy;el.style.translate=ox+'px '+oy+'px'});
+  const end=()=>{on=false;el.classList.remove('lift')};
+  el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);
+});
+
+/* ---------- band ---------- */
+const tr=$('#track');tr.append(tr.firstElementChild.cloneNode(true));
+
+/* ---------- avatars ---------- */
+const AV={
+dolores:`<svg class="art" viewBox="0 0 200 200" role="img" aria-label="Portrait of Dolores: round glasses, hair in a bun"><defs><clipPath id="cfD"><circle cx="100" cy="114" r="58"/></clipPath></defs>
+<g class="ink iy sy"><circle cx="100" cy="108" r="86"/></g>
+<g class="ink ip sp"><path data-ht="sphere,6,15" data-box="42,56,116,116" clip-path="url(#cfD)"/></g>
+<g class="ink ib sb"><circle cx="100" cy="42" r="22"/><path d="M40 108C34 52 76 44 100 44C130 44 168 58 160 108C150 82 122 76 100 76C78 76 50 82 40 108Z"/><g fill="none" stroke="currentColor" stroke-width="5"><circle cx="78" cy="114" r="16"/><circle cx="122" cy="114" r="16"/><path d="M94 112 Q100 108 106 112M80 150 Q100 162 120 150" stroke-linecap="round"/></g></g></svg>`,
+dez:`<svg class="art" viewBox="0 0 200 200" role="img" aria-label="Portrait of Dez: headphones, flat-top hair"><defs><clipPath id="cfZ"><circle cx="100" cy="100" r="90"/></clipPath><clipPath id="cfZ2"><circle cx="100" cy="116" r="52"/></clipPath></defs>
+<g class="ink iy sy"><path data-ht="flat8,9,0" data-box="10,10,180,180" clip-path="url(#cfZ)"/></g>
+<g class="ink ip sp"><circle cx="100" cy="116" r="52"/><circle cx="46" cy="118" r="10"/><circle cx="154" cy="118" r="10"/></g>
+<g class="ink ib sb"><path data-ht="rx,5,75" data-box="48,64,104,104" clip-path="url(#cfZ2)"/><path d="M62 82 Q100 52 138 82 L138 66 Q100 34 62 66Z"/><circle cx="82" cy="112" r="5"/><circle cx="118" cy="112" r="5"/><path d="M84 142 Q100 154 116 142" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><path d="M42 112C38 46 162 46 158 112" fill="none" stroke="currentColor" stroke-width="10"/><rect x="30" y="102" width="20" height="36" rx="8"/><rect x="150" y="102" width="20" height="36" rx="8"/></g></svg>`,
+mina:`<svg class="art" viewBox="0 0 200 200" role="img" aria-label="Portrait of Mina: long dark hair, big earrings"><g class="ink ip sp"><path d="M22 70C40 12 150 8 180 62C198 104 174 176 120 184C60 192 8 150 22 70Z"/></g>
+<g class="ink iy sy"><circle cx="100" cy="112" r="50"/></g>
+<g class="ink ib sb"><path d="M48 112C40 50 90 46 100 46C120 46 160 58 152 112C146 88 128 74 100 74C70 74 54 90 48 112Z"/><path d="M48 112C44 150 50 176 62 186L72 150ZM152 112C156 150 150 176 138 186L128 150Z"/><circle cx="82" cy="112" r="5"/><circle cx="118" cy="112" r="5"/><circle cx="48" cy="140" r="7"/><circle cx="152" cy="140" r="7"/><path d="M86 140 Q100 150 114 140" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></g></svg>`,
+brenda:`<svg class="art" viewBox="0 0 200 200" role="img" aria-label="Portrait of Brenda, the duplicator: a boxy yellow machine with two round lamp eyes and a sheet of paper coming out of the top"><defs><clipPath id="cfB"><circle cx="100" cy="124" r="30"/></clipPath></defs>
+<g class="ink iy sy"><rect x="26" y="66" width="148" height="104" rx="14"/></g>
+<g class="ink ip sp"><path data-ht="rad,5,15" data-box="70,94,60,60" clip-path="url(#cfB)"/><rect x="26" y="66" width="148" height="12"/></g>
+<g class="ink ib sb"><circle cx="64" cy="100" r="10"/><circle cx="136" cy="100" r="10"/><rect x="50" y="158" width="100" height="10"/><g fill="none" stroke="currentColor" stroke-width="4"><rect x="62" y="16" width="76" height="52" transform="rotate(-4 100 42)"/><path d="M72 30H128M72 42H120M72 54H110" transform="rotate(-4 100 42)"/><circle cx="100" cy="124" r="30"/></g></g></svg>`
+};
+$$('[data-av]').forEach(el=>{el.innerHTML=AV[el.dataset.av];el.firstElementChild.style.background='var(--card)'});
+initArt($('#crewgrid'));
+
+/* ---------- zine pages ---------- */
+const brendaMini=AV.brenda.replace(/id="cfB"/,'id="cfB2"').replace('url(#cfB)','url(#cfB2)').replace('class="art"','class="art" style="position:absolute;right:6%;top:6%;width:25%"');
+const minis=[['The Drift',8,6,'Both inks wander the same way. Gentle. Charming.'],['The Kiss',18,0,'Edges just touching, with an accidental white seam.'],['The Ghost',5,4,'Second ink at 40%. One pass was starved of ink.'],['The Divorce',32,20,'Eight millimetres. They are not speaking.']]
+ .map(([t,dx,dy,d])=>`<div><svg class="art" viewBox="0 0 100 70" aria-hidden="true"><g class="ink ip sp"><rect x="14" y="10" width="44" height="46"/></g><g class="ink ib sb" style="opacity:${t==='The Ghost'?.45:1}"><rect x="${14+dx*.9}" y="${10+dy*.8}" width="44" height="46"/></g></svg><h4>${t}</h4><p class="sm">${d}</p></div>`).join('');
+const PG=[
+/*0*/`<div class="pg" data-n="" style="padding:0"><svg class="art" viewBox="0 0 300 420" style="height:100%" role="img" aria-label="Cover of Press Gang issue 7: a huge pink and blue number 7 over a yellow circle, titled The Overprint Issue"><defs><clipPath id="c7"><text x="150" y="328" text-anchor="middle" font-size="310" font-family="Bagel Fat One,sans-serif">7</text></clipPath></defs>
+<g class="ink iy sy"><circle cx="150" cy="196" r="122"/></g>
+<g class="ink ip sp"><text x="150" y="328" text-anchor="middle" font-size="310" font-family="Bagel Fat One,sans-serif">7</text><path data-ht="rx,6,15" data-box="14,344,272,40"/></g>
+<g class="ink ib sb"><path data-ht="rl,6,75" data-box="40,70,230,270" clip-path="url(#c7)"/><text x="16" y="44" font-size="30" font-family="Bagel Fat One,sans-serif">PRESS GANG</text><text x="150" y="410" text-anchor="middle" font-size="19" font-family="Bagel Fat One,sans-serif">THE OVERPRINT ISSUE</text></g></svg></div>`,
+/*1*/`<div class="pg" data-n="2" data-side="l"><h3>Hello, this is <em>late.</em></h3>
+<p>Issue #7 was due in June. Then the third drum died, then the garage flooded, then Dez found a box of fluorescent ink at a car boot sale and nobody could focus for a month.</p>
+<p>So this issue is about overlap: one colour sitting on another, neither giving way. We stopped hiding the drift. Look at the cover. That 7 is leaning on its own shadow and we love it.</p>
+<p>Thank you for waiting. Please do not hold the pages up to the light.</p>
+<p>— Dolores, for the gang</p>
+<p class="sm" style="margin-top:auto;border-top:2px solid var(--navy);padding-top:.4em"><b style="font-weight:400;background:var(--yellow);padding:0 .3em;mix-blend-mode:multiply">Errata, #6:</b> the "recipe" on p.9 was not a recipe. Do not eat the toner.</p></div>`,
+/*2*/`<div class="pg" data-n="3" data-side="r"><h3>Ink is <em>a verb</em></h3>
+<svg class="art" viewBox="0 0 300 230" role="img" aria-label="Three overlapping circles in yellow, pink and blue, with the overlaps making orange, purple and green"><g class="ink iy sy"><circle cx="112" cy="96" r="72"/></g><g class="ink ip sp"><circle cx="188" cy="96" r="72"/></g><g class="ink ib sb"><circle cx="150" cy="150" r="72"/></g></svg>
+<p>Three inks, six colours. Where pink crosses yellow you get a hot orange; pink on blue, a deep violet. Nobody mixes anything. The paper simply goes through twice.</p>
+<p class="sm">Fig. 2. Circles not to scale. Scale is not a thing.</p></div>`,
+/*3*/`<div class="pg" data-n="4" data-side="l"><h3>Field guide to <em>misregistration</em></h3><div class="cells">${minis}</div></div>`,
+/*4*/`<div class="pg" data-n="5" data-side="r"><h3 style="padding-right:27%">Brenda answers <em>your questions</em></h3>${brendaMini}
+<p class="qa"><b>Q.</b> Are you okay?<br><b>A.</b> Warm. Slightly loud.</p>
+<p class="qa"><b>Q.</b> Why the stripes on page 12?<br><b>A.</b> Dez fed me the glossy. We do not discuss the glossy.</p>
+<p class="qa"><b>Q.</b> Favourite ink?<br><b>A.</b> Blue. It never clumps. Pink has a personality.</p>
+<p class="qa"><b>Q.</b> Will you be at the launch?<br><b>A.</b> I am the launch. Do not lean on me.</p></div>`,
+/*5*/`<div class="pg" data-n="6" data-side="l"><h3>A sunset from <em>two inks</em></h3>
+<svg class="art" viewBox="0 0 300 54" role="img" aria-label="A strip of halftone dots where pink fades out to the right and blue fades in, making a purple middle"><g class="ink ip sp"><path data-ht="rix,6,15" data-box="0,0,300,54"/></g><g class="ink ib sb"><path data-ht="rx,6,75" data-box="0,0,300,54"/></g></svg>
+<ol><li>Make two greyscale layers: sky and sun.</li><li>Turn each into dots. Set the angles 60 degrees apart or you get moire (we love moire; it is still a choice).</li><li>Print pink first. It is the fussy one.</li><li>Pull blue slightly crooked, on purpose.</li></ol>
+<p class="sm">The middle band is your sunset. Do not tell anyone it was two inks.</p>
+<svg class="art" viewBox="0 0 300 150" style="margin-top:auto" role="img" aria-label="A halftone sunset: a pink sun sinking behind a blue sky"><defs><clipPath id="cSs"><path d="M0 0H300V100H0Z"/></clipPath><clipPath id="cSn"><circle cx="150" cy="100" r="62"/></clipPath></defs><g class="ink ib sb"><path data-ht="riy,6,75" data-box="0,0,300,100" clip-path="url(#cSs)"/><rect x="0" y="108" width="300" height="5"/><rect x="40" y="120" width="220" height="4"/><rect x="90" y="131" width="120" height="4"/></g><g class="ink ip sp" clip-path="url(#cSs)"><path data-ht="rad,6,15" data-box="88,38,124,124" clip-path="url(#cSn)"/></g></svg></div>`,
+/*6*/`<div class="pg" data-n="7" data-side="r"><h3>Class<em>ifieds</em></h3><div class="ads">
+<div class="ad"><b>WANTED</b> Pigeon stencil, lightly used. Will trade for owl.</div>
+<div class="ad hl"><b>FREE</b> 400 sheets, mis-cut A3. Good home essential.</div>
+<div class="ad"><b>LOST</b> Yellow drum. Answers to "Sunny". Last seen in a tote bag.</div>
+<div class="ad"><b>SEEKING</b> co-printer for Tuesdays. Must tolerate ska.</div></div>
+<svg class="art" viewBox="0 0 300 150" style="margin-top:auto" role="img" aria-label="A pigeon, drawn in blue halftone with a pink chest and a yellow beak"><defs><clipPath id="cPb"><ellipse cx="150" cy="86" rx="72" ry="42"/></clipPath></defs><g class="ink ib sb"><path data-ht="ry,5,45" data-box="78,44,144,84" clip-path="url(#cPb)"/><polygon points="212,80 276,64 270,106 216,108"/><circle cx="94" cy="56" r="3.5" fill="#fff" style="fill:var(--paper)"/><path d="M142 128V146M168 128V146M130 146H152M156 146H178" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></g><g class="ink ip sp"><circle cx="100" cy="58" r="25"/><circle cx="116" cy="92" r="26" opacity=".85"/></g><g class="ink iy sy"><polygon points="76,52 48,60 76,68"/></g></svg>
+<p class="sm" style="text-align:right">Fig. 4. The pigeon in question.</p></div>`,
+/*7*/`<div class="pg" data-n=""><h3>Next: the <em>Cold</em> Issue</h3><p>One ink. Black. It will be fine.</p>
+<svg class="art" viewBox="0 0 300 190" style="margin-top:.2em" role="img" aria-label="A large blue halftone number 8 beside a pink circle"><defs><clipPath id="c8"><text x="150" y="178" text-anchor="middle" font-size="230" font-family="Bagel Fat One,sans-serif">8</text></clipPath></defs><g class="ink ip sp"><circle cx="92" cy="92" r="70"/></g><g class="ink ib sb"><path data-ht="rl,5,75" data-box="40,0,220,190" clip-path="url(#c8)"/></g></svg>
+<p class="sm">Printed in a damp garage in Ketterby. Staple not included. Actually included, sorry.</p><div class="bars" id="bars" aria-hidden="true"></div></div>`
+];
+const R=rng(77);let bs='';for(let i=0;i<34;i++)bs+=`<i style="width:${1+Math.floor(R()*4)}px"></i>`;
+PG[7]=PG[7].replace('id="bars" aria-hidden="true">','id="bars" aria-hidden="true">'+bs);
+
+const book=$('#book'),posEl=$('#pos'),prevB=$('#prev'),nextB=$('#next');
+let leaves=[],s=0,single=false,turning=false,swiped=false;
+const mx=()=>single?leaves.length-1:leaves.length;
+const mq=matchMedia('(max-width:760px)');
+function build(){
+  single=mq.matches;book.classList.toggle('single',single);book.innerHTML='';leaves=[];
+  const N=single?8:4;
+  for(let k=0;k<N;k++){
+    const lf=document.createElement('div');lf.className='leaf';
+    const f=document.createElement('div');f.className='face front';f.innerHTML=PG[single?k:2*k];lf.append(f);
+    if(!single){const b=document.createElement('div');b.className='face back';b.innerHTML=PG[2*k+1];lf.append(b)}
+    book.append(lf);leaves.push(lf);
+  }
+  initArt(book);
+  leaves.forEach((l,i)=>{l.classList.toggle('flip',i<s);l.style.zIndex=i<s?i+1:N-i});
+  shift();label();
+}
+function shift(){
+  if(single){book.style.transform='none';return}
+  book.style.transform=s===0?'translateX(calc(var(--pw)*-.5))':s===leaves.length?'translateX(calc(var(--pw)*.5))':'none';
+}
+function label(){
+  const N=leaves.length;let t;
+  if(single)t=s===0?'Cover':s===7?'Back cover':'Page '+(s+1)+' of 8';
+  else t=s===0?'Cover':s===N?'Back cover':'Pages '+(2*s)+'–'+(2*s+1)+' of 8';
+  posEl.textContent=t;prevB.disabled=s===0;nextB.disabled=s>=mx();
+}
+function turn(dir){
+  const N=leaves.length;if(turning||(dir>0&&s>=mx())||(dir<0&&s<=0))return;
+  const i=dir>0?s:s-1,lf=leaves[i];turning=!RM;
+  lf.style.zIndex=N+5;lf.classList.add('turn');lf.classList.toggle('flip',dir>0);
+  s+=dir;shift();label();
+  const done=()=>{lf.classList.remove('turn');lf.style.zIndex=i<s?i+1:N-i;turning=false};
+  RM?done():setTimeout(done,950);
+}
+function goPage(p){
+  const target=single?p:Math.ceil(p/2);let guard=0;
+  const step=()=>{if(s===target||guard>12)return;if(turning){setTimeout(step,80);return}guard++;turn(s<target?1:-1);RM?step():setTimeout(step,80)};
+  step();
+}
+nextB.onclick=()=>turn(1);prevB.onclick=()=>turn(-1);
+book.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){turn(1);e.preventDefault()}if(e.key==='ArrowLeft'){turn(-1);e.preventDefault()}});
+book.addEventListener('click',e=>{if(swiped){swiped=false;return}const r=book.getBoundingClientRect();const x=e.clientX-r.left;
+  if(single)turn(x>r.width*.4?1:-1);else turn(x>r.width/2?1:-1)});
+let sx0=null;book.addEventListener('pointerdown',e=>sx0=e.clientX);
+book.addEventListener('pointerup',e=>{if(sx0!==null&&Math.abs(e.clientX-sx0)>50){turn(e.clientX<sx0?1:-1);swiped=true;setTimeout(()=>swiped=false,50)}sx0=null});
+const keepPage=()=>{const p=single?s:(s?2*s-1:0);const was=single;single=mq.matches;s=single?p:Math.ceil(p/2);single=was;build()};
+mq.addEventListener('change',keepPage);
+build();
+$$('.toc button').forEach(b=>b.addEventListener('click',()=>{$('#zine').scrollIntoView({behavior:RM?'auto':'smooth'});setTimeout(()=>goPage(+b.dataset.page),RM?0:500)}));
+
+/* ---------- flyer tool ---------- */
+const INKS=[['Fluorescent pink','#ff48b0'],['Blue','#0078bf'],['Teal','#00838a'],['Sunflower','#ffe800'],['Orange','#ff6c2f'],['Green','#00a95c'],['Purple','#765ba7'],['Red','#f15060'],['Black','#2b2b33']];
+const STOCKS=[['cream','Cream','#f3ead2'],['white','White','#fbf9f3'],['kraft','Kraft','#c9a977']];
+const ARTS=[['sun','Sun'],['bolt','Bolt'],['bloom','Bloom']];
+const F={a:0,b:1,stock:'cream',art:'sun',move:'b',oa:{x:0,y:0},ob:{x:7,y:-5}};
+const sheet=$('#sheet'),layA=$('#layA'),layB=$('#layB');
+function seg(el,name,items,get,set){
+  el.innerHTML=items.map(([v,l],i)=>`<label><input type="radio" name="${name}" value="${v}"${get()===v?' checked':''}><span>${l}</span></label>`).join('');
+  $$('input',el).forEach(i=>i.addEventListener('change',()=>set(i.value)));
+}
+function swatches(el,name,key){
+  el.innerHTML=INKS.map(([n,c],i)=>`<label><input type="radio" name="${name}" value="${i}"${F[key]===i?' checked':''}><span class="c" style="background:${c}"></span><span class="sr">${n}</span></label>`).join('');
+  $$('input',el).forEach(i=>i.addEventListener('change',()=>{F[key]=+i.value;ink()}));
+}
+const ink=()=>{sheet.style.setProperty('--a',INKS[F.a][1]);sheet.style.setProperty('--b',INKS[F.b][1]);layA.style.color=layA.style.fill=INKS[F.a][1];layB.style.color=layB.style.fill=INKS[F.b][1];aria()};
+const marks=`<g fill="none" stroke="currentColor" stroke-width="2"><circle cx="24" cy="24" r="9"/><path d="M8 24H40M24 8V40"/><circle cx="376" cy="496" r="9"/><path d="M360 496H392M376 480V512"/></g>`;
+function motif(){
+  if(F.art==='sun'){
+    const rays=Array.from({length:16},(_,i)=>{const a=i*Math.PI/8;return `<path d="M${(200+Math.cos(a-.09)*140).toFixed(1)} ${(190+Math.sin(a-.09)*140).toFixed(1)}L${(200+Math.cos(a)*176).toFixed(1)} ${(190+Math.sin(a)*176).toFixed(1)}L${(200+Math.cos(a+.09)*140).toFixed(1)} ${(190+Math.sin(a+.09)*140).toFixed(1)}Z"/>`}).join('');
+    return `<defs><clipPath id="fc1"><circle cx="200" cy="190" r="125"/></clipPath></defs><path d="${ht(75,65,250,250,8,15,FN.sphere)}" clip-path="url(#fc1)"/>${rays}`;
+  }
+  if(F.art==='bolt'){
+    const pts='236,34 112,214 186,214 146,338 292,146 214,146 262,34';
+    return `<defs><clipPath id="fc1"><polygon points="${pts}"/></clipPath></defs><path d="${ht(100,30,200,312,7,45,FN.ry)}" clip-path="url(#fc1)"/><polygon points="${pts}" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round"/>`;
+  }
+  let cl='';for(let i=0;i<8;i++){const a=i*Math.PI/4;cl+=`<circle cx="${(200+Math.cos(a)*78).toFixed(1)}" cy="${(190+Math.sin(a)*78).toFixed(1)}" r="56"/>`}
+  return `<defs><clipPath id="fc1">${cl}</clipPath></defs><path d="${ht(66,56,268,268,8,15,(u,v)=>clamp(1.2-Math.hypot(u-.5,v-.5)*2.3,0,1))}" clip-path="url(#fc1)"/><circle cx="200" cy="190" r="32"/>`;
+}
+let flyKey='';
+function drawA(){layA.innerHTML=`<g class="rough2">${marks}${motif()}</g>`;fitXform()}
+function drawB(){
+  const head=($('#fHead').value.trim()||'PRESS GANG').toUpperCase(),small=($('#fSmall').value.trim()||'').toUpperCase();
+  let lines=[head];
+  if(head.length>8&&head.includes(' ')){const m=head.length/2;let best=0,bd=99;[...head].forEach((c,i)=>{if(c===' '&&Math.abs(i-m)<bd){bd=Math.abs(i-m);best=i}});lines=[head.slice(0,best),head.slice(best+1)]}
+  const stripe=ht(50,20,300,26,6,75,FN.rx);
+  layB.innerHTML=`<g class="rough2">${marks}<path d="${stripe}"/><circle cx="306" cy="122" r="62"/><rect x="30" y="462" width="340" height="4"/>${lines.map((l,i)=>`<text class="t" data-i="${i}" x="200" text-anchor="middle" font-family="Bagel Fat One,sans-serif" font-size="100">${l.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</text>`).join('')}<text class="sp" x="200" y="490" text-anchor="middle" font-family="Special Elite,monospace" font-size="18">${small.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</text></g>`;
+  const ts=$$('text.t',layB);let fs=ts.map(t=>Math.min(100*340/t.getComputedTextLength(),ts.length>1?132:178));
+  ts.forEach((t,i)=>{t.setAttribute('font-size',fs[i].toFixed(1));t.setAttribute('y',(ts.length>1?[340,452][i]:420)-(ts.length>1?0:0))});
+  if(ts.length>1){ts[0].setAttribute('y',340);ts[1].setAttribute('y',450)}
+  const sm=$('text.sp',layB);if(sm){const w=sm.getComputedTextLength();if(w>340)sm.setAttribute('font-size',(18*340/w).toFixed(1))}
+  fitXform();
+}
+function fitXform(){
+  const k=sheet.getBoundingClientRect().width/400||1;
+  layA.style.transform=`translate(${F.oa.x*k}px,${F.oa.y*k}px)`;layB.style.transform=`translate(${F.ob.x*k}px,${F.ob.y*k}px)`;
+  const mm=Math.hypot(F.oa.x-F.ob.x,F.oa.y-F.ob.y)*148/400;
+  $('#mm').textContent=mm.toFixed(1);
+  const g=mm<.4?'Perfect. Suspiciously.':mm<1.3?'Tight. Brenda approves.':mm<3?'Zine grade. Charming.':mm<6?'Wonderfully wrong.':'The Divorce. They are not speaking.';
+  if($('#grade').textContent!==g)$('#grade').textContent=g;
+  aria();
+}
+function aria(){sheet.setAttribute('aria-label',`Flyer reading ${$('#fHead').value||'Press Gang'}, ${INKS[F.a][0]} and ${INKS[F.b][0]} ink, ${$('#mm').textContent} millimetres out of register. Drag, or use arrow keys, to move the ${F.move==='a'?'first':'second'} ink layer. Shift moves further.`)}
+seg($('#artSeg'),'art',ARTS,()=>F.art,v=>{F.art=v;drawA()});
+seg($('#stockSeg'),'stock',STOCKS.map(s=>[s[0],s[1]]),()=>F.stock,v=>{F.stock=v;sheet.style.setProperty('--stock',STOCKS.find(s=>s[0]===v)[2])});
+seg($('#moveSeg'),'move',[['a','Ink one'],['b','Ink two']],()=>F.move,v=>{F.move=v;aria()});
+swatches($('#swA'),'inkA','a');swatches($('#swB'),'inkB','b');
+$('#fHead').addEventListener('input',()=>{drawB()});$('#fSmall').addEventListener('input',()=>{drawB()});
+let drag=null;
+sheet.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};sheet.setPointerCapture(e.pointerId);sheet.classList.add('drag')});
+sheet.addEventListener('pointermove',e=>{if(!drag)return;const k=400/sheet.getBoundingClientRect().width,o=F['o'+F.move];
+  o.x=clamp(o.x+(e.clientX-drag.x)*k,-40,40);o.y=clamp(o.y+(e.clientY-drag.y)*k,-40,40);drag={x:e.clientX,y:e.clientY};fitXform()});
+const endD=()=>{drag=null;sheet.classList.remove('drag')};sheet.addEventListener('pointerup',endD);sheet.addEventListener('pointercancel',endD);
+sheet.addEventListener('keydown',e=>{const d={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];if(!d)return;
+  e.preventDefault();const st=e.shiftKey?5:1,o=F['o'+F.move];o.x=clamp(o.x+d[0]*st,-40,40);o.y=clamp(o.y+d[1]*st,-40,40);fitXform()});
+$('#snap').onclick=()=>{F.oa={x:0,y:0};F.ob={x:0,y:0};fitXform()};
+$('#worse').onclick=()=>{F.oa={x:(Math.random()-.5)*50,y:(Math.random()-.5)*50};F.ob={x:(Math.random()-.5)*50,y:(Math.random()-.5)*50};fitXform()};
+$('#pull').onclick=function(){
+  const btn=this;if(RM){const t=btn.textContent;btn.textContent='Printed.';setTimeout(()=>btn.textContent=t,1200);return}btn.disabled=true;
+  const run=(el,delay)=>el.animate([{clipPath:'inset(0 0 100% 0)'},{clipPath:'inset(0 0 0 0)'}],{duration:850,delay,easing:'cubic-bezier(.5,.1,.3,1)',fill:'both'});
+  const a=run(layA,0),b=run(layB,700);
+  b.finished.then(()=>{a.cancel();b.cancel();btn.disabled=false}).catch(()=>{btn.disabled=false});
+};
+ink();
+let rz=0;addEventListener('resize',()=>{cancelAnimationFrame(rz);rz=requestAnimationFrame(fitXform)});
+const buildFly=()=>{drawA();drawB()};
+buildFly();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(buildFly);
+
+/* ---------- form ---------- */
+const form=$('#form'),em=$('#em');
+form.addEventListener('submit',e=>{
+  e.preventDefault();const err=$('#err');
+  if(!em.value.trim()||!em.checkValidity()){err.textContent='That email looks wonky. Try again?';em.focus();return}
+  err.textContent='';const t=$('#ticket');t.classList.add('sent');
+  $('#done').textContent=$('#rsv').checked?'Copy no. 088 of 150 is yours. We will write once, when #8 is dry.':'You are on the list. We will write once, when #8 is dry.';
+  requestAnimationFrame(()=>$('#stamp').classList.add('on'));
+  $('#done').focus({preventScroll:true});$$('input,button',form).forEach(x=>x.disabled=true);
+});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Studio Kiko — Loud design for quiet brands</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#f4f1ea;--ink:#111;--orange:#ff4d00;--lime:#c6ff00;--lilac:#b9a8ff;--pink:#ff9ecf;--sky:#7fd3ff;--b:3px solid var(--ink)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{overflow-x:clip}
+  body{background:var(--paper);color:var(--ink);font-family:Archivo,sans-serif}
+  @media(hover:hover){body,a,button{cursor:none}}
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;color:inherit;background:none;border:0}
+  ::selection{background:var(--lime)}
+
+  /* custom cursor */
+  .cur{position:fixed;left:0;top:0;z-index:999;pointer-events:none;width:18px;height:18px;margin:-9px;border-radius:50%;background:var(--ink);
+    display:grid;place-items:center;transition:width .3s cubic-bezier(.3,1.5,.5,1),height .3s cubic-bezier(.3,1.5,.5,1),margin .3s,background .3s}
+  .cur span{font:700 12px "Space Mono";color:var(--paper);opacity:0;transition:opacity .2s}
+  .cur.big{width:90px;height:90px;margin:-45px;background:var(--orange)}
+  .cur.big span{opacity:1}
+  .cur.link{width:50px;height:50px;margin:-25px;background:var(--lime);mix-blend-mode:multiply}
+  @media(hover:none){.cur{display:none}}
+
+  nav{position:fixed;top:14px;left:14px;right:14px;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:10px 12px 10px 20px;background:var(--paper);border:var(--b);border-radius:14px;box-shadow:5px 5px 0 var(--ink)}
+  .logo{font-family:"Archivo Black";font-size:20px;letter-spacing:-.02em}
+  .logo i{font-style:normal;display:inline-block;background:var(--orange);color:var(--paper);padding:0 6px;border-radius:6px;transform:rotate(-6deg);margin-left:4px}
+  .nl{display:flex;gap:6px}
+  .nl a{padding:9px 14px;border-radius:9px;font-weight:600;font-size:14px;border:2px solid transparent;transition:all .15s}
+  .nl a:hover{border-color:var(--ink);background:var(--lime)}
+  .hire{padding:10px 16px;border-radius:9px;background:var(--ink);color:var(--paper);font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px}
+  .hire b{width:8px;height:8px;border-radius:50%;background:var(--lime);animation:pulse 1.4s infinite}
+  @keyframes pulse{50%{opacity:.2}}
+  @media(max-width:760px){.nl{display:none}}
+
+  .btn{display:inline-flex;align-items:center;gap:10px;padding:16px 26px;font-weight:700;font-size:16px;border:var(--b);border-radius:12px;background:var(--lime);box-shadow:5px 5px 0 var(--ink);transition:transform .15s,box-shadow .15s}
+  .btn:hover{transform:translate(-3px,-3px);box-shadow:8px 8px 0 var(--ink)}
+  .btn:active{transform:translate(4px,4px);box-shadow:1px 1px 0 var(--ink)}
+  .btn.o{background:var(--orange);color:var(--paper)}
+
+  /* HERO */
+  .hero{min-height:100vh;padding:130px clamp(14px,4vw,50px) 60px;display:grid;grid-template-columns:1.4fr 1fr;gap:30px;align-items:center;position:relative}
+  @media(max-width:900px){.hero{grid-template-columns:1fr}}
+  .hello{font-family:"Space Mono";font-size:15px;margin-bottom:20px;display:inline-block;padding:6px 12px;border:2px solid var(--ink);border-radius:99px;background:var(--pink)}
+  .h-title{font-family:"Archivo Black";font-size:clamp(56px,8.6vw,150px);line-height:.9;letter-spacing:-.045em;text-transform:uppercase}
+  .h-title .wd{display:inline-block}
+  .h-title .l{display:inline-block;transform-origin:50% 100%}
+  /* hover wobble only switches on after the GSAP intro, so the two don't fight over transform */
+  .h-title.ready .l{transition:transform .5s cubic-bezier(.3,2.2,.5,1)}
+  .h-title.ready .l:hover{transform:scaleY(1.25) translateY(-4px) rotate(-4deg);color:var(--orange)}
+  .h-title .hl{background:var(--lime);border:var(--b);border-radius:14px;padding:0 .12em;box-shadow:6px 6px 0 var(--ink);display:inline-block;transform:rotate(-2deg)}
+  .h-title .ol{color:transparent;-webkit-text-stroke:3px var(--ink)}
+  .h-sub{font-size:clamp(17px,1.5vw,21px);line-height:1.55;max-width:520px;margin:30px 0 34px;font-weight:500}
+  .h-sub b{background:var(--lilac);padding:0 4px}
+
+  /* 3D cube */
+  .cube-wrap{display:grid;place-items:center;perspective:1000px;height:420px;position:relative}
+  .cube{width:240px;height:240px;position:relative;transform-style:preserve-3d}
+  .cube div{position:absolute;inset:0;border:var(--b);display:grid;place-items:center;font-family:"Archivo Black";font-size:34px;letter-spacing:-.02em;text-transform:uppercase}
+  .f1{background:var(--orange);color:var(--paper);transform:translateZ(120px)}
+  .f2{background:var(--lime);transform:rotateY(90deg) translateZ(120px)}
+  .f3{background:var(--lilac);transform:rotateY(180deg) translateZ(120px)}
+  .f4{background:var(--sky);transform:rotateY(-90deg) translateZ(120px)}
+  .f5{background:var(--pink);transform:rotateX(90deg) translateZ(120px)}
+  .f6{background:var(--ink);color:var(--paper);transform:rotateX(-90deg) translateZ(120px)}
+  .cube-shadow{position:absolute;bottom:10px;width:220px;height:30px;border-radius:50%;background:rgba(17,17,17,.18);filter:blur(6px)}
+  .sticker{position:absolute;width:150px;height:150px;right:6%;top:4%;animation:rot 12s linear infinite}
+  .sticker text{font:700 13.5px "Space Mono";letter-spacing:2px}
+  @keyframes rot{to{transform:rotate(360deg)}}
+  @media(max-width:900px){.cube-wrap{height:340px}.cube{scale:.68 .68 .68}.sticker{right:2%}.sticker-c{right:calc(2% + 50px)}}
+  .sticker-c{position:absolute;right:calc(6% + 50px);top:calc(4% + 50px);width:50px;height:50px;border-radius:50%;background:var(--orange);border:var(--b);display:grid;place-items:center;font-size:22px}
+
+  /* VELOCITY MARQUEE */
+  .marq{border-top:var(--b);border-bottom:var(--b);overflow:hidden;padding:18px 0;background:var(--ink);color:var(--paper)}
+  .marq.alt{background:var(--orange);color:var(--ink);border-top:0}
+  .row{display:flex;width:max-content;white-space:nowrap;will-change:transform}
+  .row span{font-family:"Archivo Black";font-size:clamp(40px,7vw,100px);text-transform:uppercase;letter-spacing:-.03em;padding-right:40px;display:inline-flex;align-items:center;gap:40px}
+  .row span i{font-style:normal;color:var(--lime);font-size:.7em}
+  .marq.alt .row span i{color:var(--paper)}
+
+  /* HORIZONTAL WORK */
+  .work{height:100vh;overflow:hidden;position:relative;border-bottom:var(--b)}
+  .work-head{position:absolute;top:110px;left:clamp(14px,4vw,50px);right:clamp(14px,4vw,50px);display:flex;justify-content:space-between;align-items:end;z-index:2}
+  .work-head h2{font-family:"Archivo Black";font-size:clamp(40px,5vw,76px);letter-spacing:-.04em;line-height:.9;text-transform:uppercase}
+  .count{font-family:"Space Mono";font-size:15px;padding:8px 14px;border:2px solid var(--ink);border-radius:99px;background:var(--paper)}
+  .track{position:absolute;left:0;top:0;height:100%;display:flex;align-items:center;gap:36px;padding:150px clamp(14px,4vw,50px) 30px;will-change:transform}
+  .proj{flex:0 0 auto;width:min(560px,80vw);height:min(480px,58vh);border:var(--b);border-radius:22px;box-shadow:8px 8px 0 var(--ink);background:var(--c);position:relative;overflow:hidden;
+    transform-style:preserve-3d;transition:transform .15s ease-out;display:flex;flex-direction:column}
+  .proj .art{flex:1;position:relative;overflow:hidden;border-bottom:var(--b)}
+  .proj .info{padding:18px 22px;display:flex;justify-content:space-between;align-items:center;background:var(--paper)}
+  .proj h3{font-family:"Archivo Black";font-size:26px;letter-spacing:-.02em}
+  .tags{display:flex;gap:6px}
+  .tags span{font:700 11px "Space Mono";padding:5px 9px;border:2px solid var(--ink);border-radius:99px}
+  .yr{position:absolute;top:16px;left:16px;font:700 13px "Space Mono";padding:5px 10px;background:var(--paper);border:2px solid var(--ink);border-radius:8px;z-index:2}
+  .end-card{flex:0 0 auto;width:min(420px,80vw);display:grid;place-items:center;text-align:center}
+  .end-card h3{font-family:"Archivo Black";font-size:clamp(40px,4vw,64px);line-height:.92;letter-spacing:-.04em;margin-bottom:24px;text-transform:uppercase}
+  /* project art (CSS only) */
+  .art-pulp{background:var(--orange);display:flex;align-items:center;justify-content:center;gap:8px}
+  .art-pulp i{width:14px;border-radius:10px;background:var(--ink);animation:eq 1s ease-in-out infinite alternate;animation-delay:calc(var(--i) * -.12s)}
+  @keyframes eq{from{height:10%}to{height:var(--h)}}
+  .art-mochi{background:var(--pink)}
+  .art-mochi i{position:absolute;border-radius:50%;border:var(--b);background:#fff;animation:squish 2.2s ease-in-out infinite;animation-delay:var(--dl)}
+  .art-mochi i::after{content:"• ᴗ •";position:absolute;inset:0;display:grid;place-items:center;font-size:20px;font-weight:700}
+  @keyframes squish{50%{transform:scale(1.12,.88) translateY(8px)}}
+  .art-grid{background:var(--lime);display:grid;place-items:center;background-image:linear-gradient(var(--ink) 2px,transparent 2px),linear-gradient(90deg,var(--ink) 2px,transparent 2px);background-size:40px 40px}
+  .art-grid b{font-family:"Archivo Black";font-size:190px;line-height:1;background:var(--lime);padding:0 20px;border:var(--b);letter-spacing:-.05em}
+  .art-notes{background:var(--lilac);display:grid;place-items:center}
+  .phone{width:170px;height:320px;border:var(--b);border-radius:30px;background:var(--paper);padding:30px 14px;transform:rotate(8deg) translateY(30px);box-shadow:8px 8px 0 var(--ink);display:flex;flex-direction:column;gap:10px}
+  .phone i{height:34px;border:2px solid var(--ink);border-radius:10px;background:var(--c)}
+  .art-orb{background:var(--ink);display:grid;place-items:center;perspective:600px}
+  .art-orb i{position:absolute;width:200px;height:200px;border-radius:50%;border:4px solid var(--c);animation:orb 6s linear infinite;animation-delay:var(--dl)}
+  @keyframes orb{from{transform:rotateX(70deg) rotateZ(0)}to{transform:rotateX(70deg) rotateZ(360deg) rotateY(360deg)}}
+
+  section.pad{padding:120px clamp(14px,4vw,50px)}
+  .sec-title{font-family:"Archivo Black";font-size:clamp(44px,6vw,96px);letter-spacing:-.045em;line-height:.9;text-transform:uppercase;margin-bottom:50px}
+  .sec-title em{font-style:normal;background:var(--orange);color:var(--paper);padding:0 .1em;border-radius:12px;display:inline-block;transform:rotate(2deg)}
+
+  /* SERVICES accordion */
+  .acc{border-top:var(--b)}
+  .item{border-bottom:var(--b)}
+  .item button{width:100%;display:flex;justify-content:space-between;align-items:center;padding:28px 0;text-align:left;font-family:"Archivo Black";font-size:clamp(28px,4vw,56px);letter-spacing:-.03em;text-transform:uppercase;transition:padding .3s,background .3s}
+  .item button:hover{padding-left:20px;background:var(--lime)}
+  .item .pm{width:56px;height:56px;border:var(--b);border-radius:50%;display:grid;place-items:center;font-size:30px;transition:transform .4s cubic-bezier(.3,1.6,.5,1),background .3s;flex:0 0 auto;background:var(--paper)}
+  .item.open .pm{transform:rotate(135deg);background:var(--orange);color:var(--paper)}
+  .item .body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s cubic-bezier(.2,.8,.2,1)}
+  .item.open .body{grid-template-rows:1fr}
+  .item .body > div{overflow:hidden}
+  .item .body p{padding:0 0 30px;max-width:640px;font-size:18px;line-height:1.6}
+  .item .body .tags{padding-bottom:30px}
+
+  /* CLIENTS */
+  .logos{display:grid;grid-template-columns:repeat(4,1fr);border:var(--b);border-radius:20px;overflow:hidden}
+  @media(max-width:700px){.logos{grid-template-columns:repeat(2,1fr)}}
+  .logos div{aspect-ratio:2/1;display:grid;place-items:center;border-right:var(--b);border-bottom:var(--b);font-family:"Archivo Black";font-size:clamp(18px,2vw,28px);letter-spacing:-.02em;transition:background .2s,color .2s}
+  .logos div:nth-child(4n){border-right:0}
+  .logos div:nth-last-child(-n+4){border-bottom:0}
+  .logos div:hover{background:var(--ink);color:var(--lime)}
+
+  /* CONTACT */
+  .contact{background:var(--ink);color:var(--paper);text-align:center;padding:140px clamp(14px,4vw,50px);border-top:var(--b);overflow:hidden;position:relative}
+  .contact h2{font-family:"Archivo Black";font-size:clamp(70px,15vw,250px);line-height:.82;letter-spacing:-.06em;text-transform:uppercase}
+  .contact h2 span{display:block}
+  .contact h2 span:nth-child(2){color:var(--lime)}
+  .magnet{display:inline-grid;place-items:center;width:190px;height:190px;border-radius:50%;background:var(--orange);color:var(--ink);font-family:"Archivo Black";font-size:20px;margin-top:50px;border:3px solid var(--paper);transition:transform .2s ease-out}
+  .email{display:block;margin-top:40px;font:700 clamp(16px,2vw,22px) "Space Mono";text-decoration:underline;text-underline-offset:6px}
+  .toast{position:fixed;left:50%;bottom:30px;transform:translate(-50%,120px);z-index:100;padding:14px 22px;background:var(--lime);color:var(--ink);border:var(--b);border-radius:12px;font-weight:700;box-shadow:5px 5px 0 var(--ink);transition:transform .4s cubic-bezier(.3,1.6,.5,1)}
+  .toast.show{transform:translate(-50%,0)}
+  footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:22px clamp(14px,4vw,50px) 76px;font:700 13px "Space Mono";background:var(--ink);color:var(--paper);border-top:1px solid #333}
+  .back{position:fixed;left:18px;bottom:18px;z-index:60;font:700 12px "Space Mono";padding:8px 12px;border:2px solid var(--ink);border-radius:9px;background:var(--paper);box-shadow:3px 3px 0 var(--ink)}
+</style>
+</head>
+<body>
+<div class="cur" id="cur"><span id="curTxt">VIEW</span></div>
+<div class="toast" id="toast">Email copied! ✌</div>
+<a class="back" href="../index.html">← all sites</a>
+
+<nav>
+  <a class="logo" href="#">studio<i>kiko</i></a>
+  <div class="nl"><a href="#work">Work</a><a href="#services">Services</a><a href="#clients">Clients</a><a href="#contact">Contact</a></div>
+  <a class="hire" href="#contact"><b></b>Available Nov '26</a>
+</nav>
+
+<section class="hero">
+  <div>
+    <div class="hello pop">👋 hey, i'm kiko — a one-person design studio</div>
+    <h1 class="h-title" id="title"><span class="wd">Loud</span> <span class="wd hl">design</span><br><span class="wd">for</span> <span class="wd ol">quiet</span><br><span class="wd">brands.</span></h1>
+    <p class="h-sub pop">I make identities, websites and <b>3D motion</b> for small companies with big ideas. Based in Lisbon, working everywhere.</p>
+    <div style="display:flex;gap:14px;flex-wrap:wrap" class="pop"><a class="btn" href="#work">See the work ↘</a><a class="btn o" href="#contact">Start a project</a></div>
+  </div>
+  <div class="cube-wrap">
+    <svg class="sticker" viewBox="0 0 150 150"><defs><path id="c" d="M75,75 m-58,0 a58,58 0 1,1 116,0 a58,58 0 1,1 -116,0"/></defs><circle cx="75" cy="75" r="73" fill="#c6ff00" stroke="#111" stroke-width="3"/><text><textPath href="#c">AVAILABLE FOR WORK ✦ 2026 ✦ SAY HI ✦</textPath></text></svg>
+    <div class="sticker-c">✺</div>
+    <div class="cube" id="cube"><div class="f1">Design</div><div class="f2">Motion</div><div class="f3">3D</div><div class="f4">Code</div><div class="f5">★</div><div class="f6">Kiko</div></div>
+    <div class="cube-shadow"></div>
+  </div>
+</section>
+
+<div class="marq"><div class="row" id="m1"></div></div>
+<div class="marq alt"><div class="row" id="m2"></div></div>
+
+<section class="work" id="work">
+  <div class="work-head"><h2>Selected<br>work</h2><div class="count" id="count">01 / 05</div></div>
+  <div class="track" id="track">
+    <article class="proj" style="--c:var(--orange)" data-cursor="VIEW"><span class="yr">2026</span><div class="art art-pulp" id="pulp"></div><div class="info"><h3>Pulp Radio</h3><div class="tags"><span>BRAND</span><span>SOUND</span></div></div></article>
+    <article class="proj" style="--c:var(--pink)" data-cursor="VIEW"><span class="yr">2025</span><div class="art art-mochi"><i style="left:12%;top:24%;width:120px;height:110px;--dl:0s"></i><i style="left:42%;top:40%;width:150px;height:135px;--dl:-.6s"></i><i style="left:70%;top:16%;width:100px;height:92px;--dl:-1.2s"></i></div><div class="info"><h3>Mochi Mochi</h3><div class="tags"><span>PACKAGING</span></div></div></article>
+    <article class="proj" style="--c:var(--lime)" data-cursor="VIEW"><span class="yr">2025</span><div class="art art-grid"><b>Aa</b></div><div class="info"><h3>Gridlock Sans</h3><div class="tags"><span>TYPEFACE</span></div></div></article>
+    <article class="proj" style="--c:var(--lilac)" data-cursor="VIEW"><span class="yr">2024</span><div class="art art-notes"><div class="phone"><i style="--c:var(--lime)"></i><i style="--c:var(--paper)"></i><i style="--c:var(--pink)"></i><i style="--c:var(--paper)"></i><i style="--c:var(--sky)"></i><i style="--c:var(--paper)"></i></div></div><div class="info"><h3>Field Notes</h3><div class="tags"><span>APP</span><span>UI</span></div></div></article>
+    <article class="proj" style="--c:var(--ink)" data-cursor="PLAY"><span class="yr">2024</span><div class="art art-orb"><i style="--c:var(--lime);--dl:0s"></i><i style="--c:var(--orange);--dl:-2s"></i><i style="--c:var(--lilac);--dl:-4s"></i></div><div class="info"><h3>Orbitals</h3><div class="tags"><span>3D</span><span>MOTION</span></div></div></article>
+    <div class="end-card"><div><h3>Your project<br>goes here?</h3><a class="btn o" href="#contact">Let's talk →</a></div></div>
+  </div>
+</section>
+
+<section class="pad" id="services">
+  <h2 class="sec-title pop">What I <em>do</em></h2>
+  <div class="acc">
+    <div class="item open"><button>Brand identity <span class="pm">+</span></button><div class="body"><div><p>Logos, type, colour and a voice that sounds like you on your best day. Delivered with a guide your team will actually read.</p><div class="tags"><span>LOGO</span><span>GUIDELINES</span><span>NAMING</span></div></div></div></div>
+    <div class="item"><button>Websites <span class="pm">+</span></button><div class="body"><div><p>Fast, accessible, ridiculously fun sites — built in-house with scroll animation and WebGL where it earns its keep.</p><div class="tags"><span>WEBFLOW</span><span>THREE.JS</span><span>GSAP</span></div></div></div></div>
+    <div class="item"><button>3D &amp; motion <span class="pm">+</span></button><div class="body"><div><p>Product renders, looping social content and launch films. Squishy, shiny and always on brand.</p><div class="tags"><span>BLENDER</span><span>C4D</span><span>AFTER EFFECTS</span></div></div></div></div>
+    <div class="item"><button>Workshops <span class="pm">+</span></button><div class="body"><div><p>Half-day sessions for teams who want to think more boldly. Sticky notes provided. Bad ideas encouraged.</p><div class="tags"><span>REMOTE</span><span>IN PERSON</span></div></div></div></div>
+  </div>
+</section>
+
+<section class="pad" id="clients" style="padding-top:0">
+  <h2 class="sec-title pop">Happy <em>humans</em></h2>
+  <div class="logos pop">
+    <div>PULP®</div><div>mochi²</div><div>NORTHWIND</div><div>Ferma</div>
+    <div>◐ HALO</div><div>okto</div><div>BRAVE NEW</div><div>Sunday.</div>
+  </div>
+</section>
+
+<section class="contact" id="contact">
+  <h2><span>Let's</span><span>make</span><span>noise</span></h2>
+  <a class="magnet" id="magnet" href="#">Say hello →</a>
+  <a class="email" id="email" href="#">hello@studiokiko.fake</a>
+</section>
+<footer><span>© 2026 Studio Kiko — fictional portfolio</span><span id="clock">Lisbon 00:00</span><span>GSAP horizontal scroll · CSS 3D cube</span></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* ---------- custom cursor ---------- */
+const cur = document.getElementById('cur'), curTxt = document.getElementById('curTxt');
+let cx = innerWidth / 2, cy = innerHeight / 2, tx = cx, ty = cy;
+addEventListener('pointermove', e => { tx = e.clientX; ty = e.clientY; });
+(function c() { cx += (tx - cx) * .25; cy += (ty - cy) * .25; cur.style.transform = `translate(${cx}px,${cy}px)`; requestAnimationFrame(c); })();
+document.addEventListener('pointerover', e => {
+  const p = e.target.closest('[data-cursor]'), l = e.target.closest('a,button');
+  cur.classList.toggle('big', !!p); cur.classList.toggle('link', !p && !!l);
+  if (p) curTxt.textContent = p.dataset.cursor;
+});
+
+/* ---------- bouncy hero letters ---------- */
+document.querySelectorAll('#title .wd').forEach(w => {
+  w.innerHTML = [...w.textContent].map(ch => `<span class="l">${ch}</span>`).join('');
+});
+gsap.from('#title .l', { yPercent: 120, rotate: 20, opacity: 0, duration: .9, ease: 'back.out(2.2)', stagger: .03, delay: .1,
+  onComplete: () => { gsap.set('#title .l', { clearProps: 'transform' }); document.getElementById('title').classList.add('ready'); } });
+gsap.utils.toArray('.pop').forEach((el, i) => gsap.from(el, {
+  scale: 1.15, rotate: i % 2 ? 4 : -4, opacity: 0, duration: .7, ease: 'back.out(2)',
+  scrollTrigger: { trigger: el, start: 'top 88%' }
+}));
+
+/* ---------- cube: spins with scroll + follows the mouse a little ---------- */
+const cube = document.getElementById('cube');
+let mxr = 0, myr = 0;
+addEventListener('pointermove', e => { mxr = (e.clientX / innerWidth - .5) * 40; myr = (e.clientY / innerHeight - .5) * -40; });
+let crx = -20, cry = 30;
+(function spin(t) {
+  const s = scrollY * .35;
+  crx += (-20 + myr + s * .3 - crx) * .08;
+  cry += (30 + mxr + s + (t || 0) * .015 - cry) * .08;
+  cube.style.transform = `rotateX(${crx}deg) rotateY(${cry}deg)`;
+  requestAnimationFrame(spin);
+})();
+
+/* ---------- velocity marquee: speeds up & skews with scroll speed ---------- */
+const words1 = ['Branding', 'Websites', '3D', 'Motion', 'Type'], words2 = ['Bold', 'Playful', 'Weird', 'Useful', 'Loud'];
+const fill = (el, ws) => { const html = ws.map(w => `<span>${w}<i>✺</i></span>`).join(''); el.innerHTML = html + html + html + html; };
+const m1 = document.getElementById('m1'), m2 = document.getElementById('m2');
+fill(m1, words1); fill(m2, words2);
+let x1 = 0, x2 = 0, vel = 0, lastY = scrollY;
+(function marquee() {
+  const dy = scrollY - lastY; lastY = scrollY;
+  vel += (dy - vel) * .1;
+  const speed = 1.2 + Math.abs(vel) * .5, dir = vel < -0.5 ? -1 : 1;
+  const w1 = m1.scrollWidth / 2, w2 = m2.scrollWidth / 2;
+  const wrap = (v, w) => ((v % w) - w) % w;      // keep offsets in [-w, 0) whichever way we scroll
+  x1 = wrap(x1 - speed * dir, w1); x2 = wrap(x2 + speed * dir, w2);
+  const skew = Math.max(-14, Math.min(14, vel * .6));
+  m1.style.transform = `translateX(${x1}px) skewX(${-skew}deg)`;
+  m2.style.transform = `translateX(${x2}px) skewX(${skew}deg)`;
+  requestAnimationFrame(marquee);
+})();
+
+/* ---------- horizontal scrolling work section ---------- */
+const track = document.getElementById('track'), countEl = document.getElementById('count');
+const projs = gsap.utils.toArray('.proj');
+gsap.to(track, {
+  x: () => -(track.scrollWidth - innerWidth),
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '#work', start: 'top top', end: () => '+=' + (track.scrollWidth - innerWidth), pin: true, scrub: 1, invalidateOnRefresh: true,
+    onUpdate: self => countEl.textContent = String(Math.min(5, Math.floor(self.progress * 5.2) + 1)).padStart(2, '0') + ' / 05'
+  }
+});
+// 3D tilt on each project card
+projs.forEach(card => {
+  card.addEventListener('pointermove', e => {
+    const r = card.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+    card.style.transform = `perspective(900px) rotateY(${x * 14}deg) rotateX(${-y * 14}deg) translateZ(10px)`;
+  });
+  card.addEventListener('pointerleave', () => card.style.transform = '');
+});
+const pulp = document.getElementById('pulp');
+pulp.innerHTML = Array.from({ length: 22 }, (_, i) => `<i style="--i:${i};--h:${30 + Math.abs(Math.sin(i * .7)) * 60}%"></i>`).join('');
+
+/* ---------- accordion ---------- */
+document.querySelectorAll('.item button').forEach(b => b.addEventListener('click', () => {
+  const it = b.parentElement, was = it.classList.contains('open');
+  document.querySelectorAll('.item').forEach(i => i.classList.remove('open'));
+  if (!was) it.classList.add('open');
+}));
+
+/* ---------- magnetic button ---------- */
+const mag = document.getElementById('magnet');
+document.getElementById('contact').addEventListener('pointermove', e => {
+  const r = mag.getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+  const d = Math.hypot(dx, dy);
+  mag.style.transform = d < 260 ? `translate(${dx * .35}px,${dy * .35}px) rotate(${dx * .05}deg)` : '';
+});
+document.getElementById('contact').addEventListener('pointerleave', () => mag.style.transform = '');
+
+/* ---------- copy email ---------- */
+const toast = document.getElementById('toast');
+[mag, document.getElementById('email')].forEach(el => el.addEventListener('click', e => {
+  e.preventDefault();
+  navigator.clipboard?.writeText('hello@studiokiko.fake').catch(() => {});
+  toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 1800);
+}));
+
+/* ---------- big contact words slide in from alternate sides ---------- */
+gsap.utils.toArray('.contact h2 span').forEach((s, i) => gsap.from(s, {
+  xPercent: i % 2 ? 60 : -60, ease: 'none', scrollTrigger: { trigger: '.contact', start: 'top bottom', end: 'center center', scrub: 1 }
+}));
+
+/* ---------- Lisbon clock ---------- */
+const clock = document.getElementById('clock');
+const tick = () => clock.textContent = 'Lisbon ' + new Date().toLocaleTimeString('en-GB', { timeZone: 'Europe/Lisbon', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+tick(); setInterval(tick, 1000);
+</script>
+</body>
+</html>

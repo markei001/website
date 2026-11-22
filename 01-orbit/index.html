@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ORBIT — Civilian Space Travel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#04040a; --ink:#f3f1ff; --muted:#9a97b8;
+    --violet:#8b7bff; --amber:#ffb46b;
+    --glass:rgba(255,255,255,.045); --line:rgba(255,255,255,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  ::selection{background:var(--violet);color:#fff}
+
+  /* the 3D galaxy lives behind everything */
+  #gl{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
+  .vignette{position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:radial-gradient(ellipse at center,transparent 40%,rgba(4,4,10,.85) 100%)}
+  main{position:relative;z-index:2}
+
+  /* scroll progress bar */
+  .progress{position:fixed;top:0;left:0;height:2px;width:100%;z-index:50;transform-origin:0 50%;transform:scaleX(0);
+    background:linear-gradient(90deg,var(--amber),var(--violet))}
+
+  nav{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;align-items:center;justify-content:space-between;
+    padding:22px clamp(18px,4vw,48px);transition:background .4s,backdrop-filter .4s}
+  nav.solid{background:rgba(4,4,10,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+  .logo{font-family:Syne;font-weight:800;letter-spacing:.32em;font-size:15px;display:flex;align-items:center;gap:10px}
+  .logo i{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);position:relative;display:inline-block}
+  .logo i::after{content:"";position:absolute;width:24px;height:6px;border:1.5px solid var(--amber);border-radius:50%;left:-7px;top:2px;transform:rotate(-20deg)}
+  .links{display:flex;gap:34px;font-size:14px;color:var(--muted)}
+  .links a{transition:color .25s}
+  .links a:hover{color:var(--ink)}
+  .btn{display:inline-flex;align-items:center;gap:10px;padding:13px 22px;border-radius:99px;font-size:14px;font-weight:500;
+    border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(10px);transition:transform .3s,background .3s,border-color .3s;cursor:pointer;color:var(--ink);font-family:inherit}
+  .btn:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.09)}
+  .btn.primary{background:var(--ink);color:#0b0a18;border-color:var(--ink)}
+  .btn.primary:hover{background:#fff}
+  @media(max-width:760px){.links{display:none}}
+
+  section{min-height:100vh;padding:120px clamp(18px,6vw,90px);position:relative}
+
+  /* HERO */
+  .hero{display:flex;flex-direction:column;justify-content:center;min-height:100vh}
+  .eyebrow{font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--amber);margin-bottom:26px;display:flex;align-items:center;gap:12px}
+  .eyebrow::before{content:"";width:34px;height:1px;background:currentColor}
+  h1{font-family:Syne;font-weight:800;font-size:clamp(56px,12vw,190px);line-height:.88;letter-spacing:-.04em}
+  h1 .line{display:block;overflow:hidden;padding-bottom:.06em}
+  h1 .ch{display:inline-block;transform:translateY(110%) rotate(8deg);animation:rise 1.1s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(var(--i) * 45ms + 200ms)}
+  h1 .ch.sp{width:.25em}
+  /* gradient is painted per letter (background-clip:text doesn't reach transformed children) */
+  h1 em{font-style:normal}
+  h1 em .ch{background:linear-gradient(100deg,var(--amber),#ff7eb6 50%,var(--violet));background-size:500% 100%;background-position:calc(var(--k) * 25%) 0;-webkit-background-clip:text;background-clip:text;color:transparent}
+  @keyframes rise{to{transform:none}}
+  .hero p{max-width:440px;color:var(--muted);font-size:clamp(16px,1.4vw,19px);line-height:1.6;margin:34px 0 38px;opacity:0;animation:fade 1s 1.1s forwards}
+  .hero .cta{display:flex;gap:14px;flex-wrap:wrap;opacity:0;animation:fade 1s 1.3s forwards}
+  @keyframes fade{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  .scrollcue{position:absolute;bottom:34px;left:50%;transform:translateX(-50%);font-size:11px;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:12px}
+  .scrollcue span{width:1px;height:48px;background:linear-gradient(var(--ink),transparent);animation:drip 2s infinite}
+  @keyframes drip{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+  .coords{position:absolute;right:clamp(18px,6vw,90px);bottom:40px;font-size:11px;color:var(--muted);letter-spacing:.15em;text-align:right;line-height:1.9;font-variant-numeric:tabular-nums}
+
+  /* reveal on scroll */
+  .reveal{opacity:0;transform:translateY(40px);filter:blur(8px);transition:opacity 1.1s cubic-bezier(.2,.8,.2,1),transform 1.1s cubic-bezier(.2,.8,.2,1),filter 1.1s;transition-delay:var(--d,0s)}
+  .reveal.in{opacity:1;transform:none;filter:none}
+
+  /* STATEMENT */
+  .statement{display:grid;place-items:center;text-align:center}
+  .statement h2{font-family:Syne;font-weight:700;font-size:clamp(38px,6.4vw,104px);line-height:1;letter-spacing:-.03em;max-width:1100px}
+  .statement h2 span{color:var(--muted)}
+
+  /* DESTINATIONS */
+  .head{display:flex;justify-content:space-between;align-items:end;gap:30px;flex-wrap:wrap;margin-bottom:60px}
+  .head h2{font-family:Syne;font-weight:700;font-size:clamp(36px,5vw,72px);letter-spacing:-.03em;line-height:1}
+  .head p{max-width:360px;color:var(--muted);line-height:1.6}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;perspective:1200px}
+  @media(max-width:1100px){.grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.grid{grid-template-columns:1fr}}
+  .card{position:relative;padding:28px;border-radius:24px;border:1px solid var(--line);background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.015)),rgba(8,6,20,.45);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);min-height:380px;display:flex;flex-direction:column;transform-style:preserve-3d;transition:transform .2s ease-out,border-color .3s;overflow:hidden}
+  .card:hover{border-color:rgba(255,255,255,.3)}
+  .card .glare{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at var(--gx,50%) var(--gy,50%),rgba(255,255,255,.14),transparent 45%);opacity:0;transition:opacity .3s}
+  .card:hover .glare{opacity:1}
+  .card .tag{font-size:11px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
+  .card h3{font-family:Syne;font-size:30px;margin-top:auto;transform:translateZ(40px)}
+  .card .meta{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-top:12px;padding-top:14px;border-top:1px solid var(--line);transform:translateZ(25px)}
+  .planet{width:132px;aspect-ratio:1;border-radius:50%;margin:34px auto 34px;position:relative;transform:translateZ(70px);
+    box-shadow:inset -26px -20px 40px rgba(0,0,0,.75),inset 8px 6px 18px rgba(255,255,255,.25),0 0 70px var(--glow);animation:spin 18s linear infinite;background-size:200% 100%}
+  @keyframes spin{to{background-position:-200% 0}}
+  .p-luna{--glow:rgba(200,200,220,.25);background:radial-gradient(circle at 30% 40%,#7e7e86 0 8%,transparent 9%),radial-gradient(circle at 62% 64%,#80808a 0 11%,transparent 12%),radial-gradient(circle at 70% 30%,#8b8b93 0 5%,transparent 6%),linear-gradient(#cfcfd6,#a9a9b4)}
+  .p-mars{--glow:rgba(255,110,50,.35);background:repeating-linear-gradient(170deg,#c1440e 0 14px,#d9622b 14px 22px,#a8380b 22px 34px)}
+  .p-europa{--glow:rgba(170,210,255,.3);background:repeating-linear-gradient(60deg,transparent 0 18px,rgba(150,80,40,.35) 18px 20px),repeating-linear-gradient(-30deg,transparent 0 26px,rgba(150,80,40,.3) 26px 27px),linear-gradient(#e9e2d0,#c9d6e3)}
+  .p-saturn{--glow:rgba(255,200,120,.3);background:repeating-linear-gradient(180deg,#e3c08d 0 10px,#c9a26b 10px 16px,#f0d7a8 16px 26px)}
+  .ring{position:absolute;left:50%;top:50%;width:230px;height:60px;border-radius:50%;transform:translate(-50%,-50%) rotate(-18deg);border:10px solid rgba(240,215,168,.55);box-shadow:0 0 0 3px rgba(240,215,168,.2);pointer-events:none}
+  .saturn-wrap{position:relative;transform:translateZ(70px)}
+  .saturn-wrap .planet{transform:none}
+
+  /* JOURNEY timeline */
+  .journey{display:grid;grid-template-columns:1fr 1.2fr;gap:8vw}
+  @media(max-width:900px){.journey{grid-template-columns:1fr}}
+  .sticky{position:sticky;top:140px;align-self:start}
+  .sticky h2{font-family:Syne;font-size:clamp(36px,5vw,72px);line-height:1;letter-spacing:-.03em}
+  .sticky p{color:var(--muted);margin-top:22px;line-height:1.6;max-width:380px}
+  .steps{position:relative;padding-left:46px}
+  .track{position:absolute;left:8px;top:0;bottom:0;width:1px;background:var(--line)}
+  .track i{position:absolute;inset:0;background:linear-gradient(var(--amber),var(--violet));transform-origin:top;transform:scaleY(var(--p,0))}
+  .step{padding:0 0 90px;position:relative}
+  .step::before{content:"";position:absolute;left:-44px;top:6px;width:14px;height:14px;border-radius:50%;background:var(--bg);border:1px solid var(--muted);transition:all .5s}
+  .step.in::before{background:var(--amber);border-color:var(--amber);box-shadow:0 0 20px var(--amber)}
+  .step .n{font-family:Syne;font-size:13px;color:var(--amber);letter-spacing:.2em}
+  .step h3{font-family:Syne;font-size:clamp(26px,3vw,40px);margin:10px 0 14px}
+  .step p{color:#bdb9dc;line-height:1.7;max-width:460px}
+  .step,.sticky,.head,.statement h2{text-shadow:0 2px 24px rgba(4,4,10,.9)}
+
+  /* STATS */
+  .stats{min-height:auto;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding-top:80px;padding-bottom:80px}
+  @media(max-width:800px){.stats{grid-template-columns:repeat(2,1fr);row-gap:50px}}
+  .stat b{display:block;font-family:Syne;font-weight:700;font-size:clamp(44px,6vw,88px);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+  .stat span{color:var(--muted);font-size:14px}
+
+  /* CTA */
+  .final{display:grid;place-items:center;text-align:center;grid-template-columns:minmax(0,1fr)}
+  .final .eyebrow{flex-wrap:wrap}
+  .final h2{font-family:Syne;font-weight:800;font-size:clamp(48px,9vw,150px);line-height:.9;letter-spacing:-.04em}
+  .final form{margin:44px auto 0;display:flex;gap:10px;padding:8px;border:1px solid var(--line);border-radius:99px;background:var(--glass);backdrop-filter:blur(12px);width:min(480px,100%)}
+  .final input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--ink);padding:0 18px;font:inherit;font-size:15px}
+  .final input::placeholder{color:var(--muted)}
+  .thanks{margin-top:18px;color:var(--amber);font-size:14px;min-height:20px}
+  footer{position:relative;z-index:2;display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px;padding:40px clamp(18px,6vw,90px) 84px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+
+  .back{position:fixed;left:18px;bottom:18px;z-index:60;font-size:12px;padding:8px 14px;border-radius:99px;background:rgba(0,0,0,.5);border:1px solid var(--line);color:var(--muted);backdrop-filter:blur(8px)}
+  .back:hover{color:var(--ink)}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+    h1 .ch{transform:none}
+  }
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div class="vignette"></div>
+<div class="progress" id="progress"></div>
+<a class="back" href="../index.html">← all sites</a>
+
+<nav id="nav">
+  <a class="logo" href="#"><i></i>ORBIT</a>
+  <div class="links"><a href="#destinations">Destinations</a><a href="#journey">The Journey</a><a href="#stats">Safety</a><a href="#book">Book</a></div>
+  <a class="btn" href="#book">Reserve a seat</a>
+</nav>
+
+<main>
+  <section class="hero">
+    <div class="eyebrow">Civilian flights · since 2031</div>
+    <h1 id="title"><span class="line">Beyond</span><span class="line">the <em>blue.</em></span></h1>
+    <p>Orbit flies ordinary people past the edge of everything. Four destinations, one unforgettable window seat.</p>
+    <div class="cta"><a class="btn primary" href="#destinations">Explore destinations →</a><a class="btn" href="#journey">How it works</a></div>
+    <div class="coords" id="coords">RA 17h 45m 40s<br>DEC −29° 00′ 28″<br>ALT 0 km</div>
+    <div class="scrollcue">Scroll<span></span></div>
+  </section>
+
+  <section class="statement">
+    <h2 class="reveal">Space isn't far away. <span>It's only</span> 100 kilometres <span>straight up.</span></h2>
+  </section>
+
+  <section id="destinations">
+    <div class="head">
+      <h2 class="reveal">Pick your<br>horizon.</h2>
+      <p class="reveal" style="--d:.15s">Every trip includes two weeks of training, a personal flight suit, and a view nobody on Earth can buy.</p>
+    </div>
+    <div class="grid">
+      <article class="card reveal" style="--d:0s"><div class="glare"></div><span class="tag">Weekend · 3 days</span><div class="planet p-luna"></div><h3>Luna</h3><div class="meta"><span>384,400 km</span><span>from $240k</span></div></article>
+      <article class="card reveal" style="--d:.1s"><div class="glare"></div><span class="tag">Expedition · 7 months</span><div class="planet p-mars"></div><h3>Mars</h3><div class="meta"><span>225M km</span><span>from $1.8M</span></div></article>
+      <article class="card reveal" style="--d:.2s"><div class="glare"></div><span class="tag">Research · 2 years</span><div class="planet p-europa"></div><h3>Europa</h3><div class="meta"><span>628M km</span><span>by invite</span></div></article>
+      <article class="card reveal" style="--d:.3s"><div class="glare"></div><span class="tag">Flyby · 3 years</span><div class="saturn-wrap"><div class="planet p-saturn"></div><div class="ring"></div></div><h3>Saturn</h3><div class="meta"><span>1.4B km</span><span>2040 waitlist</span></div></article>
+    </div>
+  </section>
+
+  <section id="journey" class="journey">
+    <div class="sticky">
+      <div class="eyebrow">The journey</div>
+      <h2 class="reveal">From your sofa<br>to zero-g.</h2>
+      <p class="reveal" style="--d:.1s">No pilot's licence. No PhD. Just four steps between you and the most beautiful view in the solar system.</p>
+    </div>
+    <div class="steps" id="steps">
+      <div class="track"><i></i></div>
+      <div class="step"><div class="n">01 — TRAIN</div><h3>Two weeks in the Atacama.</h3><p>Centrifuge sessions, zero-g parabolas and a lot of stargazing at our base in the driest desert on Earth.</p></div>
+      <div class="step"><div class="n">02 — LAUNCH</div><h3>Eight minutes of thunder.</h3><p>Our reusable Halcyon rocket takes you from 0 to 28,000 km/h. Your coffee will float before the music ends.</p></div>
+      <div class="step"><div class="n">03 — DRIFT</div><h3>Weightless, finally.</h3><p>Unbuckle. Somersault. Watch sixteen sunrises a day through a window the size of a living room.</p></div>
+      <div class="step"><div class="n">04 — ARRIVE</div><h3>Step onto another world.</h3><p>Leave a footprint that will outlast the pyramids. Then come home and try to explain it to everyone.</p></div>
+    </div>
+  </section>
+
+  <section id="stats" class="stats">
+    <div class="stat reveal"><b data-count="1204">0</b><span>civilians flown</span></div>
+    <div class="stat reveal" style="--d:.1s"><b data-count="38">0</b><span>countries represented</span></div>
+    <div class="stat reveal" style="--d:.2s"><b data-count="0">0</b><span>safety incidents</span></div>
+    <div class="stat reveal" style="--d:.3s"><b data-count="99.8" data-dec="1" data-suffix="%">0</b><span>would fly again</span></div>
+  </section>
+
+  <section id="book" class="final">
+    <div>
+      <div class="eyebrow" style="justify-content:center">Next launch · March 2036</div>
+      <h2 class="reveal">Your seat<br>is <em style="font-style:normal;color:var(--amber)">waiting.</em></h2>
+      <form id="form" class="reveal" style="--d:.15s">
+        <input type="email" required placeholder="you@earth.com" aria-label="Email">
+        <button class="btn primary" type="submit">Join waitlist</button>
+      </form>
+      <div class="thanks" id="thanks"></div>
+    </div>
+  </section>
+</main>
+<footer><span>© 2036 Orbit Aerospace — a fictional company</span><span>Made with Three.js · scroll to fly</span></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ---------- split hero title into letters for the stagger animation ---------- */
+(() => {
+  let i = 0;
+  document.querySelectorAll('#title .line').forEach(line => {
+    const walk = node => {
+      [...node.childNodes].forEach(n => {
+        if (n.nodeType === 3) {
+          const frag = document.createDocumentFragment();
+          [...n.textContent].forEach(c => {
+            const s = document.createElement('span');
+            s.className = 'ch' + (c === ' ' ? ' sp' : '');
+            s.textContent = c === ' ' ? ' ' : c;
+            s.style.setProperty('--i', i++);
+            if (node.tagName === 'EM') s.style.setProperty('--k', node.childElementCount + frag.childNodes.length);
+            frag.appendChild(s);
+          });
+          n.replaceWith(frag);
+        } else walk(n);
+      });
+    };
+    walk(line);
+  });
+})();
+
+/* ---------- reveal on scroll ---------- */
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) { e.target.classList.add('in'); if (e.target.dataset.count !== undefined) count(e.target); }
+}), { threshold: .2 });
+document.querySelectorAll('.reveal, .step').forEach(el => io.observe(el));
+document.querySelectorAll('[data-count]').forEach(el => io.observe(el));
+
+function count(el) {
+  if (el.dataset.done) return; el.dataset.done = 1;
+  const end = +el.dataset.count, dec = +(el.dataset.dec || 0), suf = el.dataset.suffix || '';
+  const t0 = performance.now(), dur = 1800;
+  const tick = t => {
+    const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 4);
+    el.textContent = (end * e).toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec }) + suf;
+    if (k < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+/* ---------- 3D tilt cards ---------- */
+document.querySelectorAll('.card').forEach(card => {
+  card.addEventListener('pointermove', e => {
+    const r = card.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    card.style.transform = `rotateY(${(x - .5) * 18}deg) rotateX(${(.5 - y) * 18}deg)`;
+    card.style.setProperty('--gx', x * 100 + '%'); card.style.setProperty('--gy', y * 100 + '%');
+  });
+  card.addEventListener('pointerleave', () => card.style.transform = '');
+});
+
+/* ---------- form ---------- */
+document.getElementById('form').addEventListener('submit', e => {
+  e.preventDefault();
+  document.getElementById('thanks').textContent = "You're on the list. We'll call you before liftoff ✦";
+  e.target.reset();
+});
+
+/* ---------- THREE.JS GALAXY ---------- */
+const canvas = document.getElementById('gl');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setClearColor(0x04040a);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 200);
+
+// soft round sprite drawn on a canvas, so stars glow instead of being squares
+function dotTexture() {
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const g = c.getContext('2d');
+  const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.2, 'rgba(255,255,255,.8)');
+  gr.addColorStop(.5, 'rgba(255,255,255,.15)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+  return new THREE.CanvasTexture(c);
+}
+const dot = dotTexture();
+
+// spiral galaxy: points spread along curved arms
+const P = { count: innerWidth < 700 ? 35000 : 80000, radius: 7, branches: 5, spin: 1.1, rand: .5, pow: 3 };
+const galaxy = new THREE.Group();
+{
+  const pos = new Float32Array(P.count * 3), col = new Float32Array(P.count * 3);
+  const inside = new THREE.Color('#ffb46b'), outside = new THREE.Color('#4f3dff'), c = new THREE.Color();
+  for (let i = 0; i < P.count; i++) {
+    const r = Math.pow(Math.random(), 1.4) * P.radius;
+    const branch = (i % P.branches) / P.branches * Math.PI * 2;
+    const angle = branch + r * P.spin;
+    const off = () => Math.pow(Math.random(), P.pow) * (Math.random() < .5 ? 1 : -1) * P.rand * r;
+    pos[i * 3] = Math.cos(angle) * r + off();
+    pos[i * 3 + 1] = off() * .35;
+    pos[i * 3 + 2] = Math.sin(angle) * r + off();
+    c.copy(inside).lerp(outside, Math.min(1, r / P.radius * 1.15));
+    col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  const mat = new THREE.PointsMaterial({ size: .045, map: dot, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+  galaxy.add(new THREE.Points(geo, mat));
+  galaxy.userData.mats = [mat];
+
+  // glowing core
+  const core = new THREE.Sprite(new THREE.SpriteMaterial({ map: dot, color: 0xffc58a, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+  core.scale.set(3.2, 3.2, 1); galaxy.add(core);
+  galaxy.userData.mats.push(core.material);
+}
+scene.add(galaxy);
+
+// distant background stars
+{
+  const n = 4000, pos = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const r = 40 + Math.random() * 60, t = Math.random() * Math.PI * 2, p = Math.acos(2 * Math.random() - 1);
+    pos[i * 3] = r * Math.sin(p) * Math.cos(t); pos[i * 3 + 1] = r * Math.cos(p); pos[i * 3 + 2] = r * Math.sin(p) * Math.sin(t);
+  }
+  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  scene.add(new THREE.Points(geo, new THREE.PointsMaterial({ size: .35, map: dot, color: 0xbfc6ff, transparent: true, depthWrite: false, opacity: .8 })));
+}
+
+// the camera flies along this curve as you scroll
+const path = new THREE.CatmullRomCurve3([
+  new THREE.Vector3(0, 7, 10),
+  new THREE.Vector3(5, 2.5, 6),
+  new THREE.Vector3(3.4, 1, 3.2),
+  new THREE.Vector3(-4.6, 1.8, -2.6),
+  new THREE.Vector3(-1, 5, -6),
+  new THREE.Vector3(0, 13, 1.5)
+]);
+
+function resize() {
+  renderer.setSize(innerWidth, innerHeight, false);
+  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize); resize();
+
+const mouse = { x: 0, y: 0, sx: 0, sy: 0 };
+addEventListener('pointermove', e => { mouse.x = e.clientX / innerWidth - .5; mouse.y = e.clientY / innerHeight - .5; });
+
+let target = 0, prog = 0;
+const nav = document.getElementById('nav'), bar = document.getElementById('progress');
+const coords = document.getElementById('coords'), steps = document.getElementById('steps');
+function onScroll() {
+  const max = document.documentElement.scrollHeight - innerHeight;
+  target = max > 0 ? scrollY / max : 0;
+  bar.style.transform = `scaleX(${target})`;
+  nav.classList.toggle('solid', scrollY > 40);
+  // timeline line fills as you move through it
+  const r = steps.getBoundingClientRect();
+  const p = Math.min(1, Math.max(0, (innerHeight * .6 - r.top) / r.height));
+  steps.style.setProperty('--p', p);
+}
+addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+const look = new THREE.Vector3();
+const clock = new THREE.Clock();
+(function frame() {
+  const t = clock.getElapsedTime();
+  prog += (target - prog) * .06;                 // ease toward scroll position
+  mouse.sx += (mouse.x - mouse.sx) * .05; mouse.sy += (mouse.y - mouse.sy) * .05;
+
+  path.getPointAt(Math.min(prog, .9999), camera.position);
+  camera.position.x += mouse.sx * 1.2; camera.position.y -= mouse.sy * .8;
+  look.set(0, 0, 0); camera.lookAt(look);
+
+  galaxy.rotation.y = t * .03 + prog * 2.2;
+  // dim the galaxy mid-page so body text stays readable
+  const dim = 1 - .45 * Math.sin(Math.PI * Math.min(1, prog * 1.1));
+  galaxy.userData.mats.forEach(m => m.opacity = dim);
+  coords.innerHTML = `RA 17h 45m ${(40 + prog * 19).toFixed(0)}s<br>DEC −29° 00′ 28″<br>ALT ${(prog * 384400).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} km`;
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

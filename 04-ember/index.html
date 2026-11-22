@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EMBER — Cold Brew, Warm Soul</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gloock&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#f3eadb; --paper:#efe3cf; --espresso:#2b1a12; --roast:#5a3522; --terra:#c8553d; --gold:#e0a458; --olive:#7a8450;
+    --ink:var(--espresso); --bg:var(--cream);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{background:var(--bg)}
+  body{background:var(--bg);color:var(--ink);font-family:"Instrument Sans",system-ui,sans-serif;overflow-x:hidden;transition:background-color .8s}
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+  nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:20px clamp(16px,4vw,48px);mix-blend-mode:normal}
+  .logo{font-family:Gloock;font-size:26px;letter-spacing:.02em;display:flex;align-items:center;gap:8px}
+  .logo svg{width:22px;height:22px}
+  .nl{display:flex;gap:30px;font-size:15px;font-weight:500}
+  .nl a{position:relative}
+  .nl a::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:1.5px;background:currentColor;transform:scaleX(0);transform-origin:right;transition:transform .4s}
+  .nl a:hover::after{transform:scaleX(1);transform-origin:left}
+  @media(max-width:760px){.nl{display:none}}
+  .cart{display:flex;align-items:center;gap:10px;padding:10px 18px;border-radius:99px;background:var(--espresso);color:var(--cream);font-weight:600;font-size:14px}
+  .cart b{display:grid;place-items:center;min-width:22px;height:22px;border-radius:99px;background:var(--terra);font-size:12px}
+  .cart.bump b{animation:bump .5s cubic-bezier(.3,2,.5,1)}
+  @keyframes bump{50%{transform:scale(1.6)}}
+
+  /* ================= CSS 3D CAN ================= */
+  .can-stage{perspective:1400px;perspective-origin:50% 30%}
+  .can-tilt{transform-style:preserve-3d;transform:rotateX(-12deg)}
+  .can{position:relative;transform-style:preserve-3d;width:calc(var(--r) * 2px);height:calc(var(--h) * 1px)}
+  .can .face{position:absolute;top:0;height:100%;backface-visibility:hidden;
+    background-image:linear-gradient(rgba(255,255,255,var(--hl,0)),rgba(255,255,255,var(--hl,0))),linear-gradient(rgba(24,12,6,var(--dk,0)),rgba(24,12,6,var(--dk,0))),var(--label);
+    background-size:auto,auto,calc(var(--lw) * 1px) 100%}
+  .can .cap{position:absolute;left:0;width:100%;aspect-ratio:1;border-radius:50%;
+    background:radial-gradient(circle at 50% 50%,#bdbdbd 0 44%,#e9e9e9 47%,#8f8f8f 52%,#d9d9d9 60%,#a4a4a4 66%,#f4f4f4 70%,#9b9b9b 100%)}
+  .can .cap.top{top:calc(var(--r) * -1px);transform:rotateX(90deg)}
+  .can .cap.top::after{content:"";position:absolute;left:38%;top:22%;width:24%;height:18%;border-radius:40%;border:3px solid #8a8a8a;background:#d4d4d4}
+  .can .cap.bot{top:calc(var(--h) * 1px - var(--r) * 1px);transform:rotateX(-90deg);background:#6f6f6f}
+  .shadow{width:calc(var(--r) * 2.4px);height:36px;margin:-10px auto 0;border-radius:50%;background:radial-gradient(rgba(43,26,18,.35),transparent 70%);filter:blur(4px)}
+
+  /* ================= HERO (pinned) ================= */
+  .hero{position:relative;height:100vh;overflow:hidden;display:grid;place-items:center}
+  .bigtext{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;font-family:Gloock;line-height:.82;pointer-events:none;user-select:none}
+  .bigtext span{font-size:clamp(90px,21vw,330px);letter-spacing:-.02em}
+  .bigtext span:last-child{color:transparent;-webkit-text-stroke:2px var(--espresso)}
+  .hero-can{position:relative;z-index:3}
+  .hero-can .scale{transform:scale(var(--s,1))}
+  .hero-copy{position:absolute;left:clamp(16px,4vw,48px);bottom:40px;z-index:4;max-width:330px}
+  .hero-copy p{font-size:16px;line-height:1.55;margin-bottom:18px}
+  .hero-copy p em{font-family:"Instrument Serif";font-size:20px}
+  .btn{display:inline-flex;align-items:center;gap:10px;padding:15px 24px;border-radius:99px;background:var(--terra);color:var(--cream);font-weight:600;transition:transform .3s cubic-bezier(.3,1.6,.5,1),background .3s}
+  .btn:hover{transform:scale(1.05) rotate(-2deg);background:var(--espresso)}
+  .btn.line{background:transparent;color:var(--ink);border:1.5px solid currentColor}
+  .btn.line:hover{background:var(--ink);color:var(--cream)}
+  .hero-meta{position:absolute;right:clamp(16px,4vw,48px);bottom:40px;z-index:4;text-align:right;font-size:13px;line-height:1.7;letter-spacing:.08em;text-transform:uppercase}
+  .hero-meta b{font-family:Gloock;font-size:42px;font-weight:400;display:block;letter-spacing:0}
+  @media(max-width:760px){.hero-meta{display:none}.hero-copy{right:16px;bottom:24px;max-width:none}}
+
+  .callout{position:absolute;z-index:4;width:min(250px,40vw);opacity:0;transform:translateY(20px);transition:opacity .6s,transform .6s cubic-bezier(.2,.8,.2,1)}
+  .callout.on{opacity:1;transform:none}
+  .callout .num{font-family:Gloock;font-size:14px;color:var(--terra)}
+  .callout h4{font-family:Gloock;font-weight:400;font-size:clamp(22px,2.2vw,30px);line-height:1.05;margin:6px 0 8px}
+  .callout p{font-size:14px;line-height:1.5;opacity:.75}
+  .callout::before{content:"";position:absolute;top:10px;width:min(120px,9vw);height:1px;background:currentColor;opacity:.4}
+  .c1{left:9vw;top:22vh}.c2{right:9vw;top:28vh;text-align:right}.c3{left:12vw;bottom:20vh}.c4{right:11vw;bottom:16vh;text-align:right}
+  .c1::before,.c3::before{left:calc(100% + 16px)}.c2::before,.c4::before{right:calc(100% + 16px)}
+  @media(max-width:760px){
+    .callout{left:16px!important;right:16px!important;top:auto!important;bottom:28px!important;width:auto;text-align:center!important;background:var(--paper);padding:16px;border-radius:18px}
+    .callout::before{display:none}
+    .callout.on:not(.cur){opacity:0}
+  }
+
+  /* floating beans */
+  #beans{position:absolute;inset:0;pointer-events:none;z-index:2}
+  .bean{position:absolute;width:calc(var(--z) * 46px);height:calc(var(--z) * 62px);border-radius:50%;z-index:calc(var(--z) * 4);
+    background:radial-gradient(ellipse at 35% 30%,#8a5634,#4a2a18 55%,#2a160c);box-shadow:inset -4px -6px 10px rgba(0,0,0,.4);filter:blur(calc((1.3 - var(--z)) * 3px))}
+  .bean::after{content:"";position:absolute;left:46%;top:10%;width:14%;height:80%;border-radius:50%;border-left:3px solid #1d0e06;transform:rotate(8deg)}
+
+  /* ================= MARQUEE ================= */
+  .marquee{background:var(--espresso);color:var(--cream);padding:26px 0;overflow:hidden}
+  .marquee .mt{display:flex;gap:50px;width:max-content;animation:m 30s linear infinite;font-family:Gloock;font-size:clamp(28px,4vw,54px);white-space:nowrap;align-items:center}
+  .marquee .mt i{font-style:normal;color:var(--gold);font-size:.6em}
+  @keyframes m{to{transform:translateX(-50%)}}
+
+  section.pad{padding:130px clamp(16px,6vw,90px)}
+  .eyebrow{font-size:13px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:var(--terra);margin-bottom:18px}
+  h2{font-family:Gloock;font-weight:400;font-size:clamp(44px,6.5vw,104px);line-height:.95;letter-spacing:-.015em}
+  h2 em{font-family:"Instrument Serif";font-style:italic}
+
+  /* ================= FLAVOURS ================= */
+  .flavours{display:grid;grid-template-columns:1.1fr 1fr;gap:6vw;align-items:center;min-height:100vh}
+  @media(max-width:900px){.flavours{grid-template-columns:1fr}}
+  .fl-can{display:grid;place-items:center;cursor:grab;touch-action:pan-y;position:relative;padding:40px 0}
+  .fl-can:active{cursor:grabbing}
+  .fl-can .ring{position:absolute;width:min(520px,80vw);aspect-ratio:1;border-radius:50%;background:var(--ring,var(--terra));opacity:.18;transition:background .8s}
+  .drag{position:absolute;bottom:0;font-size:13px;letter-spacing:.15em;text-transform:uppercase;opacity:.6}
+  .fl-name{font-family:Gloock;font-size:clamp(48px,6vw,96px);line-height:.92;margin:12px 0 22px;min-height:2em}
+  .fl-name .ch{display:inline-block;animation:chIn .7s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--i) * 25ms)}
+  @keyframes chIn{from{opacity:0;transform:translateY(40px) rotate(10deg)}}
+  .fl-desc{font-size:18px;line-height:1.6;max-width:440px;opacity:.85}
+  .notes{display:flex;gap:10px;margin:28px 0 36px;flex-wrap:wrap}
+  .notes span{padding:8px 16px;border-radius:99px;border:1.5px solid currentColor;font-size:14px;font-weight:500}
+  .swatches{display:flex;gap:14px}
+  .sw{width:58px;height:58px;border-radius:50%;background:var(--c);border:3px solid transparent;outline:2px solid transparent;transition:all .3s;position:relative}
+  .sw.on{outline-color:var(--ink);transform:scale(1.1)}
+  .sw:hover{transform:scale(1.1)}
+
+  /* ================= STACKED PROCESS CARDS ================= */
+  .process-head{text-align:center;margin-bottom:70px}
+  .stack{max-width:1100px;margin:0 auto}
+  .scard{position:sticky;top:calc(110px + var(--i) * 26px);height:min(560px,72vh);border-radius:36px;padding:clamp(28px,4vw,56px);margin-bottom:60px;
+    display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;transform-origin:50% 0;box-shadow:0 -20px 50px rgba(43,26,18,.08);overflow:hidden}
+  @media(max-width:760px){.scard{grid-template-columns:1fr;height:auto;min-height:60vh}}
+  .scard .n{font-family:Gloock;font-size:clamp(80px,12vw,180px);line-height:.8;opacity:.18}
+  .scard h3{font-family:Gloock;font-weight:400;font-size:clamp(34px,4vw,60px);line-height:1;margin-bottom:16px}
+  .scard p{font-size:17px;line-height:1.6;opacity:.85;max-width:420px}
+  .scard .art{height:100%;min-height:220px;border-radius:24px;position:relative;overflow:hidden}
+  .k1{background:#e7d3b4}.k2{background:var(--terra);color:var(--cream)}.k3{background:var(--olive);color:var(--cream)}.k4{background:var(--espresso);color:var(--cream)}
+  /* small CSS illustrations for each step */
+  .art-farm{background:linear-gradient(#f6c89a,#efa874)}
+  .art-farm i{position:absolute;bottom:0;left:-10%;right:-10%;height:55%;border-radius:50% 50% 0 0;background:#6f7a43}
+  .art-farm i:nth-child(2){height:40%;left:30%;right:-30%;background:#56602f}
+  .art-farm b{position:absolute;top:18%;left:20%;width:70px;height:70px;border-radius:50%;background:#fff3d6;box-shadow:0 0 60px #fff3d6}
+  .art-roast{background:radial-gradient(circle at 50% 120%,#ffb36b,#c8553d 40%,#5a2a1a)}
+  .art-roast i{position:absolute;bottom:-20px;width:30px;height:140px;border-radius:50% 50% 20% 20%;background:linear-gradient(#ffe2a8,#ff8a3d);filter:blur(2px);animation:flame 1.2s ease-in-out infinite alternate;left:calc(var(--x) * 1%);animation-delay:calc(var(--x) * -30ms)}
+  @keyframes flame{to{height:190px;transform:skewX(8deg)}}
+  .art-steep{background:linear-gradient(#cfd3ad,#7a8450)}
+  .art-steep i{position:absolute;left:50%;top:50%;width:150px;height:190px;transform:translate(-50%,-45%);border-radius:10px 10px 40px 40px;border:4px solid rgba(255,255,255,.7);border-top:0;overflow:hidden}
+  .art-steep i::after{content:"";position:absolute;left:0;right:0;bottom:0;height:65%;background:linear-gradient(#6b3a22,#2b1a12);animation:fill 4s ease-in-out infinite alternate}
+  @keyframes fill{from{height:25%}}
+  .art-can{background:linear-gradient(135deg,#3a2418,#140a05);display:grid;place-items:center}
+
+  /* ================= SHOP ================= */
+  .shop{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:60px}
+  @media(max-width:900px){.shop{grid-template-columns:1fr}}
+  .prod{border-radius:30px;padding:30px;background:var(--paper);display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+  .prod:hover{transform:translateY(-8px)}
+  .prod .mini{height:300px;display:grid;place-items:center}
+  .prod h4{font-family:Gloock;font-weight:400;font-size:28px;margin-top:6px}
+  .prod .pr{opacity:.7;margin:6px 0 20px}
+  .prod .btn{width:100%;justify-content:center}
+
+  footer{background:var(--espresso);color:var(--cream);padding:90px clamp(16px,6vw,90px) 90px;display:grid;grid-template-columns:2fr 1fr 1fr;gap:40px}
+  footer .big{font-family:Gloock;font-size:clamp(56px,10vw,150px);line-height:.85;grid-column:1/-1;margin-bottom:30px}
+  footer .big em{font-family:"Instrument Serif";color:var(--gold)}
+  footer small{opacity:.6;font-size:13px;line-height:1.8}
+  @media(max-width:760px){footer{grid-template-columns:1fr}}
+
+  .reveal{opacity:0;transform:translateY(40px)}
+  .back{position:fixed;left:18px;bottom:18px;z-index:60;font-size:12px;padding:8px 14px;border-radius:99px;background:var(--espresso);color:var(--cream);opacity:.85}
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">← all sites</a>
+<nav>
+  <a class="logo" href="#"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2c1 4 6 6 6 12a6 6 0 1 1-12 0c0-3 2-5 3-7 .5 2 1.5 3 3 3-1-3 0-6 0-8Z" fill="#c8553d"/></svg>Ember</a>
+  <div class="nl"><a href="#flavours">Flavours</a><a href="#process">Process</a><a href="#shop">Shop</a></div>
+  <a class="cart" id="cart" href="#shop">Cart <b id="count">0</b></a>
+</nav>
+
+<section class="hero" id="hero">
+  <div class="bigtext" id="bigtext"><span>COLD</span><span>BREW</span></div>
+  <div class="hero-can can-stage"><div class="scale" id="heroScale"><div class="can-tilt"><div class="can" id="heroCan" style="--r:95;--h:320"></div></div><div class="shadow" style="--r:95"></div></div></div>
+  <div class="callout c1"><div class="num">01</div><h4>Steeped for 18 slow hours</h4><p>Cold water, no heat, no bitterness. Just patience.</p></div>
+  <div class="callout c2"><div class="num">02</div><h4>Single-origin Ethiopian beans</h4><p>Grown at 2,000m in Yirgacheffe. Notes of cocoa &amp; plum.</p></div>
+  <div class="callout c3"><div class="num">03</div><h4>Zero sugar. 140mg caffeine.</h4><p>A clean lift that lasts all afternoon. No crash.</p></div>
+  <div class="callout c4"><div class="num">04</div><h4>Infinitely recyclable</h4><p>Aluminium cans, compostable packs, carbon-neutral shipping.</p></div>
+  <div class="hero-copy" id="heroCopy"><p>Small-batch cold brew for people who like their mornings <em>slow</em> and their coffee <em>strong.</em></p><a class="btn" href="#shop">Shop the cans →</a></div>
+  <div class="hero-meta" id="heroMeta"><b>4.9★</b>12,000+ reviews<br>Scroll to spin ↓</div>
+  <div id="beans"></div>
+</section>
+
+<div class="marquee"><div class="mt" id="mq"></div></div>
+
+<section class="pad flavours" id="flavours">
+  <div class="fl-can" id="flWrap">
+    <div class="ring" id="ring"></div>
+    <div class="can-stage"><div class="can-tilt"><div class="can" id="flCan" style="--r:110;--h:370"></div></div><div class="shadow" style="--r:110"></div></div>
+    <div class="drag">← drag to spin →</div>
+  </div>
+  <div>
+    <div class="eyebrow">Three flavours</div>
+    <div class="fl-name" id="flName">Original Roast</div>
+    <p class="fl-desc" id="flDesc">Our first love. Dark chocolate, toasted almond and a whisper of plum. Pour it over ice or drink it straight from the can.</p>
+    <div class="notes" id="flNotes"><span>Dark chocolate</span><span>Almond</span><span>Plum</span></div>
+    <div class="swatches">
+      <button class="sw on" style="--c:#c8553d" data-f="original" aria-label="Original Roast"></button>
+      <button class="sw" style="--c:#efe0c2" data-f="oat" aria-label="Oat Vanilla"></button>
+      <button class="sw" style="--c:#3a2418" data-f="mocha" aria-label="Mocha Ember"></button>
+    </div>
+  </div>
+</section>
+
+<section class="pad" id="process">
+  <div class="process-head"><div class="eyebrow">From bean to can</div><h2 class="reveal">Slow is a <em>flavour.</em></h2></div>
+  <div class="stack">
+    <div class="scard k1" style="--i:0"><div><div class="n">01</div><h3>We buy direct.</h3><p>Fair prices paid straight to the Konga cooperative — 40% above Fairtrade minimum, every single harvest.</p></div><div class="art art-farm"><b></b><i></i><i></i></div></div>
+    <div class="scard k2" style="--i:1"><div><div class="n">02</div><h3>We roast light.</h3><p>Small 12kg batches in Portland, pulled early to keep the fruit and lose the burn.</p></div><div class="art art-roast"><i style="--x:10"></i><i style="--x:28"></i><i style="--x:46"></i><i style="--x:64"></i><i style="--x:82"></i></div></div>
+    <div class="scard k3" style="--i:2"><div><div class="n">03</div><h3>We wait.</h3><p>Eighteen hours in cold filtered water. It's the only step we can't speed up — and we wouldn't want to.</p></div><div class="art art-steep"><i></i></div></div>
+    <div class="scard k4" style="--i:3"><div><div class="n">04</div><h3>We can it.</h3><p>Nitrogen-flushed so it tastes the day it was brewed, for twelve months. No preservatives. Ever.</p></div><div class="art art-can"><div class="can-stage"><div class="can-tilt"><div class="can" id="procCan" style="--r:60;--h:200"></div></div></div></div></div>
+  </div>
+</section>
+
+<section class="pad" id="shop">
+  <div class="eyebrow">Shop</div>
+  <h2 class="reveal">Stock the <em>fridge.</em></h2>
+  <div class="shop">
+    <div class="prod reveal"><div class="mini can-stage"><div class="can-tilt"><div class="can mini-can" data-f="original" style="--r:62;--h:210"></div></div></div><h4>Original Roast</h4><div class="pr">12 cans · $36</div><button class="btn add">Add to cart</button></div>
+    <div class="prod reveal"><div class="mini can-stage"><div class="can-tilt"><div class="can mini-can" data-f="oat" style="--r:62;--h:210"></div></div></div><h4>Oat Vanilla</h4><div class="pr">12 cans · $38</div><button class="btn add">Add to cart</button></div>
+    <div class="prod reveal"><div class="mini can-stage"><div class="can-tilt"><div class="can mini-can" data-f="mocha" style="--r:62;--h:210"></div></div></div><h4>Mocha Ember</h4><div class="pr">12 cans · $38</div><button class="btn add">Add to cart</button></div>
+  </div>
+</section>
+
+<footer>
+  <div class="big">Stay <em>warm.</em><br>Drink cold.</div>
+  <div><small>EMBER Coffee Co. — a fictional brand<br>Portland, Oregon · est. 2019</small></div>
+  <div><small>Pure CSS 3D cans<br>GSAP ScrollTrigger pin + scrub</small></div>
+  <div><small>Instagram<br>Newsletter<br>Wholesale</small></div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+const FLAVOURS = {
+  original: { name: 'Original Roast', base: '#c8553d', ink: '#f3eadb', accent: '#2b1a12', page: '#f3eadb', ring: '#c8553d',
+    desc: 'Our first love. Dark chocolate, toasted almond and a whisper of plum. Pour it over ice or drink it straight from the can.', notes: ['Dark chocolate', 'Almond', 'Plum'] },
+  oat: { name: 'Oat Vanilla', base: '#efe0c2', ink: '#2b1a12', accent: '#c8553d', page: '#f7efe0', ring: '#e0a458',
+    desc: 'Creamy oat milk and Madagascan vanilla folded into our cold brew. Tastes like dessert, behaves like breakfast.', notes: ['Vanilla bean', 'Oat', 'Caramel'] },
+  mocha: { name: 'Mocha Ember', base: '#3a2418', ink: '#f3eadb', accent: '#e0a458', page: '#eadfd2', ring: '#5a3522',
+    desc: 'Single-origin cacao from Ecuador meets a double-strength brew. Rich, dark and dangerously smooth.', notes: ['Cacao', 'Molasses', 'Orange peel'] }
+};
+
+/* ---------- draw a can label onto a canvas → data URL ---------- */
+const labelCache = {};
+function drawLabel(f, R, H) {
+  const key = f.name + R + H + (document.fonts.check('40px Gloock') ? 'f' : '');
+  if (labelCache[key]) return labelCache[key];
+  const S = 2, W = Math.round(2 * Math.PI * R) * S, h = H * S;
+  const c = document.createElement('canvas'); c.width = W; c.height = h;
+  const g = c.getContext('2d');
+  g.fillStyle = f.base; g.fillRect(0, 0, W, h);
+  // subtle brushed texture
+  for (let x = 0; x < W; x += 3) { g.fillStyle = `rgba(255,255,255,${Math.random() * .035})`; g.fillRect(x, 0, 2, h); }
+  const band = (y, bh) => { const gr = g.createLinearGradient(0, y, 0, y + bh); gr.addColorStop(0, '#7d7d7d'); gr.addColorStop(.45, '#f4f4f4'); gr.addColorStop(1, '#8f8f8f'); g.fillStyle = gr; g.fillRect(0, y, W, bh); };
+  const bandH = 0.055 * h;
+  band(0, bandH); band(h - bandH, bandH);
+  const u = h / 640;                       // layout unit so labels scale with can size
+  g.textAlign = 'center'; g.textBaseline = 'alphabetic';
+  [0.25, 0.75].forEach(k => {
+    const cx = W * k;
+    g.fillStyle = f.ink;
+    g.font = `600 ${17 * u}px "Instrument Sans"`; try { g.letterSpacing = `${5 * u}px`; } catch (e) {}
+    g.fillText('SMALL BATCH · PORTLAND', cx, 92 * u);
+    // sun / flame emblem
+    g.save(); g.translate(cx, 175 * u);
+    g.strokeStyle = f.ink; g.lineWidth = 3 * u;
+    g.beginPath(); g.arc(0, 0, 52 * u, 0, Math.PI * 2); g.stroke();
+    g.fillStyle = f.accent === '#2b1a12' ? f.ink : f.accent;
+    g.beginPath(); g.moveTo(0, -36 * u); g.bezierCurveTo(26 * u, -6 * u, 22 * u, 30 * u, 0, 32 * u); g.bezierCurveTo(-22 * u, 30 * u, -26 * u, 4 * u, -6 * u, -10 * u);
+    g.bezierCurveTo(-4 * u, 4 * u, 4 * u, 8 * u, 6 * u, 2 * u); g.bezierCurveTo(10 * u, -12 * u, 4 * u, -26 * u, 0, -36 * u); g.fill();
+    g.restore();
+    g.fillStyle = f.ink;
+    try { g.letterSpacing = '0px'; } catch (e) {}
+    g.font = `${112 * u}px Gloock, Georgia, serif`;
+    g.fillText('EMBER', cx, 345 * u);
+    g.font = `600 ${20 * u}px "Instrument Sans"`; try { g.letterSpacing = `${8 * u}px`; } catch (e) {}
+    g.fillText('COLD BREW COFFEE', cx, 392 * u);
+    g.fillRect(cx - 120 * u, 425 * u, 240 * u, 2 * u);
+    try { g.letterSpacing = '0px'; } catch (e) {}
+    g.font = `italic ${44 * u}px "Instrument Serif", Georgia, serif`;
+    g.fillText(f.name, cx, 488 * u);
+    g.fillRect(cx - 120 * u, 515 * u, 240 * u, 2 * u);
+    g.font = `500 ${16 * u}px "Instrument Sans"`; try { g.letterSpacing = `${4 * u}px`; } catch (e) {}
+    g.fillText('250 ML · 140 MG CAFFEINE', cx, 565 * u);
+  });
+  // back panel: wavy pattern
+  g.strokeStyle = f.ink; g.globalAlpha = .25; g.lineWidth = 2 * u;
+  [0, 0.5].forEach(k => {
+    for (let row = 0; row < 9; row++) {
+      g.beginPath();
+      for (let x = -60; x <= 60; x += 2) { const px = W * k + x * u * 1.6, py = (130 + row * 45) * u + Math.sin(x / 9 + row) * 6 * u; x === -60 ? g.moveTo(px, py) : g.lineTo(px, py); }
+      g.stroke();
+    }
+  });
+  g.globalAlpha = 1;
+  return (labelCache[key] = c.toDataURL('image/png'));
+}
+
+/* ---------- build a cylinder out of N thin faces ---------- */
+function makeCan(el, flavourKey) {
+  const R = +getComputedStyle(el).getPropertyValue('--r'), H = +getComputedStyle(el).getPropertyValue('--h');
+  const N = 40, circ = 2 * Math.PI * R, w = circ / N;
+  const faces = [];
+  for (let i = 0; i < N; i++) {
+    const f = document.createElement('div'); f.className = 'face';
+    f.style.width = (w + 1.2) + 'px';
+    f.style.left = (R - w / 2) + 'px';
+    f.style.transform = `rotateY(${i * 360 / N}deg) translateZ(${R - .5}px)`;
+    // offset by a quarter turn so the brand side of the label faces front at 0°
+    f.style.backgroundPosition = `0 0, 0 0, ${-(i * w + circ * .25 - w / 2)}px 0`;
+    el.appendChild(f); faces.push(f);
+  }
+  el.insertAdjacentHTML('beforeend', '<div class="cap top"></div><div class="cap bot"></div>');
+  el.style.setProperty('--lw', circ);
+  const can = {
+    el, faces, R, H, rot: 0, flavour: flavourKey,
+    setFlavour(k) { this.flavour = k; el.style.setProperty('--label', `url(${drawLabel(FLAVOURS[k], R, H)})`); },
+    setRot(deg) {
+      this.rot = deg;
+      el.style.transform = `rotateY(${deg}deg)`;
+      // fake lighting: darken faces turned away, add a specular stripe
+      for (let i = 0; i < N; i++) {
+        const a = (i * 360 / N + deg) * Math.PI / 180;
+        const diffuse = Math.cos(a - .55);
+        faces[i].style.setProperty('--dk', Math.max(0, .5 - diffuse * .5).toFixed(3));
+        faces[i].style.setProperty('--hl', (Math.pow(Math.max(0, Math.cos(a + .45)), 40) * .55).toFixed(3));
+      }
+    }
+  };
+  can.setFlavour(flavourKey); can.setRot(0);
+  return can;
+}
+
+const heroCan = makeCan(document.getElementById('heroCan'), 'original');
+const flCan = makeCan(document.getElementById('flCan'), 'original');
+const procCan = makeCan(document.getElementById('procCan'), 'mocha');
+const minis = [...document.querySelectorAll('.mini-can')].map(el => makeCan(el, el.dataset.f));
+const allCans = [heroCan, flCan, procCan, ...minis];
+// redraw labels once the web fonts have arrived
+Promise.all(['40px Gloock', '600 20px "Instrument Sans"', 'italic 40px "Instrument Serif"'].map(f => document.fonts.load(f))).then(() => allCans.forEach(c => c.setFlavour(c.flavour)));
+
+/* ---------- floating beans ---------- */
+const beans = document.getElementById('beans');
+const beanData = [[8, 70, .7], [16, 14, 1.1], [82, 12, .8], [90, 62, 1.2], [70, 82, .6], [28, 86, .9], [60, 6, .55], [4, 40, .5]];
+beanData.forEach(([x, y, z], i) => {
+  const b = document.createElement('div'); b.className = 'bean';
+  b.style.cssText = `left:${x}%;top:${y}%;--z:${z};transform:rotate(${i * 47}deg)`;
+  b.dataset.z = z; b.dataset.r = i * 47; beans.appendChild(b);
+});
+let mx = 0, my = 0;
+addEventListener('pointermove', e => { mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5; });
+
+/* ---------- HERO: pin + spin ---------- */
+const heroState = { rot: 0, s: 1, beanFly: 0 };
+const callouts = [...document.querySelectorAll('.callout')];
+const mobile = matchMedia('(max-width:760px)');
+gsap.timeline({
+  scrollTrigger: {
+    trigger: '#hero', start: 'top top', end: '+=280%', pin: true, scrub: 1,
+    onUpdate: self => {
+      const idx = Math.floor((self.progress - .18) / .19);
+      callouts.forEach((c, i) => { c.classList.toggle('on', i <= idx); c.classList.toggle('cur', i === idx); });
+    }
+  }
+})
+  .to('#bigtext', { scale: 1.5, opacity: 0, duration: .2, ease: 'power2.in' }, 0)
+  .to(['#heroCopy', '#heroMeta'], { opacity: 0, y: 40, duration: .12 }, 0)
+  .to(heroState, { s: mobile.matches ? .8 : 1.08, beanFly: 1, duration: .2 }, 0)
+  .to(heroState, { rot: 360, duration: .8, ease: 'none' }, .2);
+
+(function heroLoop(t) {
+  const idle = Math.sin((t || 0) / 1400) * 6;
+  heroCan.setRot(heroState.rot + idle);
+  document.getElementById('heroScale').style.setProperty('--s', (mobile.matches ? .72 : 1) * heroState.s);
+  beans.childNodes.forEach(b => {
+    const z = +b.dataset.z, fly = heroState.beanFly;
+    b.style.transform = `translate(${mx * 60 * z}px, ${my * 60 * z - fly * 260 * z}px) rotate(${+b.dataset.r + fly * 120}deg)`;
+    b.style.opacity = 1 - fly * .9;
+  });
+  requestAnimationFrame(heroLoop);
+})();
+
+/* ---------- marquee ---------- */
+document.getElementById('mq').innerHTML = Array(2).fill('Cold brew <i>✺</i> Warm soul <i>✺</i> 18 hour steep <i>✺</i> Zero sugar <i>✺</i> Recyclable <i>✺</i> ').join('');
+
+/* ---------- flavour switcher with drag-to-spin can ---------- */
+const flName = document.getElementById('flName');
+function splitName(txt) {
+  let i = 0;   // letters animate in one by one; words stay unbroken
+  flName.innerHTML = txt.split(' ').map(word => `<span style="white-space:nowrap">${[...word].map(c => `<span class="ch" style="--i:${i++}">${c}</span>`).join('')}</span>`).join(' ');
+}
+splitName('Original Roast');
+document.querySelectorAll('.sw').forEach(btn => btn.addEventListener('click', () => {
+  const f = FLAVOURS[btn.dataset.f];
+  document.querySelectorAll('.sw').forEach(b => b.classList.toggle('on', b === btn));
+  flCan.setFlavour(btn.dataset.f);
+  splitName(f.name);
+  document.getElementById('flDesc').textContent = f.desc;
+  document.getElementById('flNotes').innerHTML = f.notes.map(n => `<span>${n}</span>`).join('');
+  document.getElementById('ring').style.setProperty('--ring', f.ring);
+  document.documentElement.style.setProperty('--bg', f.page);
+  flVel += 28;                                     // give it a little spin on change
+}));
+
+let flRot = 0, flVel = 1.2, dragging = false, lastX = 0;
+const flWrap = document.getElementById('flWrap');
+flWrap.addEventListener('pointerdown', e => { dragging = true; lastX = e.clientX; flWrap.setPointerCapture(e.pointerId); });
+flWrap.addEventListener('pointermove', e => { if (!dragging) return; flVel = (e.clientX - lastX) * .6; lastX = e.clientX; });
+addEventListener('pointerup', () => dragging = false);
+(function flLoop() {
+  flRot += flVel;
+  if (!dragging) flVel += (0.35 - flVel) * .03;   // ease back to a gentle idle spin
+  flCan.setRot(flRot);
+  procCan.setRot(flRot * -.8);
+  requestAnimationFrame(flLoop);
+})();
+
+/* mini cans spin when their card is hovered */
+document.querySelectorAll('.prod').forEach((card, i) => {
+  const can = minis[i]; let spin = 0, on = false; can.setRot(-20);
+  card.addEventListener('pointerenter', () => on = true);
+  card.addEventListener('pointerleave', () => on = false);
+  (function l() { if (on || Math.abs(spin % 360) > 2) { spin += on ? 4 : (360 - (spin % 360)) * .08; can.setRot(-20 + spin); } requestAnimationFrame(l); })();
+});
+
+/* ---------- cart ---------- */
+let count = 0; const cart = document.getElementById('cart');
+document.querySelectorAll('.add').forEach(b => b.addEventListener('click', () => {
+  document.getElementById('count').textContent = ++count;
+  cart.classList.remove('bump'); void cart.offsetWidth; cart.classList.add('bump');
+  b.textContent = 'Added ✓'; setTimeout(() => b.textContent = 'Add to cart', 1400);
+}));
+
+/* ---------- stacked cards shrink as the next one slides over ---------- */
+const cards = gsap.utils.toArray('.scard');
+cards.forEach((card, i) => {
+  if (i === cards.length - 1) return;
+  gsap.to(card, { scale: .92, filter: 'brightness(.85)', ease: 'none',
+    scrollTrigger: { trigger: cards[i + 1], start: 'top bottom', end: 'top 20%', scrub: true } });
+});
+
+/* ---------- reveals ---------- */
+gsap.utils.toArray('.reveal').forEach(el => gsap.to(el, { opacity: 1, y: 0, duration: 1, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 88%' } }));
+gsap.from('.bigtext span', { yPercent: 60, opacity: 0, duration: 1.2, stagger: .12, ease: 'power4.out' });
+gsap.from('.hero-can', { y: 120, opacity: 0, duration: 1.4, ease: 'power4.out', delay: .2 });
+</script>
+</body>
+</html>

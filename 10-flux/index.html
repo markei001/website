@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FLUX One — Silence, redesigned</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#000;--ink:#f5f5f7;--muted:#86868b;--grad:linear-gradient(90deg,#a78bfa,#f472b6 50%,#fb923c)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{overflow-x:clip}
+  body{background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  #gl{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+  .glow{position:fixed;left:50%;top:55%;width:70vw;height:70vw;max-width:900px;max-height:900px;transform:translate(-50%,-50%);border-radius:50%;z-index:0;
+    background:radial-gradient(circle,var(--tint,rgba(167,139,250,.22)),transparent 60%);transition:background 1s;pointer-events:none}
+  main{position:relative;z-index:2}
+  .display{font-family:"Inter Tight";font-weight:700;letter-spacing:-.045em;line-height:1}
+  .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .silver{background:linear-gradient(180deg,#fff 30%,#8a8a90);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  nav{position:fixed;top:0;left:0;right:0;z-index:50;height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(16px,4vw,40px);
+    background:rgba(0,0,0,.6);backdrop-filter:saturate(1.8) blur(20px);-webkit-backdrop-filter:saturate(1.8) blur(20px);border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}
+  .logo{font-family:"Inter Tight";font-weight:800;letter-spacing:.18em;font-size:14px}
+  .nl{display:flex;gap:28px;color:#d2d2d7}
+  .nl a:hover{color:#fff}
+  @media(max-width:700px){.nl{display:none}}
+  .buy-s{padding:6px 14px;border-radius:99px;background:#0071e3;color:#fff;font-weight:500}
+  .pill{display:inline-flex;align-items:center;gap:8px;padding:14px 26px;border-radius:99px;background:#0071e3;color:#fff;font-size:17px;font-weight:500;transition:background .2s,transform .2s}
+  .pill:hover{background:#0077ed;transform:scale(1.03)}
+  .link{color:#2997ff;font-size:17px}
+  .link:hover{text-decoration:underline}
+
+  /* HERO */
+  .hero{position:relative;height:100vh;display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:15vh}
+  .hero .tag{font-size:clamp(17px,1.6vw,22px);font-weight:600;color:#f5a3c7;margin-bottom:10px;opacity:0;animation:up 1s .2s forwards}
+  .hero h1{font-size:clamp(64px,11vw,170px);opacity:0;animation:up 1.2s .35s forwards}
+  .hero .bottom{position:absolute;bottom:7vh;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:16px;opacity:0;animation:up 1s 1s forwards}
+  .hero .bottom p{font-size:clamp(19px,1.8vw,24px);font-weight:500;color:#d2d2d7}
+  .hero .row{display:flex;gap:26px;align-items:center}
+  @keyframes up{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+
+  /* FEATURES (pinned) */
+  .features{height:100vh;position:relative}
+  .stmt{position:absolute;left:clamp(16px,7vw,110px);top:50%;transform:translateY(-50%);max-width:560px;opacity:0}
+  .stmt .k{font-size:clamp(17px,1.4vw,21px);font-weight:600;margin-bottom:14px}
+  .stmt h2{font-size:clamp(46px,6.2vw,96px)}
+  .stmt p{font-size:clamp(17px,1.4vw,21px);color:var(--muted);line-height:1.5;margin-top:22px;max-width:440px}
+  .stmt p b{color:var(--ink);font-weight:500}
+  @media(max-width:800px){.stmt{top:auto;bottom:8vh;transform:none;right:16px}}
+
+  /* EXPLODED */
+  .explode{height:100vh;position:relative}
+  .explode .head{position:absolute;top:13vh;left:0;right:0;text-align:center}
+  .explode h2{font-size:clamp(40px,5.4vw,80px)}
+  .explode .head p{color:var(--muted);font-size:19px;margin-top:12px}
+  .label{position:fixed;left:0;top:0;z-index:3;pointer-events:none;opacity:0;font-size:14px;white-space:nowrap;transition:opacity .4s}
+  .label .dot{position:absolute;left:-5px;top:-5px;width:10px;height:10px;border-radius:50%;background:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.18)}
+  .label .line{position:absolute;left:0;top:0;height:1px;background:rgba(255,255,255,.5);transform-origin:0 0}
+  .label .txt{position:absolute;padding:8px 14px;border-radius:12px;background:rgba(28,28,30,.8);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.12)}
+  .label .txt b{display:block;font-family:"Inter Tight";font-size:16px;font-weight:600}
+  .label .txt span{color:var(--muted);font-size:13px}
+
+  /* WORD HIGHLIGHT */
+  .story{min-height:170vh;padding:30vh clamp(16px,8vw,140px) 20vh}
+  .story p{font-family:"Inter Tight";font-weight:600;font-size:clamp(30px,4vw,60px);line-height:1.18;letter-spacing:-.03em;max-width:1100px}
+  .story .w{color:#2a2a2d;transition:color .35s}
+  .story .w.on{color:var(--ink)}
+  .story .w.on.hl{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  /* COLOURS */
+  .colors{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:16vh 20px 8vh;text-align:center}
+  .colors h2{font-size:clamp(40px,5.4vw,80px)}
+  .picker{display:flex;flex-direction:column;align-items:center;gap:16px}
+  .swatches{display:flex;gap:14px;padding:10px 16px;border-radius:99px;background:rgba(40,40,44,.6);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.08)}
+  .sw{width:30px;height:30px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px rgba(255,255,255,.25);outline:2px solid transparent;outline-offset:3px;transition:outline-color .2s,transform .2s}
+  .sw:hover{transform:scale(1.12)}
+  .sw.on{outline-color:#fff}
+  .cname{font-size:17px;font-weight:500}
+
+  /* SPECS bento */
+  .specs{padding:140px clamp(16px,5vw,80px);max-width:1280px;margin:0 auto}
+  .specs h2{font-size:clamp(40px,5.4vw,80px);margin-bottom:50px}
+  .bento{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:minmax(220px,auto);gap:16px}
+  @media(max-width:900px){.bento{grid-template-columns:1fr 1fr}}
+  .tile{border-radius:28px;background:#111113;border:1px solid rgba(255,255,255,.06);padding:30px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;position:relative;
+    opacity:0;transform:translateY(60px) scale(.96);transition:opacity 1s cubic-bezier(.2,.8,.2,1),transform 1s cubic-bezier(.2,.8,.2,1);transition-delay:var(--d,0s)}
+  .tile.in{opacity:1;transform:none}
+  .tile .big{font-family:"Inter Tight";font-weight:700;font-size:clamp(48px,5vw,80px);letter-spacing:-.05em;line-height:1;font-variant-numeric:tabular-nums}
+  .tile .cap{color:var(--muted);font-size:17px;line-height:1.4}
+  .tile .cap b{color:var(--ink);font-weight:500}
+  .t-wide{grid-column:span 2}
+  .t-tall{grid-row:span 2}
+  .ring{width:170px;height:170px;margin:10px auto}
+  .ring circle{fill:none;stroke-width:12}
+  .ring .bgc{stroke:#222}
+  .ring .fg{stroke:url(#rg);stroke-linecap:round;stroke-dasharray:440;stroke-dashoffset:440;transition:stroke-dashoffset 2s cubic-bezier(.2,.8,.2,1) .3s;transform:rotate(-90deg);transform-origin:50% 50%}
+  .tile.in .ring .fg{stroke-dashoffset:40}
+  .bars{display:flex;align-items:flex-end;gap:6px;height:90px}
+  .bars i{flex:1;border-radius:4px;background:linear-gradient(#f472b6,#a78bfa);height:10%;transition:height 1.2s cubic-bezier(.2,.8,.2,1);transition-delay:calc(var(--i) * 50ms)}
+  .tile.in .bars i{height:var(--h)}
+  .mics{display:flex;gap:10px}
+  .mics i{width:14px;height:14px;border-radius:50%;background:#2a2a2d;transition:background .4s,box-shadow .4s;transition-delay:calc(var(--i) * 180ms + .4s)}
+  .tile.in .mics i{background:#fb923c;box-shadow:0 0 14px #fb923c}
+
+  /* BUY */
+  .buy{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;padding:16vh 20px 10vh}
+  .buy h2{font-size:clamp(54px,8vw,130px)}
+  .buy .price{font-size:21px;color:#d2d2d7;margin:16px 0 30px}
+  .buy .row{display:flex;gap:26px;align-items:center;justify-content:center}
+  footer{position:relative;z-index:2;border-top:1px solid #222;padding:24px clamp(16px,4vw,40px) 80px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;background:#000}
+  .back{position:fixed;left:18px;bottom:18px;z-index:60;font-size:12px;padding:8px 14px;border-radius:99px;background:rgba(40,40,44,.75);backdrop-filter:blur(10px);color:#d2d2d7}
+</style>
+</head>
+<body>
+<div class="glow" id="glow"></div>
+<canvas id="gl"></canvas>
+<a class="back" href="../index.html">← all sites</a>
+
+<nav>
+  <a class="logo" href="#">FLUX</a>
+  <div class="nl"><a href="#features">Overview</a><a href="#explode">Inside</a><a href="#colors">Colours</a><a href="#specs">Tech Specs</a></div>
+  <a class="buy-s" href="#buy">Buy</a>
+</nav>
+
+<main>
+  <section class="hero" id="hero">
+    <div class="tag">New</div>
+    <h1 class="display silver">FLUX One</h1>
+    <div class="bottom">
+      <p>Silence, redesigned.</p>
+      <div class="row"><a class="pill" href="#buy">Pre-order</a><a class="link" href="#features">Learn more ›</a></div>
+    </div>
+  </section>
+
+  <section class="features" id="features">
+    <div class="stmt" id="st1"><div class="k grad">Adaptive noise cancelling</div><h2 class="display">The world,<br>on mute.</h2><p>Twelve microphones listen <b>48,000 times a second</b> and erase the noise before it reaches you.</p></div>
+    <div class="stmt" id="st2"><div class="k grad">Battery</div><h2 class="display">40 hours.<br>Then some.</h2><p>A week of commuting on a single charge. <b>Five minutes</b> plugged in gives you four more hours.</p></div>
+    <div class="stmt" id="st3"><div class="k grad">Spatial audio</div><h2 class="display">Sound that<br>stays put.</h2><p>Turn your head and the band stays on stage. Head tracking at <b>1,000 Hz</b> makes music feel like a room.</p></div>
+  </section>
+
+  <section class="explode" id="explode">
+    <div class="head"><h2 class="display silver">Look inside.</h2><p>Every part, rethought.</p></div>
+  </section>
+
+  <section class="story" id="story">
+    <p id="storyP">We started with one question: what if headphones disappeared? Not the sound — the weight, the pressure, the noise of everyday life. Two years and four hundred prototypes later, FLUX One weighs less than a paperback and blocks out a jet engine. You'll forget you're wearing them. You won't forget how they sound.</p>
+  </section>
+
+  <section class="colors" id="colors">
+    <h2 class="display">Pick your <span class="grad">vibe.</span></h2>
+    <div class="picker">
+      <div class="cname" id="cname">Midnight</div>
+      <div class="swatches">
+        <button class="sw on" style="--c:#1d1d20" data-c="#1d1d20" data-a="#a78bfa" data-n="Midnight" aria-label="Midnight"></button>
+        <button class="sw" style="--c:#d9dade" data-c="#d9dade" data-a="#60a5fa" data-n="Starlight" aria-label="Starlight"></button>
+        <button class="sw" style="--c:#8fb8e0" data-c="#8fb8e0" data-a="#f0f9ff" data-n="Sky" aria-label="Sky"></button>
+        <button class="sw" style="--c:#f08a7e" data-c="#f08a7e" data-a="#fde68a" data-n="Coral" aria-label="Coral"></button>
+        <button class="sw" style="--c:#9bbf8a" data-c="#9bbf8a" data-a="#ecfccb" data-n="Sage" aria-label="Sage"></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="specs" id="specs">
+    <h2 class="display silver">The numbers.</h2>
+    <div class="bento">
+      <div class="tile t-tall" style="--d:0s"><div class="cap"><b>Battery life</b><br>with noise cancelling on</div>
+        <svg class="ring" viewBox="0 0 160 160"><defs><linearGradient id="rg"><stop offset="0" stop-color="#a78bfa"/><stop offset="1" stop-color="#fb923c"/></linearGradient></defs><circle class="bgc" cx="80" cy="80" r="70"/><circle class="fg" cx="80" cy="80" r="70"/></svg>
+        <div class="big"><span data-count="40">0</span>h</div></div>
+      <div class="tile t-wide" style="--d:.1s"><div class="cap"><b>Frequency response.</b> Custom 40mm graphene drivers from deep sub-bass to crystal highs.</div>
+        <div class="bars" id="bars"></div></div>
+      <div class="tile" style="--d:.2s"><div class="big"><span data-count="254">0</span>g</div><div class="cap">Lighter than a <b>paperback.</b></div></div>
+      <div class="tile" style="--d:.3s"><div class="mics"><i style="--i:0"></i><i style="--i:1"></i><i style="--i:2"></i><i style="--i:3"></i><i style="--i:4"></i><i style="--i:5"></i></div><div class="cap"><b>12 microphones</b> for calls that sound like you're in the room.</div></div>
+      <div class="tile" style="--d:.15s"><div class="big"><span data-count="5">0</span>min</div><div class="cap">Charge for <b>4 hours</b> of playback.</div></div>
+      <div class="tile" style="--d:.25s"><div class="big">6.0</div><div class="cap"><b>Bluetooth</b> with lossless codec.</div></div>
+      <div class="tile t-wide" style="--d:.35s"><div class="big grad">−42 dB</div><div class="cap">Of noise removed. That's a busy street turned into a <b>library.</b></div></div>
+    </div>
+  </section>
+
+  <section class="buy" id="buy">
+    <div><h2 class="display silver">Hear what<br>matters.</h2></div>
+    <div><div class="price">From $349 or $29.08/mo. for 12 mo.</div><div class="row"><a class="pill" href="#">Pre-order now</a><a class="link" href="#specs">Compare models ›</a></div></div>
+  </section>
+</main>
+<footer><span>FLUX One is a fictional product. Design inspired by Apple-style launch pages.</span><span>Three.js model · GSAP pinned scroll · projected 3D labels</span></footer>
+
+<div class="label" id="lb0"><div class="line"></div><div class="dot"></div><div class="txt"><b>Memory-foam cushions</b><span>Protein leather, 30% softer</span></div></div>
+<div class="label" id="lb1"><div class="line"></div><div class="dot"></div><div class="txt"><b>40mm graphene driver</b><span>Distortion under 0.01%</span></div></div>
+<div class="label" id="lb2"><div class="line"></div><div class="dot"></div><div class="txt"><b>Titanium headband</b><span>Bends, never breaks</span></div></div>
+<div class="label" id="lb3"><div class="line"></div><div class="dot"></div><div class="txt"><b>Touch-sensitive cap</b><span>Swipe to change volume</span></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* ================= RENDERER + STUDIO LIGHTING ================= */
+const canvas = document.getElementById('gl');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, 1, .1, 100);
+camera.position.set(0, 0, 9);
+
+// a tiny "photo studio" rendered into an environment map, so the shiny parts have something to reflect
+{
+  const env = new THREE.Scene();
+  env.add(new THREE.Mesh(new THREE.SphereGeometry(20, 32, 16), new THREE.MeshBasicMaterial({ color: 0x0a0a0c, side: THREE.BackSide })));
+  const box = (w, h, x, y, z, c) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: c, side: THREE.DoubleSide })); m.position.set(x, y, z); m.lookAt(0, 0, 0); env.add(m); };
+  box(12, 4, 0, 10, 2, 0x9a9a9a); box(3, 10, -9, 1, 4, 0x8f96b8); box(3, 10, 9, 1, -2, 0xb89f90); box(8, 2, 0, -6, 8, 0x333338);
+  scene.environment = new THREE.PMREMGenerator(renderer).fromScene(env, .04).texture;
+}
+scene.add(new THREE.AmbientLight(0xffffff, .25));
+const key = new THREE.DirectionalLight(0xffffff, 1.6); key.position.set(3, 4, 5); scene.add(key);
+const rim = new THREE.DirectionalLight(0xb9a8ff, 2.2); rim.position.set(-5, 2, -4); scene.add(rim);
+const rim2 = new THREE.DirectionalLight(0xffc6a8, 1.2); rim2.position.set(5, -1, -4); scene.add(rim2);
+
+/* ================= HEADPHONES (built from primitives) ================= */
+const shellMat = new THREE.MeshPhysicalMaterial({ color: 0x1d1d20, roughness: .4, metalness: .1, clearcoat: .7, clearcoatRoughness: .3, envMapIntensity: .45 });
+const metalMat = new THREE.MeshStandardMaterial({ color: 0xd4d4da, metalness: 1, roughness: .22 });
+const padMat = new THREE.MeshStandardMaterial({ color: 0x161618, roughness: .92 });
+const accentMat = new THREE.MeshStandardMaterial({ color: 0xa78bfa, emissive: 0xa78bfa, emissiveIntensity: 1.2 });
+const driverMat = new THREE.MeshStandardMaterial({ color: 0x18181b, metalness: .2, roughness: .8, envMapIntensity: .15 });
+const innerMat = new THREE.MeshStandardMaterial({ color: 0x0c0c0e, roughness: 1, envMapIntensity: 0, side: THREE.DoubleSide });
+const coneMat = new THREE.MeshStandardMaterial({ color: 0xb08d57, metalness: .9, roughness: .3 });
+const capMat = new THREE.MeshStandardMaterial({ color: 0x55555c, metalness: .6, roughness: .35, envMapIntensity: .6 });
+
+const model = new THREE.Group(); scene.add(model);
+const parts = {};
+// headband
+const band = new THREE.Group(); model.add(band);
+band.add(new THREE.Mesh(new THREE.TorusGeometry(1.25, .075, 24, 140, Math.PI), shellMat));
+const pad = new THREE.Mesh(new THREE.TorusGeometry(1.16, .06, 20, 120, Math.PI * .74), padMat); pad.rotation.z = Math.PI * .13; band.add(pad);
+[-1, 1].forEach(s => { const sl = new THREE.Mesh(new THREE.CylinderGeometry(.032, .032, .5, 16), metalMat); sl.position.set(s * 1.25, -.22, 0); band.add(sl); });
+parts.band = band;
+
+// ear cups
+function makeCup(side) {
+  const cup = new THREE.Group(); cup.position.set(side * 1.25, -.62, 0);
+  const shell = new THREE.Group(); cup.add(shell);
+  // open-ended shell so the inside of the cup can be dark foam instead of shiny plastic
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(.5, .5, .3, 72, 1, true), shellMat); body.rotation.z = Math.PI / 2; shell.add(body);
+  const inner = new THREE.Mesh(new THREE.CircleGeometry(.5, 72), innerMat); inner.rotation.y = Math.PI / 2; inner.position.x = -side * .14; shell.add(inner);
+  const lip = new THREE.Mesh(new THREE.TorusGeometry(.5, .045, 16, 72), shellMat); lip.rotation.y = Math.PI / 2; lip.position.x = side * .15; shell.add(lip);
+  const cap = new THREE.Mesh(new THREE.CylinderGeometry(.43, .43, .03, 72), capMat); cap.rotation.z = Math.PI / 2; cap.position.x = side * .165; shell.add(cap);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(.28, .012, 12, 64), accentMat); ring.rotation.y = Math.PI / 2; ring.position.x = side * .185; shell.add(ring);
+  const yoke = new THREE.Mesh(new THREE.TorusGeometry(.57, .028, 12, 64, Math.PI), metalMat); yoke.rotation.y = Math.PI / 2; cup.add(yoke);
+  const driver = new THREE.Group(); cup.add(driver);
+  const dBody = new THREE.Mesh(new THREE.CylinderGeometry(.36, .36, .05, 48), driverMat); dBody.rotation.z = Math.PI / 2; driver.add(dBody);
+  const cone = new THREE.Mesh(new THREE.ConeGeometry(.24, .1, 48, 1, true), coneMat); cone.rotation.z = side * -Math.PI / 2; cone.position.x = -side * .05; driver.add(cone);
+  const cushion = new THREE.Mesh(new THREE.TorusGeometry(.37, .12, 24, 72), padMat); cushion.rotation.y = Math.PI / 2; cushion.position.x = -side * .2; cup.add(cushion);
+  model.add(cup);
+  return { cup, shell, driver, cushion, yoke, cap };
+}
+const L = makeCup(-1), Rc = makeCup(1);
+
+/* ================= STATE driven by scroll =================
+   The model's pose is a pure function of scroll position: keyframes are pinned
+   to section positions, and we interpolate between them. No tweens fighting. */
+const S = { ry: -.55, rx: .18, x: 0, y: -.62, s: .82, e: 0, op: 1 };   // what's rendered (smoothed)
+const T = { ...S };                                                    // where scroll says it should be
+const mob = () => innerWidth < 800;
+const TAU = Math.PI * 2;
+
+// statements fade in and out while the features section is pinned
+const ft = gsap.timeline({ scrollTrigger: { trigger: '#features', start: 'top top', end: '+=300%', pin: true, scrub: 1 } });
+const inS = { opacity: 1, y: 0, filter: 'blur(0px)', duration: .45 }, outS = { opacity: 0, y: -50, filter: 'blur(12px)', duration: .4 };
+gsap.set('.stmt', { y: 50, filter: 'blur(12px)' });
+ft.to('#st1', inS, .1).to('#st1', outS, .9)
+  .to('#st2', inS, 1.2).to('#st2', outS, 1.9)
+  .to('#st3', inS, 2.2).to('#st3', outS, 2.95);
+const et = ScrollTrigger.create({ trigger: '#explode', start: 'top top', end: '+=220%', pin: true });
+
+let KEYS = [];
+function buildKeys() {
+  const vh = innerHeight, top = id => document.getElementById(id).getBoundingClientRect().top + scrollY;
+  const f0 = ft.scrollTrigger.start, f1 = ft.scrollTrigger.end, e0 = et.start, e1 = et.end;
+  const st = top('story'), co = top('colors'), sp = top('specs'), bu = top('buy');
+  const max = document.documentElement.scrollHeight - vh;
+  const k = (ry, rx, x, y, s, e, op) => ({ ry, rx, x, y, s, e, op });
+  KEYS = [
+    [0,                    k(-.55, .18, 0, -.62, .82, 0, 1)],
+    [f0,                   k(.15, .12, .9, -.2, .95, 0, 1)],
+    [f0 + (f1 - f0) * .15, k(.5, .06, 1.55, -.15, 1.05, 0, 1)],
+    [f1,                   k(Math.PI * .5 + .7, .05, 1.55, -.15, 1.15, 0, 1)],
+    [e0,                   k(TAU - .62, .22, 0, -.35, .8, 0, 1)],
+    [e0 + (e1 - e0) * .65, k(TAU - .5, .22, 0, -.35, .8, 1, 1)],
+    [e1,                   k(TAU - .25, .2, 0, -.35, .8, 1, 1)],
+    [st + vh * .6,         k(TAU + 1.2, .15, 2.4, 0, .55, 0, .45)],
+    [co,                   k(TAU * 2 - .35, .15, 0, 0, .95, 0, 1)],
+    [co + vh * .4,         k(TAU * 2 - .35, .15, 0, 0, .95, 0, 1)],
+    [sp + vh * .3,         k(TAU * 2 - .2, .15, 0, 0, .8, 0, 0)],
+    [bu - vh * .4,         k(TAU * 2 - .5, .15, 0, .1, .62, 0, 0)],
+    [Math.min(bu, max),    k(TAU * 2 - .5, .15, 0, .1, .62, 0, 1)]
+  ];
+}
+ScrollTrigger.addEventListener('refresh', buildKeys);
+buildKeys();
+const ease = t => t * t * (3 - 2 * t);
+function targetAt(y) {
+  if (y <= KEYS[0][0]) return Object.assign(T, KEYS[0][1]);
+  for (let i = 0; i < KEYS.length - 1; i++) {
+    const [a, A] = KEYS[i], [b, B] = KEYS[i + 1];
+    if (y < b) { const t = ease((y - a) / Math.max(1, b - a)); for (const p in A) T[p] = A[p] + (B[p] - A[p]) * t; return T; }
+  }
+  return Object.assign(T, KEYS[KEYS.length - 1][1]);
+}
+
+/* ================= WORD-BY-WORD HIGHLIGHT ================= */
+const storyP = document.getElementById('storyP');
+const HL = ['disappeared?', 'paperback', 'jet', 'engine.', 'sound.'];
+storyP.innerHTML = storyP.textContent.split(' ').map(w => `<span class="w${HL.includes(w) ? ' hl' : ''}">${w}</span>`).join(' ');
+const words = [...storyP.querySelectorAll('.w')];
+ScrollTrigger.create({ trigger: '#story', start: 'top 65%', end: 'bottom 75%', scrub: true,
+  onUpdate: self => { const n = Math.round(self.progress * words.length); words.forEach((w, i) => w.classList.toggle('on', i < n)); } });
+
+/* ================= COLOUR PICKER ================= */
+const targetShell = new THREE.Color(0x1d1d20), targetAccent = new THREE.Color(0xa78bfa);
+document.querySelectorAll('.sw').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.sw').forEach(o => o.classList.toggle('on', o === b));
+  targetShell.set(b.dataset.c); targetAccent.set(b.dataset.a);
+  document.getElementById('cname').textContent = b.dataset.n;
+  const c = new THREE.Color(b.dataset.c);
+  document.getElementById('glow').style.setProperty('--tint', `rgba(${c.r * 255 | 0},${c.g * 255 | 0},${c.b * 255 | 0},.28)`);
+  spinKick = 1;
+}));
+let spinKick = 0;
+
+/* ================= SPECS reveal + counters ================= */
+document.getElementById('bars').innerHTML = Array.from({ length: 32 }, (_, i) => `<i style="--i:${i};--h:${(20 + 75 * Math.abs(Math.sin(i * .35 + 1) * Math.cos(i * .11))).toFixed(0)}%"></i>`).join('');
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  e.target.classList.add('in');
+  e.target.querySelectorAll('[data-count]').forEach(el => {
+    const end = +el.dataset.count, t0 = performance.now();
+    (function f(t) { const k = Math.min(1, (t - t0) / 1500); el.textContent = Math.round(end * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(f); })(t0);
+  });
+  io.unobserve(e.target);
+}), { threshold: .3 });
+document.querySelectorAll('.tile').forEach(t => io.observe(t));
+
+/* ================= 3D → screen labels for the exploded view ================= */
+const labels = [0, 1, 2, 3].map(i => document.getElementById('lb' + i));
+const anchors = [
+  { obj: () => L.cushion, off: new THREE.Vector3(0, .38, 0), dx: -150, dy: -70 },
+  { obj: () => L.driver, off: new THREE.Vector3(0, -.3, 0), dx: -170, dy: 90 },
+  { obj: () => band, off: new THREE.Vector3(.55, 1.15, 0), dx: 150, dy: -10 },
+  { obj: () => Rc.cap, off: new THREE.Vector3(0, -.35, 0), dx: 120, dy: 80 }
+];
+const wp = new THREE.Vector3();
+function placeLabels() {
+  const vis = Math.max(0, (S.e - .55) / .45);
+  labels.forEach((el, i) => {
+    const a = anchors[i];
+    a.obj().localToWorld(wp.copy(a.off));
+    wp.project(camera);
+    const x = (wp.x * .5 + .5) * innerWidth, y = (-wp.y * .5 + .5) * innerHeight;
+    el.style.opacity = vis;
+    el.style.transform = `translate(${x}px,${y}px)`;
+    const dx = mob() ? a.dx * .45 : a.dx, dy = a.dy;
+    const line = el.querySelector('.line'), txt = el.querySelector('.txt');
+    const w = txt.offsetWidth, h = txt.offsetHeight;
+    // keep the callout on screen, then aim the leader line at its nearest edge
+    const ax = Math.min(innerWidth - w - 8, Math.max(8, x + (dx < 0 ? dx - w : dx)));
+    const ay = Math.min(innerHeight - h - 8, Math.max(56, y + dy - h / 2));
+    const left = ax - x, top = ay - y;
+    const ex = left + (left + w / 2 < 0 ? w : 0), ey = top + h / 2;
+    txt.style.left = left + 'px'; txt.style.top = top + 'px';
+    line.style.width = Math.hypot(ex, ey) + 'px';
+    line.style.transform = `rotate(${Math.atan2(ey, ex)}rad) scaleX(${vis})`;
+  });
+}
+
+/* ================= RENDER LOOP ================= */
+function resize() {
+  renderer.setSize(innerWidth, innerHeight, false);
+  camera.aspect = innerWidth / innerHeight;
+  camera.position.z = innerWidth < innerHeight ? 13 : 9;
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize); resize();
+let mx = 0, my = 0;
+addEventListener('pointermove', e => { mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5; });
+
+const clock = new THREE.Clock();
+let extraSpin = 0;
+(function loop() {
+  const t = clock.getElapsedTime();
+  spinKick *= .94; extraSpin += spinKick * .12;
+  targetAt(scrollY);
+  for (const p in S) S[p] += (T[p] - S[p]) * .1;
+  model.position.set(mob() ? 0 : S.x, S.y + Math.sin(t * 1.2) * .04 + (mob() && S.x ? .6 : 0), 0);
+  model.rotation.set(S.rx + my * .15, S.ry + mx * .3 + extraSpin, 0);
+  model.scale.setScalar(S.s * (mob() ? 1 - S.e * .38 : 1));
+  canvas.style.opacity = S.op;
+
+  // exploded view: parts slide apart along the cup axis
+  const e = S.e;
+  band.position.y = e * .55;
+  [[L, -1], [Rc, 1]].forEach(([c, s]) => {
+    c.shell.position.x = s * e * .75;
+    c.driver.position.x = s * e * .2;
+    c.cushion.position.x = -s * (.2 + e * .45);
+    c.yoke.position.y = e * .25;
+    c.cup.position.y = -.62 - e * .1;
+  });
+
+  shellMat.color.lerp(targetShell, .06);
+  accentMat.color.lerp(targetAccent, .06); accentMat.emissive.lerp(targetAccent, .06);
+  accentMat.emissiveIntensity = 1 + Math.sin(t * 2) * .3;
+
+  if (S.e > .05) placeLabels(); else labels.forEach(l => l.style.opacity = 0);
+  renderer.render(scene, camera);
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

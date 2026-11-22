@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>APOTHECA — Index Compositorum, Catalogue Nº 13</title>
+<meta name="description" content="APOTHECA is a Swiss-style archive of thirty fictional compounds: a 12-column grid, giant numerals, a sortable index and plate diagrams. Type is the only thing that moves, and only when you scroll.">
+<meta name="theme-color" content="#F5F4EF">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23C93408'/%3E%3Crect x='4' y='26' width='24' height='2' fill='%23F5F4EF'/%3E%3Ctext x='16' y='23' font-family='Helvetica,Arial,sans-serif' font-weight='900' font-size='22' text-anchor='middle' fill='%23F5F4EF'%3EA%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@100..900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<noscript><style>[data-sd]{animation:none!important}.pg{display:none}</style></noscript>
+<style>
+@property --pg{syntax:"<integer>";initial-value:0;inherits:true}
+:root{
+  --paper:#F5F4EF; --ink:#111111; --mute:#5f5d56; --ghost:#b9b6ab; --hair:rgba(17,17,17,.2);
+  --signal:#C93408;
+  --m:24px; --gut:24px;
+  --sans:"Hanken Grotesk","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --mono:"DM Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:56px}
+body{background:var(--paper);color:var(--ink);font:400 16px/1.45 var(--sans);font-kerning:normal;font-feature-settings:"kern","liga";-webkit-font-smoothing:antialiased;overflow-x:hidden}
+::selection{background:var(--signal);color:var(--paper)}
+a{color:inherit;text-underline-offset:.2em;text-decoration-thickness:1px}
+button,input,select{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer;text-align:left}
+:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.mono,.lab{font-family:var(--mono);font-size:12px;line-height:1.5;letter-spacing:.04em;text-transform:uppercase}
+.mute{color:var(--mute)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- grid ---------- */
+.wrap{padding:0 var(--m)}
+.g{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--gut)}
+.ov{position:fixed;inset:0;padding:0 var(--m);z-index:90;pointer-events:none;display:none;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--gut)}
+.ov i{background:rgba(201,52,8,.09);border-left:1px solid rgba(201,52,8,.5);border-right:1px solid rgba(201,52,8,.5)}
+body.show-grid .ov{display:grid}
+
+/* ---------- scroll-linked type (the only motion) ---------- */
+@keyframes wt-up{from{font-weight:100}to{font-weight:900}}
+@keyframes wt-down{from{font-weight:900;letter-spacing:-.05em}to{font-weight:150;letter-spacing:-.015em}}
+@keyframes ink{from{color:var(--ghost)}to{color:var(--ink)}}
+@keyframes ink-sig{from{color:var(--ghost)}to{color:var(--signal)}}
+@keyframes pgk{to{--pg:100}}
+[data-sd]{animation-duration:1s;animation-timing-function:linear;animation-fill-mode:both;animation-play-state:paused}
+[data-sd=up]{animation-name:wt-up}
+[data-sd=down]{animation-name:wt-down}
+[data-sd=ink]{animation-name:ink}
+[data-sd=pg]{animation-name:pgk}
+.say em .w{animation-name:ink-sig}
+@supports (animation-timeline:scroll()){
+  [data-sd]{animation-duration:auto;animation-play-state:running}
+  [data-sd=down]{animation-timeline:scroll(root);animation-range:0px 60vh}
+  [data-sd=pg]{animation-timeline:scroll(root)}
+  [data-sd=up]{animation-timeline:view();animation-range:cover 0% cover 45%}
+  [data-sd=ink]{animation-timeline:view();animation-range:cover 18% cover 52%}
+}
+@media (prefers-reduced-motion:reduce){[data-sd]{animation:none!important}.pg{display:none!important}}
+
+/* ---------- top bar ---------- */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;z-index:50;background:var(--paper);border-bottom:1px solid var(--ink);display:flex;align-items:center;justify-content:space-between;padding:0 var(--m)}
+.bar b{font-weight:800;letter-spacing:-.02em;font-size:15px}
+.bar nav{display:flex;gap:28px}
+.bar nav a{text-decoration:none}
+.bar nav a:hover{color:var(--signal)}
+.bar .rt{display:flex;gap:20px;align-items:center}
+.pg{display:inline-block;min-width:4.8ch;text-align:right;font-variant-numeric:tabular-nums}
+.pg::after{counter-reset:pg var(--pg);content:counter(pg,decimal-leading-zero) "%"}
+.gbtn{font-family:var(--mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;border:1px solid var(--ink);padding:3px 8px;line-height:1.3}
+.gbtn[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+
+/* ---------- hero ---------- */
+.hero{padding-top:44px;position:relative}
+.hero .meta{padding:20px 0 0;row-gap:6px}
+.hero .meta p:last-child{text-align:right}
+.hero h1{font-size:19.2vw;line-height:.8;font-weight:900;letter-spacing:-.05em;white-space:nowrap;margin:3vw 0 2.2vw -.045em;text-transform:uppercase}
+.mark{position:absolute;font-family:var(--mono);font-size:14px;line-height:1;color:var(--mute)}
+.stats{border-top:1px solid var(--ink)}
+.stat{border-left:1px solid var(--ink);padding:10px 12px 18px}
+.stat:first-child{border-left:0;padding-left:0}
+.stat .big{display:block;font-size:clamp(5.5rem,13vw,13rem);line-height:.86;letter-spacing:-.05em;font-weight:800;font-variant-numeric:tabular-nums;margin:14px 0 14px -.03em}
+.stat p{max-width:22ch}
+
+/* ---------- sections ---------- */
+.sec{border-top:1px solid var(--ink);margin-top:72px;padding-top:10px}
+.sec-top{display:flex;justify-content:space-between;gap:16px}
+.sec-head{padding:28px 0 40px;align-items:start}
+.sec-num{display:block;font-size:clamp(7rem,17vw,17rem);line-height:.8;letter-spacing:-.06em;font-weight:800;font-variant-numeric:tabular-nums;margin-left:-.04em}
+h2{font-size:clamp(2.4rem,5.6vw,5.4rem);line-height:.92;letter-spacing:-.035em;font-weight:700}
+.sec-head .ttl p{margin-top:18px;max-width:46ch;font-size:17px;text-wrap:pretty}
+.say{font-size:clamp(1.7rem,4.2vw,3.9rem);line-height:1.1;letter-spacing:-.025em;font-weight:500;text-wrap:pretty;padding-bottom:12px}
+.say .w{display:inline}
+.say em{font-style:normal;color:var(--signal)}
+.say + .foot{margin-top:40px}
+
+/* ---------- index controls ---------- */
+.ctrl{row-gap:16px;align-items:end;padding:6px 0 18px}
+.f{display:flex;flex-direction:column;gap:5px}
+.f input,.f select{background:transparent;border:0;border-bottom:1px solid var(--ink);border-radius:0;padding:6px 0;height:36px;width:100%;font-size:16px;appearance:none;-webkit-appearance:none}
+.f select{background-image:linear-gradient(45deg,transparent 50%,var(--ink) 50%),linear-gradient(135deg,var(--ink) 50%,transparent 50%);background-size:5px 5px;background-position:calc(100% - 8px) 15px,calc(100% - 3px) 15px;background-repeat:no-repeat;padding-right:20px;border-radius:0}
+.f input::placeholder{color:var(--mute);opacity:1}
+.dirb{height:36px;border:1px solid var(--ink);padding:0 12px;white-space:nowrap}
+.dirb:hover,.rst:hover{background:var(--ink);color:var(--paper)}
+.cnt{text-align:right;align-self:end;line-height:1}
+.cnt b{font-family:var(--sans);display:block;font-size:clamp(3.5rem,7vw,6.5rem);font-weight:800;letter-spacing:-.05em;line-height:.8;font-variant-numeric:tabular-nums;margin-bottom:6px}
+.chips{display:flex;flex-wrap:wrap;gap:0;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);margin-bottom:22px}
+.chips button{padding:9px 14px 9px 0;margin-right:14px;font-family:var(--mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;position:relative}
+.chips button sup{font-size:10px;margin-left:3px;color:var(--mute)}
+.chips button[aria-pressed=true]{color:var(--signal)}
+.chips button[aria-pressed=true]::before{content:"";position:absolute;left:0;right:14px;bottom:-1px;height:3px;background:var(--signal)}
+.chips button:hover{text-decoration:underline;text-underline-offset:4px}
+.reg{list-style:none;display:grid;grid-template-columns:repeat(15,1fr);gap:0;border-left:1px solid var(--hair);border-top:1px solid var(--hair);margin-bottom:44px}
+.reg button{width:100%;height:36px;border-right:1px solid var(--hair);border-bottom:1px solid var(--hair);font-family:var(--mono);font-size:11px;text-align:center;font-variant-numeric:tabular-nums}
+.reg button.off{color:#a29f94}
+.reg button.sel{background:var(--signal);color:#fff}
+.reg button:not(.sel):hover{background:var(--ink);color:var(--paper)}
+
+/* ---------- table + plate ---------- */
+.split{align-items:start}
+.tbl{grid-column:1/9;grid-row:1}
+.plate{grid-column:9/13;grid-row:1;position:sticky;top:60px}
+table{width:100%;border-collapse:collapse}
+th{font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;font-weight:400;text-align:left;border-bottom:1px solid var(--ink);padding:0 8px 8px 0;vertical-align:bottom}
+th button{font:inherit;letter-spacing:inherit;text-transform:inherit;padding:0;white-space:nowrap}
+th button:hover{text-decoration:underline;text-underline-offset:3px}
+th[aria-sort=ascending] button,th[aria-sort=descending] button{color:var(--signal)}
+th[aria-sort=ascending] button::after{content:" ↑"}
+th[aria-sort=descending] button::after{content:" ↓"}
+td{padding:11px 8px 11px 0;border-bottom:1px solid var(--hair);vertical-align:baseline;font-size:14px}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:rgba(17,17,17,.05)}
+tbody tr.sel{background:var(--ink);color:var(--paper)}
+tbody tr.sel td:first-child{padding-left:8px}
+td.n,td.mw,td.frm{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums}
+td.mw,th.r{text-align:right}
+td.mw{padding-right:14px}
+td.nm button{font-weight:700;font-size:17px;letter-spacing:-.015em;padding:0}
+td.nm button:focus-visible{outline-offset:3px}
+tbody tr.sel :focus-visible{outline-color:var(--paper)}
+td.cls{font-family:var(--mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.sg{display:inline-block;width:9px;height:9px;margin-right:7px;border:1.5px solid var(--ink);background:transparent;vertical-align:-1px}
+.sg-Shelved{background:var(--ink)}
+.sg-Withdrawn{background:var(--signal);border-color:var(--signal)}
+.sg-Misplaced{border-color:var(--signal)}
+.sel .sg{border-color:var(--paper)}.sel .sg-Shelved{background:var(--paper)}.sel .sg-Withdrawn{background:var(--signal);border-color:var(--signal)}.sel .sg-Misplaced{border-color:var(--signal)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 22px;padding-top:14px}
+.none td{padding:40px 0;font-size:18px;cursor:default}
+.none button{text-decoration:underline;color:var(--signal)}
+
+.plate{border-top:1px solid var(--ink);padding-top:8px}
+.pl-h{display:flex;justify-content:space-between}
+.pn{display:block;font-size:clamp(5.5rem,9vw,8.5rem);line-height:.82;font-weight:900;letter-spacing:-.06em;margin:14px 0 10px -.04em;font-variant-numeric:tabular-nums}
+.plate h3{font-size:clamp(1.8rem,2.6vw,2.6rem);letter-spacing:-.03em;line-height:1;font-weight:700;margin-bottom:12px}
+.plate svg{display:block;width:100%;height:auto;border:1px solid var(--ink);background:var(--paper)}
+.plate dl{display:grid;grid-template-columns:auto 1fr;border-top:1px solid var(--ink);margin-top:16px}
+.plate dt,.plate dd{padding:6px 0;border-bottom:1px solid var(--hair)}
+.plate dt{padding-right:16px;display:flex;align-items:baseline}
+.plate dd{font-size:14px;text-align:right}
+.plate dd.m{font-family:var(--mono);font-size:13px}
+.plate .cap{margin-top:12px;color:var(--mute);font-size:13px;max-width:44ch;text-wrap:pretty}
+.plate .cap b{color:var(--signal);font-weight:500}
+.plate .tolist{display:none;margin-top:10px}
+#mol text{font-family:var(--mono)}
+
+/* ---------- holdings ---------- */
+.hold{border-top:1px solid var(--ink);padding:10px 0 22px;row-gap:8px;align-items:start}
+.hold:last-of-type{border-bottom:1px solid var(--ink)}
+.hold .ct{display:block;font-size:clamp(6rem,15vw,15rem);line-height:.8;letter-spacing:-.06em;font-weight:800;font-variant-numeric:tabular-nums;margin:10px 0 0 -.04em}
+.hold h3{font-size:clamp(1.6rem,2.8vw,2.6rem);letter-spacing:-.03em;line-height:1;font-weight:700;margin-top:10px}
+.hold p{font-size:17px;max-width:40ch;margin-top:10px;text-wrap:pretty}
+.hold .nums{text-align:right;margin-top:10px}
+.hold .nums>div{margin-bottom:10px}.hold .nums span{display:block}
+.hold .nums b{font-family:var(--sans);display:block;font-size:clamp(1.8rem,3vw,2.8rem);font-weight:700;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+
+/* ---------- colophon ---------- */
+.spec{width:100%}
+.spec th,.spec td{padding:12px 16px 12px 0;vertical-align:top;border-bottom:1px solid var(--hair);font-size:15px}
+.spec th{font-size:11px;border-bottom:1px solid var(--hair);padding-bottom:12px;width:1%;white-space:nowrap}
+.sw{display:inline-flex;align-items:center;gap:8px;margin-right:18px;font-family:var(--mono);font-size:12px;white-space:nowrap}
+.sw i{display:inline-block;width:18px;height:18px;border:1px solid var(--ink)}
+.errata{margin-top:36px;padding-top:12px;border-top:1px solid var(--ink);column-gap:var(--gut)}
+footer{margin:90px var(--m) 0;border-top:1px solid var(--ink);padding:10px 0 20px}
+.fbig{font-size:21vw;line-height:.8;font-weight:900;letter-spacing:-.055em;margin:34px 0 20px -.04em;text-transform:uppercase;white-space:nowrap;overflow:hidden}
+
+/* ---------- reflow ---------- */
+@media (min-width:1100px){
+  .plate svg{max-height:40vh;width:auto;max-width:100%;margin-inline:auto}
+  .pn{font-size:clamp(4rem,7vh,6rem);margin:8px 0 6px -.04em}
+  .plate h3{font-size:clamp(1.5rem,2.2vw,2.2rem);margin-bottom:8px}
+  .plate dl{margin-top:10px}.plate dt,.plate dd{padding:3px 0}
+  .plate .cap{font-size:12px;margin-top:8px}
+}
+@media (min-width:1100px) and (max-height:800px){
+  .plate .cap,.plate .pl-h{display:none}
+  .plate svg{max-height:32vh}
+  .plate{top:52px}
+}
+@media (max-width:1099px){
+  .plate{grid-column:1/-1;grid-row:1;position:static;margin-bottom:44px}
+  .tbl{grid-column:1/-1;grid-row:2}
+  .plate .tolist{display:block}
+  .plate svg{max-width:560px}
+  .reg{grid-template-columns:repeat(10,1fr)}
+}
+@media (max-width:760px){
+  :root{--m:16px;--gut:12px}
+  .g>*{grid-column:1/-1!important}
+  .stats>*,.hero .meta>*{grid-column:span 6!important}
+  .stat:nth-child(odd){border-left:0;padding-left:0}
+  .stat:nth-child(n+3){border-top:1px solid var(--ink)}
+  .bar nav{display:none}
+  .hero h1{font-size:18vw}
+  .hero .meta p,.hero .meta p:last-child{grid-column:span 6!important;text-align:left}
+  .sec{margin-top:56px}
+  .sec-head{padding-bottom:28px}
+  .ctrl .half{grid-column:span 6!important}
+  .cnt{text-align:left}
+  .chips button{padding:10px 12px 10px 0;margin-right:12px}
+  .chips button[aria-pressed=true]::before{right:12px}
+  thead{display:none}
+  table,tbody{display:block}
+  tbody tr{display:grid;grid-template-columns:2.6rem 1fr auto;grid-template-areas:"n nm mw" "n cls st" "n frm frm";column-gap:10px;padding:12px 0;border-bottom:1px solid var(--hair)}
+  tbody tr.sel{padding-left:8px;padding-right:8px}
+  tbody tr.sel td:first-child{padding-left:0}
+  td{border:0;padding:1px 0}
+  td.n{grid-area:n;font-size:15px}td.nm{grid-area:nm}td.mw{grid-area:mw;padding-right:0}td.cls{grid-area:cls}td.st{grid-area:st;text-align:right;font-size:13px}td.frm{grid-area:frm}td.fo{display:none}
+  .none{display:block}.none td{display:block}
+  .hold .nums{text-align:left;display:grid;grid-template-columns:repeat(3,auto);justify-content:start;gap:0 22px}
+  .spec th{display:block;border:0;padding-bottom:0}
+  .spec td{display:block;padding-top:2px}
+  .spec tr{display:block;border-bottom:1px solid var(--hair);padding:10px 0}
+  .spec th,.spec td{border:0}
+  .errata>*{margin-top:8px}
+}
+@media (min-width:761px){.ctrl .half{grid-column:span 2}}
+</style>
+</head>
+<body data-sd="pg">
+<noscript><p style="padding:70px var(--m) 0;font:14px/1.4 monospace">The index and plate diagrams are assembled by script. Enable JavaScript to browse the thirty compounds. Everything else on this page is plain text.</p></noscript>
+<div class="ov" aria-hidden="true"></div>
+
+<div class="bar">
+  <b>APOTHECA</b>
+  <nav class="lab" aria-label="Sections"><a href="#statement">01 Statement</a><a href="#index">02 Index</a><a href="#holdings">03 Holdings</a><a href="#colophon">04 Colophon</a></nav>
+  <div class="rt lab"><span class="mute" aria-hidden="true">P.<span class="pg"></span></span><button class="gbtn" id="gbtn" type="button" aria-pressed="false" title="Toggle the 12-column grid (G)">Grid</button></div>
+</div>
+
+<main class="wrap">
+<section class="hero" aria-labelledby="t">
+  <span class="mark" style="left:-14px;top:60px" aria-hidden="true">+</span>
+  <span class="mark" style="right:-14px;top:60px" aria-hidden="true">+</span>
+  <div class="g meta lab">
+    <p style="grid-column:1/4">Catalogue Nº 13<br><span class="mute">Haus 13, Laboratorien</span></p>
+    <p style="grid-column:4/8">Index Compositorum<br><span class="mute">Archive of thirty fictional compounds</span></p>
+    <p style="grid-column:8/11"><span class="mute">Edition</span><br>MMXXVI</p>
+    <p style="grid-column:11/13">Not real.<br>Not for use.</p>
+  </div>
+  <h1 id="t" data-sd="down">Apotheca</h1>
+  <div class="g stats">
+    <div class="stat" style="grid-column:1/4"><span class="lab mute">Tab. 0.1</span><span class="big" data-sd="up">30</span><p>Compounds on the shelf, each with a number, a name, a formula and a mass.</p></div>
+    <div class="stat" style="grid-column:4/7"><span class="lab mute">Tab. 0.2</span><span class="big" data-sd="up">06</span><p>Structural classes, sorted by skeleton rather than by purpose.</p></div>
+    <div class="stat" style="grid-column:7/10"><span class="lab mute">Tab. 0.3</span><span class="big" data-sd="up">66</span><p>Years of entries, 1958 to 2024. Some of the dates are fibs.</p></div>
+    <div class="stat" style="grid-column:10/13"><span class="lab mute">Tab. 0.4</span><span class="big" data-sd="up">12</span><p>Columns. One grid, one red, no exceptions.</p></div>
+  </div>
+</section>
+
+<section class="sec" id="statement" aria-labelledby="h1s">
+  <div class="sec-top lab"><span>§ 01 — Statement</span><span class="mute">Read slowly. The ink arrives as you scroll.</span></div>
+  <div class="g sec-head">
+    <span class="sec-num" data-sd="up" style="grid-column:1/4" aria-hidden="true">01</span>
+    <div class="ttl" style="grid-column:4/13">
+      <h2 id="h1s" class="sr">Statement</h2>
+      <p class="say" id="say">Every compound in this archive is <em>fictional</em>. None was synthesised, weighed or tested. They are filed with the care owed to real ones: a number, a name, a formula, a mass, a shelf. The subject is the grid. Nothing here is medical information, and nothing here is for use.</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="index" aria-labelledby="h2s">
+  <div class="sec-top lab"><span>§ 02 — Index</span><span class="mute">Tab. 2.1 — Compositorum</span></div>
+  <div class="g sec-head">
+    <span class="sec-num" data-sd="up" style="grid-column:1/4" aria-hidden="true">02</span>
+    <div class="ttl" style="grid-column:4/12"><h2 id="h2s">The Index</h2><p>Filter by skeleton, search by name or formula, sort by anything with a number in it. Choose a row and its plate is drawn alongside. Hetero-atoms are set in the signal red.</p></div>
+  </div>
+
+  <div class="g ctrl">
+    <label class="f" style="grid-column:1/5"><span class="lab mute">Search</span><input id="q" type="search" placeholder="name, formula, AP-014  ( / )" autocomplete="off" spellcheck="false"></label>
+    <label class="f half"><span class="lab mute">Status</span><select id="fst"><option value="all">All</option><option>Shelved</option><option>Sealed</option><option>Withdrawn</option><option>Misplaced</option></select></label>
+    <label class="f half"><span class="lab mute">Sort</span><select id="fsort"><option value="n">Number</option><option value="name">Name</option><option value="cls">Class</option><option value="mw">Mass</option><option value="yr">Year</option><option value="st">Status</option></select></label>
+    <div class="f half" style="grid-column:span 1;justify-content:flex-end"><button class="dirb lab" id="dir" type="button">Asc ↑</button></div>
+    <div class="cnt lab" style="grid-column:10/13" role="status" aria-live="polite"><b id="count">30</b><span class="mute">of 30 shown</span></div>
+  </div>
+  <div class="chips" id="chips" role="group" aria-label="Filter by class"></div>
+  <p class="lab mute" style="margin:-8px 0 10px">Register — 30 positions. Filled red is the plate on display; dim is filtered out.</p>
+  <ol class="reg" id="reg"></ol>
+
+  <div class="g split">
+    <aside class="plate" id="plate" aria-label="Plate diagram"></aside>
+    <div class="tbl">
+      <table>
+        <caption class="sr">Index of compounds</caption>
+        <thead><tr>
+          <th scope="col" aria-sort="none" style="width:54px"><button data-k="n">No.</button></th>
+          <th scope="col" aria-sort="none"><button data-k="name">Compound</button></th>
+          <th scope="col" aria-sort="none"><button data-k="cls">Class</button></th>
+          <th scope="col" aria-sort="none"><button data-k="f">Formula</button></th>
+          <th scope="col" aria-sort="none" class="r"><button data-k="mw">g/mol</button></th>
+          <th scope="col" aria-sort="none"><button data-k="form">Form</button></th>
+          <th scope="col" aria-sort="none"><button data-k="st">Status</button></th>
+        </tr></thead>
+        <tbody id="tb"></tbody>
+      </table>
+      <div class="legend lab mute"><span><i class="sg sg-Shelved"></i>Shelved</span><span><i class="sg sg-Sealed"></i>Sealed</span><span><i class="sg sg-Withdrawn"></i>Withdrawn</span><span><i class="sg sg-Misplaced"></i>Misplaced</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="holdings" aria-labelledby="h3s">
+  <div class="sec-top lab"><span>§ 03 — Holdings</span><span class="mute">Tab. 3.1 — By skeleton</span></div>
+  <div class="g sec-head">
+    <span class="sec-num" data-sd="up" style="grid-column:1/4" aria-hidden="true">03</span>
+    <div class="ttl" style="grid-column:4/12"><h2 id="h3s">Holdings</h2><p>The same thirty entries, counted. Figures are computed from the same index data, not typed in by hand.</p></div>
+  </div>
+  <div id="hold"></div>
+</section>
+
+<section class="sec" id="colophon" aria-labelledby="h4s">
+  <div class="sec-top lab"><span>§ 04 — Colophon</span><span class="mute">Tab. 4.1 — Specification</span></div>
+  <div class="g sec-head">
+    <span class="sec-num" data-sd="up" style="grid-column:1/4" aria-hidden="true">04</span>
+    <div class="ttl" style="grid-column:4/12"><h2 id="h4s">Colophon</h2></div>
+  </div>
+  <div class="g"><div style="grid-column:4/13">
+  <table class="spec">
+    <tr><th class="lab" scope="row">Grid</th><td>Twelve columns, 24 px gutters and margins; 12 px and 16 px under 760 px. Press <b>G</b> to see it. Flush left, ragged right. Rules are 1 px, always.</td></tr>
+    <tr><th class="lab" scope="row">Type</th><td>Hanken Grotesk, variable weight 100 to 900, for everything that is read. DM Mono for everything that is measured. Numerals are tabular.</td></tr>
+    <tr><th class="lab" scope="row">Colour</th><td><span class="sw"><i style="background:#F5F4EF"></i>#F5F4EF paper</span><span class="sw"><i style="background:#111"></i>#111111 ink 17.1:1</span><span class="sw"><i style="background:#C93408"></i>#C93408 signal 4.8:1</span></td></tr>
+    <tr><th class="lab" scope="row">Motion</th><td>Type only, and only while you scroll: the masthead thins, the numerals gain weight, the statement darkens, the page counter climbs. CSS <span class="mono">animation-timeline</span> where supported; a paused-animation fallback elsewhere. Off under <span class="mono">prefers-reduced-motion</span>.</td></tr>
+    <tr><th class="lab" scope="row">Plates</th><td>Drawn in plain SVG from each formula's own atom counts and a seeded generator. Schematic: they will never pass an exam.</td></tr>
+  </table>
+  <div class="g errata lab" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+    <p><span class="mute">Errata</span><br>AP-019 Sorvanel: shelf mark corrected twice, still doubtful.</p>
+    <p><span class="mute">Note</span><br>Compound names are invented and may resemble real ones by accident.</p>
+    <p><span class="mute">Reminder</span><br>No claims are made or implied. Do not rely on any of this.</p>
+  </div>
+  </div></div>
+</section>
+</main>
+
+<footer>
+  <div class="lab" style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap"><span>Apotheca Laboratorien — fictional house</span><span class="mute">Catalogue Nº 13 / MMXXVI</span><a href="#top" onclick="window.scrollTo(0,0);return false">Top ↑</a></div>
+  <div class="fbig" aria-hidden="true">Nº 13</div>
+</footer>
+
+<script>
+(function(){
+"use strict";
+/* ---------- data ---------- */
+var CLS={ALK:["Alkaloid-type","Nitrogenous skeletons built from fused rings."],TER:["Terpenoid-type","Branched, isoprene-pattern chains and rings."],ARO:["Aromatic","Single or fused benzenoid cores with substituents."],GLY:["Glycoside-type","Sugar-like rings joined across an oxygen bridge."],PEP:["Peptide-type","Amide-linked chains with short side branches."],SAL:["Salt-type","Organic cores paired with simple ions."]};
+var RAW=[
+["Alquenzine","ALK","C17H22ClN3O2","Crystal","Shelved",1958],["Brevotrol","TER","C15H26O2","Oil","Shelved",1963],
+["Calmeridone","ALK","C12H14N2O3","Powder","Sealed",1971],["Dorvaline","PEP","C20H31N5O6","Powder","Shelved",1989],
+["Elmaprene","TER","C10H16O","Oil","Withdrawn",1966],["Fenoquil","ARO","C13H11ClN2O","Crystal","Shelved",1974],
+["Glaucemide","GLY","C21H28O11","Resin","Shelved",1982],["Hexadrine","ALK","C14H19NO2","Tincture","Misplaced",1960],
+["Ixoplast","SAL","C9H13K2NO5","Powder","Sealed",1999],["Juvarelin","PEP","C34H52N8O9","Powder","Shelved",2011],
+["Kestrinol","TER","C20H34O3","Resin","Sealed",1977],["Lumenthane","ARO","C11H9FN2OS","Crystal","Shelved",1993],
+["Marvelose","GLY","C18H30O13","Powder","Withdrawn",1961],["Nortavane","ALK","C19H25N3O","Tablet","Shelved",2004],
+["Ostrevine","ALK","C16H20N2O4","Crystal","Shelved",1985],["Pallinex","SAL","C7H11NaO4S","Powder","Shelved",1969],
+["Quorabin","PEP","C27H44N6O8S","Powder","Sealed",2018],["Rhodamyl","GLY","C24H34O12","Resin","Shelved",1972],
+["Sorvanel","ARO","C15H12BrNO2","Crystal","Misplaced",1998],["Tamerosine","ALK","C18H23N3O3","Tincture","Shelved",1979],
+["Ulvacetin","TER","C15H24O4","Oil","Withdrawn",2002],["Vantheol","TER","C20H30O2","Crystal","Shelved",2016],
+["Wexilane","ARO","C10H8F2N2","Powder","Shelved",2009],["Xyrolate","SAL","C8H12NaNO6","Tablet","Sealed",1987],
+["Yarrowin","GLY","C27H42O13","Resin","Shelved",1995],["Zenthrapine","ALK","C21H27FN4O","Crystal","Sealed",2021],
+["Ambrosel","TER","C17H28O3","Oil","Shelved",1968],["Bromelith","SAL","C12H16BrKO3","Crystal","Shelved",2007],
+["Cyvaprol","ARO","C16H17NO3S","Tablet","Withdrawn",2013],["Dunmorrin","PEP","C41H63N9O12","Powder","Shelved",2024]];
+var MASS={H:1.008,C:12.011,N:14.007,O:15.999,F:18.998,S:32.06,Cl:35.45,Br:79.904,K:39.098,Na:22.99};
+function parse(f){var o={},re=/([A-Z][a-z]?)(\d*)/g,m;while((m=re.exec(f)))o[m[1]]=(o[m[1]]||0)+(m[2]?+m[2]:1);return o}
+function pad(n){return(n<10?"00":n<100?"0":"")+n}
+var DB=RAW.map(function(r,i){var el=parse(r[2]),mw=0,at=0,k;for(k in el){mw+=MASS[k]*el[k];if(k!=="H")at+=el[k]}
+  var n=i+1;return{n:n,name:r[0],cls:r[1],f:r[2],el:el,mw:mw,at:at,tot:Object.keys(el).reduce(function(s,k){return s+el[k]},0),form:r[3],st:r[4],yr:r[5],sh:r[1].charAt(0)+"-"+pad((n*7)%12+1).slice(1)+"-"+(n%5+1)}});
+function fhtml(f){return f.replace(/(\d+)/g,"<sub>$1</sub>")}
+function $(s){return document.querySelector(s)}
+
+/* ---------- state ---------- */
+var S={q:"",cls:"all",st:"all",key:"n",dir:1,sel:7,user:false};
+var narrow=window.matchMedia("(max-width:1099px)");
+var KEYS={n:function(c){return c.n},name:function(c){return c.name},cls:function(c){return CLS[c.cls][0]},f:function(c){return c.tot},mw:function(c){return c.mw},form:function(c){return c.form},st:function(c){return c.st+c.n},yr:function(c){return c.yr}};
+function view(){
+  var q=S.q.trim().toLowerCase();
+  var r=DB.filter(function(c){
+    if(S.cls!=="all"&&c.cls!==S.cls)return false;
+    if(S.st!=="all"&&c.st!==S.st)return false;
+    if(!q)return true;
+    return (c.name+" "+c.f+" ap-"+pad(c.n)+" "+c.n+" "+CLS[c.cls][0]+" "+c.form).toLowerCase().indexOf(q)>-1});
+  var kf=KEYS[S.key];
+  r.sort(function(a,b){var x=kf(a),y=kf(b);return(x<y?-1:x>y?1:a.n-b.n)*S.dir});
+  return r}
+
+/* ---------- render: chips / register / table ---------- */
+var chips=$("#chips"),reg=$("#reg"),tb=$("#tb");
+function renderChips(){
+  var h='<button type="button" data-c="all" aria-pressed="'+(S.cls==="all")+'">All<sup>'+DB.length+'</sup></button>';
+  Object.keys(CLS).forEach(function(k){var n=DB.filter(function(c){return c.cls===k}).length;h+='<button type="button" data-c="'+k+'" aria-pressed="'+(S.cls===k)+'">'+CLS[k][0].replace("-type","")+'<sup>'+n+'</sup></button>'});
+  chips.innerHTML=h}
+function render(){
+  var rows=view(),ids={};rows.forEach(function(c){ids[c.n]=1});
+  $("#count").textContent=rows.length;
+  renderChips();
+  reg.innerHTML=DB.map(function(c){return '<li><button type="button" data-n="'+c.n+'" class="'+(c.n===S.sel?"sel":ids[c.n]?"":"off")+'" aria-label="'+c.name+', number '+c.n+'"'+(c.n===S.sel?' aria-current="true"':'')+'>'+pad(c.n).slice(1)+'</button></li>'}).join("");
+  tb.innerHTML=rows.length?rows.map(function(c){return '<tr data-n="'+c.n+'"'+(c.n===S.sel?' class="sel" aria-current="true"':'')+'><td class="n">'+pad(c.n)+'</td><td class="nm"><button type="button">'+c.name+'</button></td><td class="cls">'+CLS[c.cls][0].replace("-type","")+'</td><td class="frm">'+fhtml(c.f)+'</td><td class="mw">'+c.mw.toFixed(2)+'</td><td class="fo">'+c.form+'</td><td class="st"><i class="sg sg-'+c.st+'"></i>'+c.st+'</td></tr>'}).join(""):'<tr class="none"><td colspan="7">Nothing on the shelf matches. <button type="button" id="rs">Clear the filters</button></td></tr>';
+  document.querySelectorAll("th[aria-sort]").forEach(function(th){var k=th.firstElementChild.dataset.k;th.setAttribute("aria-sort",k===S.key?(S.dir>0?"ascending":"descending"):"none")});
+  $("#dir").textContent=S.dir>0?"Asc ↑":"Desc ↓";
+  $("#fsort").value=KEYS[S.key]&&[].some.call($("#fsort").options,function(o){return o.value===S.key})?S.key:$("#fsort").value;
+}
+
+/* ---------- molecule generator (plain SVG) ---------- */
+function rng(s){return function(){s|=0;s=s+0x6D2B79F5|0;var t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function mol(c){
+  var R=rng(c.n*9301+7),L=34,N=[],B=[],M={},rad=function(d){return d*Math.PI/180},S3=Math.sqrt(3),rings=[];
+  function add(x,y){var k=Math.round(x/3)+","+Math.round(y/3);if(k in M)return M[k];N.push({x:x,y:y,el:"C",d:0,ring:0,lab:null,cx:0,cy:0});return M[k]=N.length-1}
+  function bond(a,b,o,rc){if(a===b)return;for(var i=0;i<B.length;i++){var q=B[i];if((q.a===a&&q.b===b)||(q.a===b&&q.b===a))return}B.push({a:a,b:b,o:o||1,rc:rc||null});N[a].d++;N[b].d++}
+  function ring(cx,cy,ar){var ids=[],k;for(k=0;k<6;k++){var a=rad(-90+60*k);ids.push(add(cx+L*Math.cos(a),cy+L*Math.sin(a)))}
+    ids.forEach(function(i){N[i].ring++;N[i].cx=cx;N[i].cy=cy});
+    for(k=0;k<6;k++)bond(ids[k],ids[(k+1)%6],ar&&k%2===0?2:1,[cx,cy]);rings.push(ids);return ids}
+  function cen(d,m){return[S3*L*(m||1)*Math.cos(rad(d)),S3*L*(m||1)*Math.sin(rad(d))]}
+  function free(x,y){return!N.some(function(m){return Math.hypot(m.x-x,m.y-y)<L*.72})}
+  function chain(i,ang,len,o){var cur=i,s=R()<.5?1:-1;for(var k=0;k<len;k++){var a=k%2===0?ang+(k===0?0:0):ang+60*s;if(k>0&&k%2===1)a=ang+60*s;else if(k>0)a=ang;
+      var x=N[cur].x+L*Math.cos(rad(a)),y=N[cur].y+L*Math.sin(rad(a));if(!free(x,y))return;var id=add(x,y);bond(cur,id,k===0?o:1);cur=id}}
+  function shuf(a){for(var i=a.length-1;i>0;i--){var j=R()*(i+1)|0,t=a[i];a[i]=a[j];a[j]=t}return a}
+  var e=c.el,nN=e.N||0,nO=e.O||0,nS=e.S||0,hal=[],ions=[],d0=[0,60,120,180,240,300][R()*6|0],cc;
+  ["F","Cl","Br"].forEach(function(h){for(var i=0;i<(e[h]||0);i++)(c.cls==="SAL"?ions:hal).push(h+(c.cls==="SAL"?"⁻":""))});
+  ["K","Na"].forEach(function(h){for(var i=0;i<(e[h]||0);i++)ions.push(h+"⁺")});
+  var pepN=[];
+  if(c.cls==="ARO"){ring(0,0,true);if(R()<.6)ring.apply(null,cen(d0).concat([true]))}
+  else if(c.cls==="SAL"){ring(0,0,true)}
+  else if(c.cls==="ALK"){ring(0,0,true);cc=cen(d0);ring(cc[0],cc[1],false);if(R()<.45){cc=cen(d0+60);ring(cc[0],cc[1],false)}}
+  else if(c.cls==="TER"){ring(0,0,false);cc=cen(d0);ring(cc[0],cc[1],false);if(R()<.6){var c3=cen(d0+(R()<.5?0:60));ring(cc[0]+c3[0],cc[1]+c3[1],false)}}
+  else if(c.cls==="GLY"){var v=ring(0,0,false),k0=R()*6|0,th=-90+60*k0,vv=v[k0];
+    var bx=2*L*Math.cos(rad(th)),by=2*L*Math.sin(rad(th)),b=add(bx,by);N[b].el="O";N[b].lab="O";
+    var r2=ring(3*L*Math.cos(rad(th)),3*L*Math.sin(rad(th)),false);bond(vv,b);bond(b,r2[(k0+3)%6]);nO--}
+  else{var nb=8+(R()*3|0),prev=-1,bb=[];
+    for(var i=0;i<nb;i++){var id=add(i*L*.866,(i%2)*L*.5);N[id].out=i%2?90:-90;if(prev>=0)bond(prev,id);prev=id;bb.push(id)}
+    bb.forEach(function(id,i){if(i%3===2&&i<nb-1)chain(id,N[id].out,1,2);else if(i%3===0&&i>0&&i<nb-1&&R()<.7)chain(id,N[id].out,1+(R()*2|0),1);if(i%3===1)pepN.push(id)})}
+  /* substituents on free ring vertices */
+  if(rings.length){var outer=shuf(N.map(function(n,i){return i}).filter(function(i){return N[i].ring===1&&N[i].d===2})),cnt=2+(R()*3|0);
+    outer.slice(0,cnt).forEach(function(i){chain(i,Math.atan2(N[i].y-N[i].cy,N[i].x-N[i].cx)*180/Math.PI,1+(R()*3|0),1)})}
+  /* hetero in the skeleton */
+  function ringHet(el,k){var cand=shuf(N.map(function(n,i){return i}).filter(function(i){return N[i].ring===1&&N[i].el==="C"}));for(var i=0;i<k&&i<cand.length;i++){N[cand[i]].el=el;N[cand[i]].lab=el}return Math.min(k,cand.length)}
+  if(c.cls==="ALK")nN-=ringHet("N",Math.min(nN,1+(R()*2|0)));
+  else if(c.cls==="ARO")nN-=ringHet("N",Math.min(nN,2));
+  else if(c.cls==="GLY"){var q=Math.min(nO,1+(R()*2|0));nO-=ringHet("O",q)}
+  else if(c.cls==="PEP"){var pn=Math.min(nN,pepN.length);for(var j=0;j<pn;j++){N[pepN[j]].el="N";N[pepN[j]].lab="N"}nN-=pn}
+  /* ensure enough leaves */
+  var need=nN+nO+nS+hal.length;
+  function pool(){return N.map(function(n,i){return i}).filter(function(i){return N[i].el==="C"&&!N[i].ring&&N[i].d<=2})}
+  var guard=0;while(pool().length<need*1.8&&guard++<14){var cand=N.map(function(n,i){return i}).filter(function(i){return N[i].ring===1&&N[i].d===2});if(!cand.length)break;var i0=cand[R()*cand.length|0];chain(i0,Math.atan2(N[i0].y-N[i0].cy,N[i0].x-N[i0].cx)*180/Math.PI,1,1)}
+  var P=shuf(pool());
+  function nbrHet(id){return B.some(function(b){var o=b.a===id?b.b:b.b===id?b.a:-1;return o>-1&&N[o].el!=="C"})}
+  function take(leafOnly){var i,id;for(i=0;i<P.length;i++){id=P[i];if(N[id].el==="C"&&(!leafOnly||N[id].d===1)&&!nbrHet(id))return id}
+    return -1}
+  hal.forEach(function(h){var id=take(true);if(id>-1){N[id].el=h;N[id].lab=h}});
+  for(var a=0;a<nS;a++){var id=take(false);if(id>-1){N[id].el="S";N[id].lab=N[id].d===1?"SH":"S"}}
+  for(a=0;a<nO;a++){var id=take(false);if(id<0)break;N[id].el="O";if(N[id].d===1){var dbl=R()<.5;N[id].lab=dbl?"O":"OH";if(dbl)B.forEach(function(b){if(b.a===id||b.b===id)b.o=2})}else N[id].lab="O"}
+  for(a=0;a<nN;a++){var id=take(false);if(id<0)break;N[id].el="N";N[id].lab=N[id].d===1?"NH2":"N"}
+  /* ions */
+  var mx=Math.max.apply(null,N.map(function(n){return n.x})),my=Math.min.apply(null,N.map(function(n){return n.y}));
+  ions.forEach(function(t,i){N.push({x:mx+L*1.5,y:my+i*L*.9,el:"I",d:0,ring:0,lab:t,ion:1})});
+  /* fit to the plate */
+  var xs=N.map(function(n){return n.x}),ys=N.map(function(n){return n.y}),x0=Math.min.apply(null,xs),x1=Math.max.apply(null,xs),y0=Math.min.apply(null,ys),y1=Math.max.apply(null,ys);
+  var sc=Math.min(1.2,300/Math.max(x1-x0,y1-y0,1)),ox=200-(x0+x1)/2*sc,oy=196-(y0+y1)/2*sc;
+  var P2=N.map(function(n){return{x:n.x*sc+ox,y:n.y*sc+oy,lab:n.lab,ion:n.ion,el:n.el}});
+  var out='',INK="#111",SIG="#C93408";
+  function ln(x1,y1,x2,y2){return '<line x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'"/>'}
+  var g='<g stroke="'+INK+'" stroke-width="1.4" fill="none" vector-effect="non-scaling-stroke" stroke-linecap="butt">';
+  B.forEach(function(b){var A=P2[b.a],Z=P2[b.b],dx=Z.x-A.x,dy=Z.y-A.y,len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len,sa=A.lab?11:0,sz=Z.lab?11:0;
+    var ax=A.x+ux*sa,ay=A.y+uy*sa,zx=Z.x-ux*sz,zy=Z.y-uy*sz;
+    if(b.o===2){var px=-uy,py=ux;
+      if(b.rc){var mxp=(A.x+Z.x)/2,myp=(A.y+Z.y)/2,rcx=b.rc[0]*sc+ox,rcy=b.rc[1]*sc+oy,sg=((rcx-mxp)*px+(rcy-myp)*py)>0?1:-1,o=5*sc;
+        g+=ln(ax,ay,zx,zy)+ln(ax+ux*len*.12+px*o*sg,ay+uy*len*.12+py*o*sg,zx-ux*len*.12+px*o*sg,zy-uy*len*.12+py*o*sg)}
+      else g+=ln(ax+px*2.6,ay+py*2.6,zx+px*2.6,zy+py*2.6)+ln(ax-px*2.6,ay-py*2.6,zx-px*2.6,zy-py*2.6)}
+    else g+=ln(ax,ay,zx,zy)});
+  g+='</g>';
+  var t='<g fill="'+SIG+'" font-size="14" font-weight="500" text-anchor="middle" dominant-baseline="central">';
+  P2.forEach(function(n){if(!n.lab)return;var l=n.lab.replace(/(H)(\d)$/,'$1<tspan font-size="9" dy="3">$2</tspan>');t+='<text x="'+n.x.toFixed(1)+'" y="'+n.y.toFixed(1)+'">'+l+'</text>'});
+  t+='</g>';
+  var sb=L*sc,fr='<g stroke="'+INK+'" stroke-width="1" fill="none" vector-effect="non-scaling-stroke">'+
+    '<path d="M0 14h14M14 0v14M386 0v14M400 14h-14M0 386h14M14 400v-14M386 400v-14M400 386h-14" />'+
+    ln(20,372,20+sb,372)+ln(20,368,20,376)+ln(20+sb,368,20+sb,376)+'</g>';
+  var cap='<g fill="'+INK+'" font-size="10" letter-spacing=".5"><text x="'+(26+sb)+'" y="372" dominant-baseline="central">1.5 Å</text><text x="380" y="372" text-anchor="end" dominant-baseline="central">FIG. AP-'+pad(c.n)+'</text><text x="22" y="30">SCHEMATIC</text></g>';
+  return '<svg id="mol" viewBox="0 0 400 400" role="img" aria-label="Schematic skeletal diagram of '+c.name+', formula '+c.f+'. Nitrogen, oxygen, sulphur and halogen atoms are labelled in red.">'+fr+g+t+cap+'</svg>'}
+
+function renderPlate(){
+  var c=DB[S.sel-1],cl=CLS[c.cls];
+  var atoms=Object.keys(c.el).sort(function(a,b){return a==="C"?-1:b==="C"?1:a==="H"?-1:b==="H"?1:a<b?-1:1}).map(function(k){return k+(c.el[k]>1?"<sub>"+c.el[k]+"</sub>":"")}).join(" ");
+  $("#plate").innerHTML='<div class="pl-h lab"><span>Plate</span><span class="mute">'+c.cls+' / '+c.sh+'</span></div><span class="pn" aria-hidden="true">'+pad(c.n)+'</span><h3>'+c.name+'</h3>'+mol(c)+
+  '<dl><dt class="lab mute">Class</dt><dd>'+cl[0]+'</dd><dt class="lab mute">Formula</dt><dd class="m">'+fhtml(c.f)+'</dd><dt class="lab mute">Atoms</dt><dd class="m">'+atoms+'</dd><dt class="lab mute">Mass</dt><dd class="m">'+c.mw.toFixed(2)+' g/mol</dd><dt class="lab mute">Form</dt><dd>'+c.form+'</dd><dt class="lab mute">Entered</dt><dd class="m">'+c.yr+'</dd><dt class="lab mute">Shelf</dt><dd class="m">'+c.sh+'</dd><dt class="lab mute">Status</dt><dd><i class="sg sg-'+c.st+'"></i>'+c.st+'</dd></dl>'+
+  '<p class="cap">'+cl[1]+' Red marks every atom that is not carbon or hydrogen. <b>Fictional</b>: the drawing follows the formula&rsquo;s counts, not chemistry.</p><p class="tolist lab"><a href="#index" data-to="tb">Jump to table ↓</a></p>'}
+
+function select(n,user){S.sel=n;S.user=!!user;render();renderPlate();if(user&&narrow.matches){$("#plate").scrollIntoView()}}
+
+/* ---------- holdings ---------- */
+function renderHold(){
+  var h="";Object.keys(CLS).forEach(function(k,i){var xs=DB.filter(function(c){return c.cls===k}),m=xs.reduce(function(s,c){return s+c.mw},0)/xs.length,hv=xs.slice().sort(function(a,b){return b.mw-a.mw})[0],yr=xs.map(function(c){return c.yr});
+    h+='<div class="g hold"><span class="lab mute" style="grid-column:1/13">Class '+(i+1)+' / '+k+'</span><span class="ct" data-sd="up" style="grid-column:1/6" aria-label="'+xs.length+' compounds">'+(xs.length<10?"0":"")+xs.length+'</span><div style="grid-column:6/10"><h3>'+CLS[k][0]+'</h3><p>'+CLS[k][1]+'</p></div><div class="nums lab" style="grid-column:10/13"><div><span class="mute">Mean mass</span><b>'+m.toFixed(1)+'</b></div><div><span class="mute">Heaviest</span><span>'+hv.name+' '+hv.mw.toFixed(1)+'</span></div><div><span class="mute">Entered</span><span>'+Math.min.apply(null,yr)+'–'+Math.max.apply(null,yr)+'</span></div></div></div>'});
+  $("#hold").innerHTML=h}
+
+/* ---------- statement: split into words ---------- */
+(function(){var p=$("#say");(function walk(n){Array.prototype.slice.call(n.childNodes).forEach(function(c){
+  if(c.nodeType===3){var f=document.createDocumentFragment();c.textContent.split(/(\s+)/).forEach(function(w){if(!w)return;if(/^\s+$/.test(w)){f.appendChild(document.createTextNode(w))}else{var s=document.createElement("span");s.className="w";s.setAttribute("data-sd","ink");s.textContent=w;f.appendChild(s)}});c.parentNode.replaceChild(f,c)}
+  else if(c.nodeType===1)walk(c)})})(p)})();
+
+/* ---------- wiring ---------- */
+$("#q").addEventListener("input",function(e){S.q=e.target.value;render()});
+$("#fst").addEventListener("change",function(e){S.st=e.target.value;render()});
+$("#fsort").addEventListener("change",function(e){S.key=e.target.value;render()});
+$("#dir").addEventListener("click",function(){S.dir*=-1;render()});
+chips.addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;S.cls=b.dataset.c;render();var f=chips.querySelector('[data-c="'+S.cls+'"]');if(f)f.focus()});
+reg.addEventListener("click",function(e){var b=e.target.closest("button");if(b){var n=+b.dataset.n;select(n,true);var nb=reg.querySelector('[data-n="'+n+'"]');if(nb)nb.focus({preventScroll:true})}});
+tb.addEventListener("click",function(e){if(e.target.id==="rs"){S.q="";S.cls="all";S.st="all";$("#q").value="";$("#fst").value="all";render();return}var tr=e.target.closest("tr[data-n]");if(tr){var n=+tr.dataset.n;select(n,true);var b=tb.querySelector('tr[data-n="'+n+'"] button');if(b)b.focus({preventScroll:true})}});
+document.querySelector("thead").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;var k=b.dataset.k;if(S.key===k)S.dir*=-1;else{S.key=k;S.dir=1}render()});
+$("#plate").addEventListener("click",function(e){if(e.target.dataset.to){e.preventDefault();$(".tbl").scrollIntoView()}});
+var gb=$("#gbtn"),ov=$(".ov");for(var i=0;i<12;i++)ov.appendChild(document.createElement("i"));
+function grid(){var on=document.body.classList.toggle("show-grid");gb.setAttribute("aria-pressed",on)}
+gb.addEventListener("click",grid);
+document.addEventListener("keydown",function(e){if(e.metaKey||e.ctrlKey||e.altKey)return;var t=e.target.tagName;if(t==="INPUT"||t==="SELECT"||t==="TEXTAREA")return;
+  if(e.key==="g"||e.key==="G")grid();else if(e.key==="/"){e.preventDefault();$("#q").focus()}});
+
+render();renderPlate();renderHold();
+
+/* ---------- fallback for browsers without animation-timeline ---------- */
+var native=window.CSS&&CSS.supports&&CSS.supports("animation-timeline:scroll()");
+if(!native&&!window.matchMedia("(prefers-reduced-motion:reduce)").matches){
+  var CFG={up:[0,.45],ink:[.18,.52]},vis=new Set(),all=[].slice.call(document.querySelectorAll("[data-sd]")),pend=false;
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){e.isIntersecting?vis.add(e.target):vis.delete(e.target)});upd()},{rootMargin:"20% 0px"});
+  all.forEach(function(el){var m=el.dataset.sd;if(m==="up"||m==="ink")io.observe(el)});
+  function put(el,p){el.style.animationDelay=(-Math.min(1,Math.max(0,p))).toFixed(4)+"s"}
+  function tick(){pend=false;var vh=innerHeight,y=scrollY;
+    put(document.body,y/Math.max(1,document.documentElement.scrollHeight-vh));
+    put($("#t"),y/(vh*.6));
+    vis.forEach(function(el){var r=el.getBoundingClientRect(),f=(vh-r.top)/(vh+r.height),c=CFG[el.dataset.sd];put(el,(f-c[0])/(c[1]-c[0]))})}
+  function upd(){if(!pend){pend=true;requestAnimationFrame(tick)}}
+  addEventListener("scroll",upd,{passive:true});addEventListener("resize",upd);upd();
+}
+})();
+</script>
+</body>
+</html>

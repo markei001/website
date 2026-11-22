@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ABYSS — A dive to the bottom of the ocean</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#eaf7ff;--muted:rgba(234,247,255,.65);--cyan:#5ef2ff;--line:rgba(234,247,255,.18)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{background:#000}
+  body{color:var(--ink);font-family:Sora,sans-serif;overflow-x:hidden;background:#000}
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+  .water{position:fixed;inset:0;z-index:0;background:#4fb7dc;transition:background-color .1s linear}
+  /* god rays near the surface */
+  .rays{position:fixed;inset:-20% -10% 30%;z-index:1;pointer-events:none;mix-blend-mode:soft-light;
+    background:repeating-conic-gradient(from 170deg at 50% -10%,rgba(255,255,255,.0) 0deg,rgba(255,255,255,.55) 3deg,rgba(255,255,255,0) 7deg,rgba(255,255,255,0) 12deg);
+    filter:blur(12px);-webkit-mask:linear-gradient(#000,transparent 85%);mask:linear-gradient(#000,transparent 85%);animation:sway 9s ease-in-out infinite alternate}
+  @keyframes sway{to{transform:rotate(4deg) translateX(3%)}}
+  .caustics{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.25;mix-blend-mode:overlay;
+    background:radial-gradient(ellipse 30px 12px at 20% 30%,#fff,transparent),radial-gradient(ellipse 40px 14px at 70% 20%,#fff,transparent),radial-gradient(ellipse 26px 10px at 45% 60%,#fff,transparent);filter:blur(6px)}
+  #gl{position:fixed;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
+  main{position:relative;z-index:5}
+
+  nav{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;justify-content:space-between;align-items:center;padding:22px clamp(16px,4vw,48px)}
+  .logo{font-weight:700;letter-spacing:.5em;font-size:14px}
+  .nav-r{display:flex;gap:10px;font-family:"IBM Plex Mono";font-size:12px}
+  .chip{padding:8px 14px;border:1px solid var(--line);border-radius:99px;background:rgba(0,20,40,.25);backdrop-filter:blur(10px)}
+  @media(max-width:700px){.nav-r .chip:nth-child(n+2){display:none}}
+
+  /* depth gauge */
+  .gauge{position:fixed;right:clamp(14px,3vw,40px);top:50%;transform:translateY(-50%);z-index:20;text-align:right;font-family:"IBM Plex Mono"}
+  .depth{font-family:Sora;font-weight:200;font-size:clamp(38px,5vw,72px);line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+  .depth small{font-size:.35em;margin-left:4px;color:var(--muted)}
+  .zones{list-style:none;margin-top:24px;display:grid;gap:12px;font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  .zones li{color:rgba(234,247,255,.35);transition:color .4s;display:flex;align-items:center;justify-content:flex-end;gap:10px}
+  .zones li::after{content:"";width:16px;height:1px;background:currentColor;transition:width .4s}
+  .zones li.on{color:var(--cyan)}
+  .zones li.on::after{width:38px}
+  .read{margin-top:22px;font-size:12px;color:var(--muted);line-height:1.9}
+  @media(max-width:800px){.zones,.read{display:none}.gauge{top:auto;bottom:22px;transform:none}}
+
+  section{min-height:130vh;padding:22vh clamp(16px,7vw,110px);display:flex;align-items:center}
+  .txt{max-width:600px}
+  .zone-tag{font-family:"IBM Plex Mono";font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--cyan);margin-bottom:22px;display:flex;align-items:center;gap:12px}
+  .zone-tag::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 12px currentColor}
+  h1{font-weight:200;font-size:clamp(80px,17vw,260px);letter-spacing:.06em;line-height:.85;text-shadow:0 10px 60px rgba(0,40,80,.35)}
+  h2{font-weight:300;font-size:clamp(40px,5.5vw,84px);line-height:1;letter-spacing:-.03em}
+  h2 b{font-weight:600;color:var(--cyan)}
+  p.lead{font-size:clamp(16px,1.4vw,20px);line-height:1.7;color:var(--muted);margin-top:26px;max-width:520px}
+  .fact{display:inline-flex;gap:30px;margin-top:40px;padding-top:24px;border-top:1px solid var(--line);flex-wrap:wrap}
+  .fact div b{display:block;font-weight:300;font-size:36px;letter-spacing:-.02em}
+  .fact div span{font-family:"IBM Plex Mono";font-size:11px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase}
+  .dive{display:inline-flex;align-items:center;gap:14px;margin-top:40px;padding:16px 26px;border-radius:99px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.4);backdrop-filter:blur(10px);font-weight:600;transition:all .3s}
+  .dive:hover{background:#fff;color:#0a3d5c}
+  .dive i{display:inline-block;animation:bob 1.6s ease-in-out infinite}
+  @keyframes bob{50%{transform:translateY(5px)}}
+  .hero{min-height:100vh;align-items:flex-end;padding-bottom:16vh}
+  .right{margin-left:auto;text-align:right}
+  @media(min-width:801px){section.right{padding-right:calc(clamp(16px,7vw,110px) + 230px)}}
+  .right .zone-tag{justify-content:flex-end}
+  .right p.lead{margin-left:auto}
+
+  /* letters drift up into place */
+  .reveal{opacity:0;transform:translateY(50px);filter:blur(10px);transition:all 1.3s cubic-bezier(.2,.8,.2,1);transition-delay:var(--d,0s)}
+  .reveal.in{opacity:1;transform:none;filter:none}
+
+  .final{min-height:100vh;justify-content:center;text-align:center}
+  .final h2{font-size:clamp(48px,8vw,130px);font-weight:200}
+  .final .fact{justify-content:center}
+
+  /* sonar ping on click */
+  .ping{position:fixed;z-index:25;width:20px;height:20px;margin:-10px;border-radius:50%;border:1.5px solid var(--cyan);pointer-events:none;animation:ping 1.6s cubic-bezier(.2,.8,.3,1) forwards}
+  @keyframes ping{to{transform:scale(28);opacity:0}}
+  .pinghint{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:20;font-family:"IBM Plex Mono";font-size:11px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
+  @media(max-width:800px){.pinghint{display:none}}
+  .back{position:fixed;left:18px;bottom:18px;z-index:40;font-size:12px;padding:8px 14px;border-radius:99px;border:1px solid var(--line);color:var(--muted);background:rgba(0,10,20,.4);backdrop-filter:blur(8px)}
+  .back:hover{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="water" id="water"></div>
+<div class="rays" id="rays"></div>
+<div class="caustics" id="caustics"></div>
+<canvas id="gl"></canvas>
+<a class="back" href="../index.html">← all sites</a>
+<div class="pinghint">click anywhere to send a sonar ping</div>
+
+<nav>
+  <div class="logo">ABYSS</div>
+  <div class="nav-r"><span class="chip" id="press">1.0 atm</span><span class="chip" id="temp">22°C</span><span class="chip" id="light">Light 100%</span></div>
+</nav>
+
+<div class="gauge">
+  <div class="depth"><span id="depth">0</span><small>m</small></div>
+  <ul class="zones" id="zones">
+    <li data-z="0">Sunlight</li><li data-z="200">Twilight</li><li data-z="1000">Midnight</li><li data-z="4000">Abyssal</li><li data-z="6000">Hadal</li>
+  </ul>
+  <div class="read" id="read">↓ descending</div>
+</div>
+
+<main>
+  <section class="hero" data-depth="0">
+    <div class="txt">
+      <div class="zone-tag reveal">Pacific Ocean · 11.35°N 142.2°E</div>
+      <h1 class="reveal" style="--d:.1s">ABYSS</h1>
+      <p class="lead reveal" style="--d:.25s">Eleven kilometres of water lie beneath you. Hold your breath — we're going all the way to the bottom.</p>
+      <a class="dive reveal" style="--d:.4s" href="#sun">Begin the dive <i>↓</i></a>
+    </div>
+  </section>
+
+  <section id="sun" data-depth="40">
+    <div class="txt">
+      <div class="zone-tag reveal">Sunlight zone · 0–200 m</div>
+      <h2 class="reveal" style="--d:.1s">Where <b>90%</b> of ocean life lives.</h2>
+      <p class="lead reveal" style="--d:.2s">Warm, bright and crowded. Sunlight powers tiny plankton that make half the oxygen you breathe. Look — a school of sardines just turned to look at you.</p>
+      <div class="fact reveal" style="--d:.3s"><div><b>50%</b><span>of Earth's oxygen</span></div><div><b>22°C</b><span>surface water</span></div></div>
+    </div>
+  </section>
+
+  <section class="right" data-depth="200">
+    <div class="txt right">
+      <div class="zone-tag reveal">Twilight zone · 200–1,000 m</div>
+      <h2 class="reveal" style="--d:.1s">The light <b>fades</b> to blue.</h2>
+      <p class="lead reveal" style="--d:.2s">Every night, billions of animals swim up from here to feed, then sink back before sunrise. It's the largest migration on the planet — and it happens every single day.</p>
+      <div class="fact reveal" style="--d:.3s"><div><b>1%</b><span>sunlight left</span></div><div><b>×10bn</b><span>tonnes migrating</span></div></div>
+    </div>
+  </section>
+
+  <section data-depth="1000">
+    <div class="txt">
+      <div class="zone-tag reveal">Midnight zone · 1,000–4,000 m</div>
+      <h2 class="reveal" style="--d:.1s">Here, life makes its <b>own light.</b></h2>
+      <p class="lead reveal" style="--d:.2s">No sunlight has ever reached this deep. Three in four creatures glow — to hunt, to hide, or to find each other in the endless dark.</p>
+      <div class="fact reveal" style="--d:.3s"><div><b>76%</b><span>bioluminescent</span></div><div><b>4°C</b><span>water temperature</span></div></div>
+    </div>
+  </section>
+
+  <section class="right" data-depth="4000">
+    <div class="txt right">
+      <div class="zone-tag reveal">Abyssal zone · 4,000–6,000 m</div>
+      <h2 class="reveal" style="--d:.1s">You are <b>not</b> alone.</h2>
+      <p class="lead reveal" style="--d:.2s">That light isn't a star. It's the lure of an anglerfish, dangling just out of reach. The pressure here would crush a car like a soda can.</p>
+      <div class="fact reveal" style="--d:.3s"><div><b>×500</b><span>surface pressure</span></div><div><b>2°C</b><span>near freezing</span></div></div>
+    </div>
+  </section>
+
+  <section data-depth="6000">
+    <div class="txt">
+      <div class="zone-tag reveal">Hadal zone · 6,000–10,935 m</div>
+      <h2 class="reveal" style="--d:.1s">The trenches of <b>Hades.</b></h2>
+      <p class="lead reveal" style="--d:.2s">More people have walked on the Moon than have reached this depth. Translucent snailfish, giant amphipods and silence. Mostly silence.</p>
+      <div class="fact reveal" style="--d:.3s"><div><b>12</b><span>moonwalkers</span></div><div><b>27</b><span>hadal visitors</span></div></div>
+    </div>
+  </section>
+
+  <section class="final" data-depth="10935">
+    <div>
+      <div class="zone-tag reveal" style="justify-content:center">Challenger Deep · the bottom</div>
+      <h2 class="reveal" style="--d:.1s">10,935 m.<br>You made it.</h2>
+      <p class="lead reveal" style="--d:.2s;margin-left:auto;margin-right:auto">Mount Everest could sink here and its peak would still be two kilometres underwater.</p>
+      <a class="dive reveal" style="--d:.3s" href="#" onclick="scrollTo({top:0,behavior:'smooth'});return false">Return to surface <i>↑</i></a>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ---------------- scroll → depth ---------------- */
+const secs = [...document.querySelectorAll('[data-depth]')];
+let marks = [];
+// a section's depth is reached when its top hits the middle of the screen
+function measure() { marks = secs.map(s => ({ y: Math.max(0, s.offsetTop - innerHeight * .5), d: +s.dataset.depth })); }
+function depthAt(y) {
+  for (let i = 0; i < marks.length - 1; i++) {
+    if (y < marks[i + 1].y) return marks[i].d + (marks[i + 1].d - marks[i].d) * Math.max(0, (y - marks[i].y) / (marks[i + 1].y - marks[i].y));
+  }
+  return marks[marks.length - 1].d;
+}
+// water colour along the dive
+const STOPS = [[0, [79, 183, 220]], [120, [28, 118, 170]], [400, [12, 62, 105]], [1100, [6, 26, 52]], [3000, [3, 10, 24]], [6000, [1, 3, 9]], [11000, [0, 0, 0]]];
+function waterAt(d) {
+  for (let i = 0; i < STOPS.length - 1; i++) {
+    const [d0, c0] = STOPS[i], [d1, c1] = STOPS[i + 1];
+    if (d <= d1) { const k = (d - d0) / (d1 - d0); return c0.map((v, j) => Math.round(v + (c1[j] - v) * k)); }
+  }
+  return [0, 0, 0];
+}
+
+const $ = id => document.getElementById(id);
+const water = $('water'), rays = $('rays'), caus = $('caustics');
+const zoneEls = [...document.querySelectorAll('#zones li')];
+let depth = 0, depthT = 0, prog = 0, progT = 0;
+function onScroll() {
+  depthT = depthAt(scrollY);
+  const max = document.documentElement.scrollHeight - innerHeight;
+  progT = max > 0 ? scrollY / max : 0;
+}
+addEventListener('scroll', onScroll, { passive: true });
+addEventListener('resize', () => { measure(); onScroll(); });
+measure(); onScroll();
+
+const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && e.target.classList.add('in')), { threshold: .3 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+addEventListener('click', e => {
+  if (e.target.closest('a')) return;
+  const p = document.createElement('div'); p.className = 'ping';
+  p.style.left = e.clientX + 'px'; p.style.top = e.clientY + 'px';
+  document.body.appendChild(p); setTimeout(() => p.remove(), 1700);
+  pingAt = clock.elapsedTime;
+});
+
+/* ---------------- THREE.JS underwater world ---------------- */
+const WORLD = 200;                                 // camera travels from y=0 to y=-WORLD
+const canvas = $('gl');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, 1, .1, 120);
+scene.add(camera);
+const amb = new THREE.AmbientLight(0x9fdcff, .8); scene.add(amb);
+const sunL = new THREE.DirectionalLight(0xffffff, 1.2); sunL.position.set(2, 10, 4); scene.add(sunL);
+const headlight = new THREE.SpotLight(0xcff6ff, 0, 40, .5, .6, 1.2);   // submarine lamp for the deep
+headlight.position.set(0, 0, 0); camera.add(headlight); camera.add(headlight.target); headlight.target.position.set(0, -2, -10);
+scene.fog = new THREE.Fog(0x000000, 6, 40);
+
+function glowTex(inner = 'rgba(255,255,255,1)') {
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, inner); gr.addColorStop(.3, 'rgba(255,255,255,.5)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c);
+}
+const glow = glowTex();
+
+// marine snow: drifting particles through the whole water column
+const SNOW = innerWidth < 700 ? 2000 : 4500;
+const snowGeo = new THREE.BufferGeometry();
+const snowPos = new Float32Array(SNOW * 3);
+for (let i = 0; i < SNOW; i++) { snowPos[i * 3] = (Math.random() - .5) * 40; snowPos[i * 3 + 1] = 10 - Math.random() * (WORLD + 20); snowPos[i * 3 + 2] = -Math.random() * 30 + 4; }
+snowGeo.setAttribute('position', new THREE.BufferAttribute(snowPos, 3));
+const snow = new THREE.Points(snowGeo, new THREE.PointsMaterial({ size: .09, map: glow, transparent: true, opacity: .7, depthWrite: false, color: 0xdff6ff, fog: true }));
+scene.add(snow);
+
+// bioluminescent sparks — only in the deep
+{
+  const n = 900, pos = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) { pos[i * 3] = (Math.random() - .5) * 36; pos[i * 3 + 1] = -60 - Math.random() * 140; pos[i * 3 + 2] = -Math.random() * 25; }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  var sparks = new THREE.Points(g, new THREE.PointsMaterial({ size: .22, map: glow, color: 0x5ef2ff, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+  scene.add(sparks);
+}
+
+// placement helper: put an object at the scroll position of a section
+const yOf = i => -(secs[i].offsetTop + secs[i].offsetHeight * .5 - innerHeight * .5) / (document.documentElement.scrollHeight - innerHeight) * WORLD;
+
+/* fish school (InstancedMesh) */
+const FISH = 260;
+// a tiny low-poly fish: diamond body + forked tail, pointing along +z
+const fishGeo = new THREE.BufferGeometry();
+{
+  const N = [0, 0, .32], T = [0, 0, -.18], U = [0, .07, .02], D = [0, -.06, .02], Lf = [-.035, 0, .02], R = [.035, 0, .02];
+  const F1 = [0, .1, -.34], F2 = [0, -.1, -.34];
+  const tris = [N, U, Lf, N, R, U, N, Lf, D, N, D, R, T, Lf, U, T, U, R, T, D, Lf, T, R, D, T, F1, F2];
+  fishGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(tris.flat()), 3));
+  fishGeo.computeVertexNormals();
+}
+const fish = new THREE.InstancedMesh(fishGeo, new THREE.MeshStandardMaterial({ color: 0xd8eef8, metalness: .6, roughness: .35, side: THREE.DoubleSide, flatShading: true }), FISH);
+const fishP = Array.from({ length: FISH }, () => ({ r: 2.5 + Math.random() * 3.5, s: .35 + Math.random() * .15, ph: Math.random() * Math.PI * 2, y: (Math.random() - .5) * 2.4, z: (Math.random() - .5) * 1.5 }));
+scene.add(fish);
+const dummy = new THREE.Object3D(), tmp = new THREE.Vector3();
+
+/* jellyfish: shader bell + animated line tentacles */
+const jellies = [];
+function makeJelly(x, z, scale, c1, c2) {
+  const g = new THREE.Group();
+  const u = { uTime: { value: Math.random() * 10 }, uC1: { value: new THREE.Color(c1) }, uC2: { value: new THREE.Color(c2) } };
+  const bell = new THREE.Mesh(new THREE.SphereGeometry(1, 48, 24, 0, Math.PI * 2, 0, Math.PI * .55), new THREE.ShaderMaterial({
+    uniforms: u, transparent: true, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: `uniform float uTime; varying vec3 vN; varying vec3 vV; varying float vY;
+      void main(){
+        vec3 p = position;
+        float pulse = sin(uTime * 2.2 - p.y * 2.);
+        p.xz *= 1. + .14 * pulse; p.y *= 1. - .1 * pulse;
+        vY = position.y;
+        vec4 mv = modelViewMatrix * vec4(p, 1.);
+        vN = normalize(normalMatrix * normal); vV = normalize(-mv.xyz);
+        gl_Position = projectionMatrix * mv; }`,
+    fragmentShader: `uniform vec3 uC1, uC2; varying vec3 vN; varying vec3 vV; varying float vY;
+      void main(){
+        float f = pow(1. - abs(dot(vN, vV)), 2.);
+        vec3 col = mix(uC2, uC1, vY) * (.25 + f * 1.8);
+        gl_FragColor = vec4(col, .2 + f * .8); }`
+  }));
+  g.add(bell);
+  const core = new THREE.Sprite(new THREE.SpriteMaterial({ map: glow, color: c1, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: .8 }));
+  core.scale.set(2.2, 2.2, 1); core.position.y = .3; g.add(core);
+  const tentacles = [];
+  for (let k = 0; k < 10; k++) {
+    const pts = new Float32Array(40 * 3);
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pts, 3));
+    const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: k % 2 ? c1 : c2, transparent: true, opacity: .55, blending: THREE.AdditiveBlending }));
+    line.userData = { a: k / 10 * Math.PI * 2, len: 3 + Math.random() * 3 };
+    g.add(line); tentacles.push(line);
+  }
+  g.scale.setScalar(scale); g.position.set(x, 0, z);
+  scene.add(g);
+  jellies.push({ g, u, tentacles, baseX: x, ph: Math.random() * 6 });
+}
+makeJelly(3.2, -7, 1.1, '#ff6ad5', '#7b5cff');
+makeJelly(-4.5, -12, .8, '#5ef2ff', '#3a7bff');
+makeJelly(6, -16, .9, '#c48bff', '#ff6ad5');
+
+/* anglerfish: a lure on a stalk and two eyes in the dark */
+const angler = new THREE.Group();
+const lure = new THREE.Sprite(new THREE.SpriteMaterial({ map: glow, color: 0xb8ffef, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+lure.scale.set(1.6, 1.6, 1); angler.add(lure);
+const lureLight = new THREE.PointLight(0x8fffe0, 1.3, 6); angler.add(lureLight);
+const stalkGeo = new THREE.BufferGeometry(); stalkGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(20 * 3), 3));
+const stalk = new THREE.Line(stalkGeo, new THREE.LineBasicMaterial({ color: 0x3d6b66, transparent: true, opacity: .7 })); angler.add(stalk);
+const eyes = [];
+[-.55, .55].forEach(x => { const e = new THREE.Sprite(new THREE.SpriteMaterial({ map: glow, color: 0xfff2c0, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false })); e.scale.set(.28, .28, 1); e.position.set(x - 2.4, -1.3, -.6); angler.add(e); eyes.push(e); });
+// a dim body silhouette lit only by the lure
+const body = new THREE.Mesh(new THREE.SphereGeometry(1.6, 24, 16), new THREE.MeshStandardMaterial({ color: 0x0c1213, roughness: 1 }));
+body.scale.set(1.6, 1, 1.1); body.position.set(-2.8, -1.7, -2.4); angler.add(body);
+scene.add(angler);
+
+/* sea floor */
+const floorGeo = new THREE.PlaneGeometry(80, 60, 80, 60).rotateX(-Math.PI / 2);
+{ const p = floorGeo.attributes.position; for (let i = 0; i < p.count; i++) p.setY(i, Math.sin(p.getX(i) * .4) * .6 + Math.cos(p.getZ(i) * .5) * .5 + (Math.random() - .5) * .35); floorGeo.computeVertexNormals(); }
+const floor = new THREE.Mesh(floorGeo, new THREE.MeshStandardMaterial({ color: 0x4a4a52, roughness: 1, flatShading: true }));
+scene.add(floor);
+
+function place() {
+  fish.userData.y = yOf(1) - .5;
+  fish.userData.x = innerWidth < 800 ? 0 : 3.5;
+  jellies.forEach((j, i) => j.baseY = yOf(3) - 1 + i * 1.5);
+  angler.position.set(innerWidth < 800 ? 1.5 : -3.2, yOf(4) + .5, -6);
+  floor.position.set(0, -WORLD - 3.2, -14);
+}
+function resize() {
+  renderer.setSize(innerWidth, innerHeight, false);
+  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+  place();
+}
+addEventListener('resize', resize); resize();
+addEventListener('load', () => { measure(); place(); onScroll(); });
+
+let mx = 0, my = 0, pingAt = -10;
+addEventListener('pointermove', e => { mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5; });
+
+const clock = new THREE.Clock();
+const deepColor = new THREE.Color();
+(function loop() {
+  const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
+  depth += (depthT - depth) * .08; prog += (progT - prog) * .08;
+
+  // HUD + water colour
+  const [r, g, b] = waterAt(depth);
+  water.style.backgroundColor = `rgb(${r},${g},${b})`;
+  deepColor.setRGB(r / 255, g / 255, b / 255); scene.fog.color.copy(deepColor);
+  const lightPct = Math.max(0, Math.exp(-depth / 90) * 100);
+  rays.style.opacity = caus.style.opacity = Math.max(0, 1 - depth / 180);
+  caus.style.opacity *= .25;
+  $('depth').textContent = Math.round(depth).toLocaleString('en-US');
+  $('press').textContent = (1 + depth / 10.06).toFixed(depth < 100 ? 1 : 0) + ' atm';
+  $('temp').textContent = (depth < 1000 ? 22 - depth / 1000 * 18 : Math.max(1.5, 4 - (depth - 1000) / 3000)).toFixed(1) + '°C';
+  $('light').textContent = 'Light ' + (lightPct < .1 ? '0' : lightPct.toFixed(lightPct < 1 ? 2 : 0)) + '%';
+  zoneEls.forEach((li, i) => li.classList.toggle('on', depth >= +li.dataset.z && (i === zoneEls.length - 1 || depth < +zoneEls[i + 1].dataset.z)));
+
+  // camera descends; tilts toward the sea floor at the end
+  const endTilt = Math.max(0, (prog - .9) / .1);
+  camera.position.set(mx * 1.2, -prog * WORLD - my * .6, 4);
+  camera.rotation.set(-endTilt * .35 - my * .05, -mx * .08, 0);
+  amb.intensity = .15 + .8 * Math.max(0, 1 - depth / 600);
+  sunL.intensity = 1.4 * Math.max(0, 1 - depth / 400);
+  headlight.intensity = Math.min(3, Math.max(0, (depth - 600) / 800) * 3);
+  const sinceP = t - pingAt; amb.intensity += sinceP < 1.2 ? (1.2 - sinceP) * .6 : 0;   // sonar flash
+
+  // marine snow sinks slowly and wraps
+  const sp = snowGeo.attributes.position;
+  for (let i = 0; i < SNOW; i++) { let y = sp.array[i * 3 + 1] - dt * .15; if (y < -WORLD - 12) y = 10; sp.array[i * 3 + 1] = y; sp.array[i * 3] += Math.sin(t * .3 + i) * .002; }
+  sp.needsUpdate = true;
+  sparks.material.opacity = .4 + Math.sin(t * 3) * .25;
+
+  // fish swirl
+  for (let i = 0; i < FISH; i++) {
+    const f = fishP[i], a = t * f.s + f.ph;
+    const cx = fish.userData.x, x = cx + Math.cos(a) * f.r, z = Math.sin(a) * f.r * .55 - 9 + f.z, y = fish.userData.y + f.y + Math.sin(a * 3) * .25;
+    dummy.position.set(x, y, z);
+    tmp.set(cx + Math.cos(a + .05) * f.r, y, Math.sin(a + .05) * f.r * .55 - 9 + f.z);
+    dummy.lookAt(tmp); dummy.updateMatrix();
+    fish.setMatrixAt(i, dummy.matrix);
+  }
+  fish.instanceMatrix.needsUpdate = true;
+
+  // jellies pulse & drift; tentacles trail
+  jellies.forEach(j => {
+    j.u.uTime.value += dt;
+    const pulse = Math.sin(j.u.uTime.value * 2.2);
+    j.g.position.y = j.baseY + Math.sin(t * .4 + j.ph) * .8 + pulse * .08;
+    j.g.position.x = j.baseX + Math.sin(t * .2 + j.ph) * .6;
+    j.tentacles.forEach(l => {
+      const arr = l.geometry.attributes.position.array, { a, len } = l.userData;
+      for (let s = 0; s < 40; s++) {
+        const k = s / 39, rr = .75 * (1 + .14 * pulse) * (1 - k * .5);
+        arr[s * 3] = Math.cos(a) * rr + Math.sin(t * 1.6 + k * 6 + a) * .25 * k;
+        arr[s * 3 + 1] = -k * len;
+        arr[s * 3 + 2] = Math.sin(a) * rr + Math.cos(t * 1.3 + k * 5 + a) * .25 * k;
+      }
+      l.geometry.attributes.position.needsUpdate = true;
+    });
+  });
+
+  // anglerfish lure bobs on its stalk, eyes blink
+  const lx = Math.sin(t * .9) * .4, ly = Math.cos(t * 1.3) * .25 + .4;
+  lure.position.set(lx, ly, 0); lureLight.position.copy(lure.position);
+  lure.material.opacity = .75 + Math.sin(t * 5) * .15;
+  const sa = stalk.geometry.attributes.position.array;
+  for (let s = 0; s < 20; s++) { const k = s / 19; sa[s * 3] = -2 + (lx + 2) * k; sa[s * 3 + 1] = -.6 + (ly + .6) * k + Math.sin(k * Math.PI) * 1.1; sa[s * 3 + 2] = -.6 * (1 - k); }
+  stalk.geometry.attributes.position.needsUpdate = true;
+  const blink = (t % 4) < .12 ? .02 : .28; eyes.forEach(e => e.scale.set(.28, blink, 1));
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

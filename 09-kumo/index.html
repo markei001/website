@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KUMO — Journeys through Japan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--washi:#f2ece0;--paper:#e9e1d1;--ink:#1f2a44;--muted:#5f6680;--red:#c73e3a;--sakura:#f4b6c2;--gold:#d4a24c}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{overflow-x:clip}
+  body{background:var(--washi);color:var(--ink);font-family:"Zen Kaku Gothic New",sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  button,input,select{font:inherit;color:inherit}
+  .serif{font-family:"Shippori Mincho",serif}
+  #petals{position:fixed;inset:0;width:100%;height:100%;z-index:30;pointer-events:none}
+  /* washi paper texture */
+  .paper{position:fixed;inset:0;z-index:31;pointer-events:none;opacity:.22;mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.6' numOctaves='4'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .35 0 0 0 0 .3 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+  nav{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;justify-content:space-between;align-items:center;padding:22px clamp(16px,4vw,52px);transition:color .5s,background .5s}
+  nav.solid{background:rgba(242,236,224,.85);backdrop-filter:blur(10px)}
+  .logo{display:flex;align-items:center;gap:12px;font-family:"Shippori Mincho";font-weight:800;font-size:22px;letter-spacing:.3em}
+  .seal{width:34px;height:34px;border-radius:6px;background:var(--red);color:var(--washi);display:grid;place-items:center;font-size:18px;letter-spacing:0;transform:rotate(-4deg)}
+  .nl{display:flex;gap:34px;font-size:14px;letter-spacing:.12em}
+  .nl a{position:relative;padding:4px 0}
+  .nl a::after{content:"";position:absolute;left:50%;bottom:-2px;width:5px;height:5px;border-radius:50%;background:var(--red);transform:translateX(-50%) scale(0);transition:transform .3s}
+  .nl a:hover::after{transform:translateX(-50%) scale(1)}
+  @media(max-width:760px){.nl{display:none}}
+  .btn{display:inline-flex;align-items:center;gap:12px;padding:15px 28px;background:var(--ink);color:var(--washi);font-size:14px;letter-spacing:.15em;border:0;cursor:pointer;transition:background .3s,gap .3s}
+  .btn:hover{background:var(--red);gap:20px}
+  .btn.red{background:var(--red)}
+  .btn.red:hover{background:var(--ink)}
+
+  /* ============ HERO: layered parallax landscape ============ */
+  .hero{position:relative;height:100vh;min-height:640px;overflow:hidden;background:linear-gradient(var(--sky1,#f7c6a3),var(--sky2,#f6e3cf) 60%)}
+  .layer{position:absolute;left:0;right:0;bottom:0;will-change:transform}
+  .layer svg{display:block;width:100%;height:max(66vh,420px)}
+  .sun{position:absolute;left:62%;top:30%;width:min(26vw,300px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#e8644a,#c73e3a);box-shadow:0 0 120px rgba(231,100,74,.5);will-change:transform}
+  .hero-title{position:absolute;left:0;right:0;top:20vh;text-align:center;will-change:transform,opacity}
+  .hero-title .jp{font-family:"Shippori Mincho";font-size:clamp(90px,15vw,230px);font-weight:800;line-height:1;color:var(--ink)}
+  .hero-title .en{font-size:clamp(13px,1.2vw,16px);letter-spacing:.8em;margin-top:10px;padding-left:.8em}
+  .vert{position:absolute;right:clamp(16px,5vw,70px);top:18vh;writing-mode:vertical-rl;font-family:"Shippori Mincho";font-size:clamp(16px,1.6vw,22px);letter-spacing:.5em;color:var(--ink);opacity:.8;z-index:3}
+  .hero-foot{position:absolute;left:0;right:0;bottom:max(72px,8vh);z-index:6;display:flex;justify-content:space-between;align-items:end;padding:0 clamp(16px,4vw,52px);color:var(--washi)}
+  .hero-foot p{max-width:340px;font-size:15px;line-height:1.7;opacity:.85}
+  .scroll{font-size:11px;letter-spacing:.4em;writing-mode:vertical-rl;display:flex;align-items:center;gap:12px}
+  .scroll::after{content:"";width:1px;height:60px;background:linear-gradient(var(--washi),transparent);animation:drop 2s infinite}
+  @keyframes drop{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+  /* ============ ENSŌ quote ============ */
+  .quote{background:var(--ink);color:var(--washi);min-height:130vh;display:grid;place-items:center;position:relative;padding:120px 20px;overflow:hidden}
+  .enso{position:absolute;width:min(760px,92vw);aspect-ratio:1;left:50%;top:50%;transform:translate(-50%,-50%)}
+  .quote blockquote{position:relative;max-width:760px;text-align:center;font-family:"Shippori Mincho";font-size:clamp(28px,3.6vw,54px);line-height:1.35}
+  .quote blockquote em{font-style:normal;color:var(--sakura)}
+  .quote cite{display:block;margin-top:30px;font-family:"Zen Kaku Gothic New";font-style:normal;font-size:13px;letter-spacing:.4em;opacity:.6}
+
+  section.pad{padding:140px clamp(16px,6vw,96px)}
+  .eyebrow{display:flex;align-items:center;gap:14px;font-size:13px;letter-spacing:.35em;color:var(--red);margin-bottom:22px}
+  .eyebrow b{font-family:"Shippori Mincho";font-size:20px;letter-spacing:0;font-weight:600}
+  h2{font-family:"Shippori Mincho";font-weight:600;font-size:clamp(40px,5.4vw,82px);line-height:1.05;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:17px;line-height:1.8;max-width:520px;margin-top:20px}
+
+  /* ============ SEASONS: expanding panels ============ */
+  .seasons{display:flex;gap:12px;height:560px;margin-top:60px}
+  .season{flex:1;position:relative;overflow:hidden;border-radius:4px;cursor:pointer;transition:flex 1s cubic-bezier(.2,.8,.2,1);color:var(--washi);display:flex;flex-direction:column;justify-content:flex-end;padding:28px}
+  .season.on{flex:3.2}
+  .season .kanji{position:absolute;top:24px;left:24px;font-family:"Shippori Mincho";font-size:80px;font-weight:800;line-height:1;text-shadow:0 4px 30px rgba(0,0,0,.2)}
+  .season .info{opacity:0;transform:translateY(20px);transition:all .6s .2s;max-width:420px;position:relative}
+  .season.on .info{opacity:1;transform:none}
+  .season h3{font-family:"Shippori Mincho";font-size:34px;font-weight:600}
+  .season p{font-size:15px;line-height:1.7;margin-top:8px;opacity:.9}
+  .season .meta{font-size:12px;letter-spacing:.25em;margin-bottom:8px;opacity:.8}
+  .season .label{position:absolute;bottom:28px;left:28px;writing-mode:vertical-rl;transform:rotate(180deg);font-size:13px;letter-spacing:.4em;transition:opacity .4s}
+  .season.on .label{opacity:0}
+  .s-spring{background:linear-gradient(#f7c5cf,#e78fa3)}
+  .s-summer{background:linear-gradient(#7fd4dc,#1f7f9c)}
+  .s-autumn{background:linear-gradient(#f2a65a,#b8432f)}
+  .s-winter{background:linear-gradient(#dfe8f2,#8aa2c0)}
+  .season .art{position:absolute;inset:0;pointer-events:none}
+  .s-spring .art{background:radial-gradient(circle at 70% 30%,#fff3 0 8%,transparent 9%),radial-gradient(circle at 30% 60%,#fff4 0 5%,transparent 6%)}
+  .s-summer .art{background:repeating-radial-gradient(ellipse at 50% 120%,transparent 0 24px,rgba(255,255,255,.18) 24px 28px)}
+  .s-autumn .art i,.s-spring .art i,.s-winter .art i{position:absolute;border-radius:50% 0 50% 50%;animation:fall linear infinite}
+  .s-autumn .art i{width:16px;height:16px;background:#ffcf6b}
+  .s-spring .art i{width:12px;height:10px;background:#fff;opacity:.85}
+  .s-winter .art i{width:7px;height:7px;border-radius:50%;background:#fff}
+  @keyframes fall{from{transform:translateY(-40px) rotate(0)}to{transform:translateY(600px) rotate(540deg)}}
+  .mtn{position:absolute;left:0;right:0;bottom:0;height:45%;clip-path:polygon(0 100%,0 60%,18% 30%,30% 50%,52% 5%,70% 45%,82% 30%,100% 55%,100% 100%);background:rgba(255,255,255,.35)}
+  @media(max-width:860px){.seasons{flex-direction:column;height:auto}.season{min-height:110px}.season.on{min-height:380px}.season .label{display:none}.season .kanji{font-size:56px}}
+
+  /* ============ ITINERARY ============ */
+  .itin{display:grid;grid-template-columns:1fr 1.3fr;gap:8vw}
+  @media(max-width:860px){.itin{grid-template-columns:1fr}}
+  .itin .stick{position:sticky;top:130px;align-self:start}
+  .days{position:relative;padding-left:80px}
+  .days svg{position:absolute;left:20px;top:0;height:100%;width:40px;overflow:visible}
+  .day{position:relative;padding-bottom:70px;opacity:.25;transition:opacity .6s}
+  .day.in{opacity:1}
+  .day .num{position:absolute;left:-80px;top:-6px;width:42px;height:42px;border-radius:50%;background:var(--washi);border:1.5px solid var(--ink);display:grid;place-items:center;font-family:"Shippori Mincho";font-size:20px;transition:all .5s}
+  .day.in .num{background:var(--red);border-color:var(--red);color:var(--washi)}
+  .day .when{font-size:12px;letter-spacing:.3em;color:var(--red)}
+  .day h3{font-family:"Shippori Mincho";font-size:clamp(24px,2.4vw,34px);font-weight:600;margin:6px 0 10px}
+  .day p{color:var(--muted);line-height:1.8;max-width:480px}
+
+  /* ============ NIGHT + LANTERNS + BOOKING ============ */
+  .night{position:relative;background:linear-gradient(#0b1026,#1f2a44 70%,#2b3558);color:var(--washi);padding:160px clamp(16px,6vw,96px) 140px;overflow:hidden}
+  .stars{position:absolute;inset:0;background-image:radial-gradient(1.5px 1.5px at 10% 20%,#fff,transparent),radial-gradient(1px 1px at 30% 10%,#fff,transparent),radial-gradient(1.5px 1.5px at 55% 25%,#fff,transparent),radial-gradient(1px 1px at 70% 8%,#fff,transparent),radial-gradient(1.2px 1.2px at 85% 30%,#fff,transparent),radial-gradient(1px 1px at 20% 40%,#fff,transparent),radial-gradient(1px 1px at 45% 45%,#fff,transparent),radial-gradient(1.5px 1.5px at 92% 15%,#fff,transparent);background-size:600px 400px;opacity:.8;animation:twinkle 4s ease-in-out infinite alternate}
+  @keyframes twinkle{to{opacity:.4}}
+  .moon{position:absolute;right:12%;top:90px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle at 40% 40%,#fffbe9,#f1e3b8);box-shadow:0 0 80px rgba(255,240,200,.45)}
+  .lanterns{position:absolute;inset:0;pointer-events:none;perspective:900px}
+  .lantern{position:absolute;width:70px;height:90px;transform-style:preserve-3d;animation:sway 5s ease-in-out infinite alternate;transform-origin:50% -120px}
+  .lantern .string{position:absolute;left:50%;top:-120px;width:1px;height:120px;background:rgba(255,255,255,.3)}
+  .lantern .body{position:relative;width:70px;height:90px;transform-style:preserve-3d;animation:turn 14s linear infinite}
+  .lantern .body i{position:absolute;left:50%;top:0;width:19px;margin-left:-9.5px;height:100%;border-radius:40%/8%;
+    background:linear-gradient(90deg,rgba(0,0,0,.15),transparent 30%,transparent 70%,rgba(0,0,0,.15)),linear-gradient(#ffb36b,#e8553e 50%,#c7322e);
+    box-shadow:inset 0 0 12px rgba(255,220,150,.6);opacity:.95;backface-visibility:hidden}
+  .lantern .glow{position:absolute;left:50%;top:50%;width:220px;height:220px;margin:-110px;border-radius:50%;background:radial-gradient(rgba(255,160,90,.45),transparent 65%);transform:translateZ(-1px)}
+  .lantern .cap,.lantern .cap2{position:absolute;left:50%;width:34px;height:8px;margin-left:-17px;background:#2a1a14;border-radius:3px}
+  .lantern .cap{top:-6px}.lantern .cap2{bottom:-6px}
+  @keyframes sway{from{transform:rotateZ(-4deg)}to{transform:rotateZ(4deg)}}
+  @keyframes turn{to{transform:rotateY(360deg)}}
+  .book{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:6vw;align-items:center;max-width:1200px;margin:0 auto}
+  @media(max-width:860px){.book{grid-template-columns:1fr}}
+  .book h2{color:var(--washi)}
+  .book .sub{color:#b8bdd4}
+  .form{position:relative;background:rgba(242,236,224,.06);border:1px solid rgba(242,236,224,.18);backdrop-filter:blur(10px);padding:34px;display:grid;gap:18px}
+  .field label{display:block;font-size:12px;letter-spacing:.3em;color:#b8bdd4;margin-bottom:8px}
+  .field select,.field input{width:100%;background:transparent;border:0;border-bottom:1px solid rgba(242,236,224,.3);padding:10px 0;color:var(--washi);outline:0;font-size:17px;color-scheme:dark}
+  .field select option{background:#1f2a44}
+  .count{display:flex;align-items:center;gap:20px;font-size:20px}
+  .count button{width:38px;height:38px;border-radius:50%;border:1px solid rgba(242,236,224,.4);background:none;cursor:pointer;font-size:18px;transition:background .2s}
+  .count button:hover{background:rgba(242,236,224,.15)}
+  .stamp{position:absolute;right:26px;bottom:26px;width:110px;height:110px;border:4px solid var(--red);color:var(--red);border-radius:8px;display:grid;place-items:center;text-align:center;font-family:"Shippori Mincho";font-weight:800;font-size:34px;line-height:1;transform:scale(3) rotate(-14deg);opacity:0;pointer-events:none;mix-blend-mode:screen}
+  .stamp small{display:block;font-size:10px;letter-spacing:.2em;margin-top:6px;font-family:"Zen Kaku Gothic New"}
+  .stamp.go{animation:stamp .5s cubic-bezier(.5,0,.75,0) forwards}
+  @keyframes stamp{to{transform:scale(1) rotate(-14deg);opacity:.95}}
+  .thanks{font-size:15px;color:var(--sakura);min-height:24px}
+
+  footer{background:#0b1026;color:#8e94b0;padding:40px clamp(16px,6vw,96px) 84px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;font-size:13px;letter-spacing:.08em}
+  .reveal{opacity:0;transform:translateY(40px);transition:opacity 1.2s cubic-bezier(.2,.8,.2,1),transform 1.2s cubic-bezier(.2,.8,.2,1);transition-delay:var(--d,0s)}
+  .reveal.in{opacity:1;transform:none}
+  .back{position:fixed;left:18px;bottom:18px;z-index:50;font-size:12px;letter-spacing:.1em;padding:8px 14px;background:var(--ink);color:var(--washi)}
+</style>
+</head>
+<body>
+<canvas id="petals"></canvas>
+<div class="paper"></div>
+<a class="back" href="../index.html">← all sites</a>
+
+<nav id="nav">
+  <a class="logo" href="#"><span class="seal">雲</span>KUMO</a>
+  <div class="nl"><a href="#seasons">Seasons</a><a href="#journey">Journey</a><a href="#book">Book</a></div>
+  <a class="btn" href="#book" style="padding:11px 20px;font-size:12px">Plan a trip</a>
+</nav>
+
+<header class="hero" id="hero">
+  <div class="sun" id="sun" data-speed=".75"></div>
+  <div class="hero-title" id="htitle" data-speed=".55"><div class="jp">雲</div><div class="en">KUMO · JOURNEYS THROUGH JAPAN</div></div>
+  <div class="vert" data-speed=".4">雲の上を、ゆっくりと旅する。</div>
+  <div class="layer" data-speed=".62" id="L1"></div>
+  <div class="layer" data-speed=".5" id="L2"></div>
+  <div class="layer" data-speed=".36" id="L3"></div>
+  <div class="layer" data-speed=".2" id="L4"></div>
+  <div class="layer" data-speed="0" id="L5"></div>
+  <div class="hero-foot"><p>Slow, small-group journeys through temples, mountains and hot springs. Never more than eight travellers.</p><div class="scroll">SCROLL</div></div>
+</header>
+
+<section class="quote" id="quote">
+  <svg class="enso" viewBox="0 0 800 800" aria-hidden="true">
+    <defs><mask id="ensoMask"><path id="ensoTrace" fill="none" stroke="#fff" stroke-width="90" stroke-linecap="round"/></mask></defs>
+    <path id="ensoShape" fill="#c73e3a" mask="url(#ensoMask)" opacity=".9"/>
+  </svg>
+  <blockquote class="reveal">Some journeys are measured in kilometres.<br>Ours are measured in <em>moments.</em><cite>— 一期一会 · ONE TIME, ONE MEETING</cite></blockquote>
+</section>
+
+<section class="pad" id="seasons">
+  <div class="eyebrow reveal"><b>四季</b> FOUR SEASONS</div>
+  <h2 class="reveal" style="--d:.1s">Japan is four countries,<br>one for each season.</h2>
+  <div class="seasons reveal" style="--d:.2s" id="seasonList">
+    <div class="season s-spring on"><div class="art" data-fall="12"></div><div class="mtn"></div><div class="kanji">春</div><div class="label">SPRING · KYOTO</div><div class="info"><div class="meta">MARCH — APRIL · KYOTO</div><h3>Cherry blossom season</h3><p>Philosopher's Path at dawn, before the crowds. Tea in a 400-year-old machiya. Petals in your hair for a week.</p></div></div>
+    <div class="season s-summer"><div class="art"></div><div class="kanji">夏</div><div class="label">SUMMER · OKINAWA</div><div class="info"><div class="meta">JUNE — AUGUST · OKINAWA</div><h3>Islands &amp; festivals</h3><p>Snorkel coral gardens by day; dance the Eisa under lanterns by night. The slowest pace in Japan.</p></div></div>
+    <div class="season s-autumn"><div class="art" data-fall="14"></div><div class="mtn"></div><div class="kanji">秋</div><div class="label">AUTUMN · NIKKŌ</div><div class="info"><div class="meta">OCTOBER — NOVEMBER · NIKKŌ</div><h3>Maple fire</h3><p>Mountains turn red and gold. Soak in an outdoor onsen while leaves drift onto the water.</p></div></div>
+    <div class="season s-winter"><div class="art" data-fall="30"></div><div class="mtn" style="background:rgba(255,255,255,.7)"></div><div class="kanji">冬</div><div class="label">WINTER · HOKKAIDŌ</div><div class="info"><div class="meta">DECEMBER — FEBRUARY · HOKKAIDŌ</div><h3>Snow country</h3><p>Powder snow, steaming ramen, and red-crowned cranes dancing on frozen marshland.</p></div></div>
+  </div>
+</section>
+
+<section class="pad" id="journey" style="padding-top:40px">
+  <div class="itin">
+    <div class="stick">
+      <div class="eyebrow reveal"><b>旅</b> THE JOURNEY</div>
+      <h2 class="reveal" style="--d:.1s">Seven days,<br>no rush.</h2>
+      <p class="sub reveal" style="--d:.2s">Our signature route from Tokyo to Kyoto, by bullet train, mountain railway and on foot. Luggage travels ahead of you.</p>
+    </div>
+    <div class="days" id="days">
+      <svg preserveAspectRatio="none" viewBox="0 0 40 1000"><path d="M20 0 C 34 120, 6 240, 20 360 S 34 600, 20 720 S 6 900, 20 1000" fill="none" stroke="rgba(31,42,68,.15)" stroke-width="2" vector-effect="non-scaling-stroke"/><path id="trail" d="M20 0 C 34 120, 6 240, 20 360 S 34 600, 20 720 S 6 900, 20 1000" fill="none" stroke="#c73e3a" stroke-width="3" vector-effect="non-scaling-stroke"/></svg>
+      <div class="day"><div class="num">一</div><div class="when">DAY 1 · TOKYO</div><h3>Lanterns of Asakusa</h3><p>Arrive, breathe, and wander the old Shitamachi streets as the temple lights flicker on.</p></div>
+      <div class="day"><div class="num">二</div><div class="when">DAY 2 · HAKONE</div><h3>Fuji from the water</h3><p>Pirate ship across Lake Ashi, then a ryokan with a private hot spring facing the mountain.</p></div>
+      <div class="day"><div class="num">三</div><div class="when">DAY 3 · KISO VALLEY</div><h3>The old post road</h3><p>Walk the Nakasendō between Magome and Tsumago — eight kilometres of cedar forest and waterfalls.</p></div>
+      <div class="day"><div class="num">四</div><div class="when">DAY 4 · TAKAYAMA</div><h3>Morning markets</h3><p>Miso, sake breweries and Hida beef skewers in a perfectly preserved Edo-era town.</p></div>
+      <div class="day"><div class="num">五</div><div class="when">DAY 5 · KYOTO</div><h3>Ten thousand gates</h3><p>Climb Fushimi Inari at sunrise, when it's just you, the foxes and the vermilion torii.</p></div>
+      <div class="day"><div class="num">六</div><div class="when">DAY 6 · ARASHIYAMA</div><h3>The bamboo sea</h3><p>Zazen with a monk, a shōjin-ryōri temple lunch, and a slow boat down the Hozu river.</p></div>
+      <div class="day"><div class="num">七</div><div class="when">DAY 7 · NARA</div><h3>Bowing deer</h3><p>Say goodbye under the Great Buddha. The deer will bow to you. Bow back.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="night" id="book">
+  <div class="stars"></div><div class="moon"></div>
+  <div class="lanterns" id="lanterns"></div>
+  <div class="book">
+    <div>
+      <div class="eyebrow reveal" style="color:var(--sakura)"><b>予約</b> RESERVE</div>
+      <h2 class="reveal" style="--d:.1s">Your lantern<br>is waiting.</h2>
+      <p class="sub reveal" style="--d:.2s">Departures every month from March to November. 7 days from ¥498,000 per person, all ryokan, rail and most meals included.</p>
+    </div>
+    <form class="form reveal" style="--d:.2s" id="form">
+      <div class="field"><label>SEASON</label><select><option>Spring · Kyoto</option><option>Summer · Okinawa</option><option>Autumn · Nikkō</option><option>Winter · Hokkaidō</option></select></div>
+      <div class="field"><label>DEPARTURE</label><input type="date" value="2027-04-02"></div>
+      <div class="field"><label>TRAVELLERS</label><div class="count"><button type="button" id="minus">−</button><span id="n">2</span><button type="button" id="plus">+</button></div></div>
+      <button class="btn red" type="submit" style="justify-content:center">Reserve my place</button>
+      <div class="thanks" id="thanks"></div>
+      <div class="stamp" id="stamp">予約<small>RESERVED</small></div>
+    </form>
+  </div>
+</section>
+<footer><span>© 2026 KUMO Journeys — a fictional travel company</span><span>SVG parallax · scroll-drawn ensō · CSS 3D lanterns</span></footer>
+
+<script>
+/* ================= HERO LANDSCAPE (generated SVG ridges) ================= */
+const VB = 'viewBox="0 0 1440 600" preserveAspectRatio="xMidYMax slice"';
+const ridgeY = (x, base, amp, freq, seed) => base - amp * (Math.sin(x * freq + seed) * .6 + Math.sin(x * freq * 2.3 + seed * 2) * .3 + Math.sin(x * freq * 5.1 + seed * 3) * .1);
+function ridge(base, amp, freq, seed, color, extra = '') {
+  let d = `M0 600 L0 ${base}`;
+  for (let x = 0; x <= 1440; x += 24) d += ` L${x} ${ridgeY(x, base, amp, freq, seed).toFixed(1)}`;
+  return `<svg ${VB}><path d="${d} L1440 600 Z" fill="${color}"/>${extra}</svg>`;
+}
+// Fuji: big cone with a snow cap
+const fuji = `<svg ${VB}><path d="M240 600 L520 260 Q560 222 600 238 Q620 230 640 246 Q680 222 720 260 L1000 600 Z" fill="#a9b6cc"/>
+  <path d="M520 260 Q560 222 600 238 Q620 230 640 246 Q680 222 720 260 L680 300 L655 282 L630 310 L600 284 L575 306 L548 286 Z" fill="#fbf7ef"/>
+  ${ridge(470, 40, .004, 1, '#a9b6cc').replace(/<\/?svg[^>]*>/g, '')}</svg>`;
+// pagoda silhouette for the near ridge
+const pagoda = (x, y, s) => {
+  let g = `<g transform="translate(${x} ${y}) scale(${s})" fill="#33416a">`;
+  for (let i = 0; i < 5; i++) { const w = 70 - i * 10, yy = -i * 34; g += `<path d="M${-w} ${yy} Q0 ${yy - 16} ${w} ${yy} L${w - 14} ${yy - 8} L${-w + 14} ${yy - 8} Z"/><rect x="${-w * .45}" y="${yy - 30}" width="${w * .9}" height="22"/>`; }
+  return g + `<rect x="-2" y="-210" width="4" height="40"/></g>`;
+};
+// torii gate + pines for the front layer
+const torii = `<g transform="translate(1080 ${(ridgeY(1080, 445, 40, .012, 7) - 165).toFixed(0)})" fill="#c73e3a"><path d="M-120 0 Q0 -26 120 0 L126 -16 Q0 -44 -126 -16 Z"/><rect x="-104" y="14" width="208" height="12"/><rect x="-90" y="-6" width="16" height="200"/><rect x="74" y="-6" width="16" height="200"/><rect x="-6" y="0" width="12" height="26"/></g>`;
+const pines = [140, 220, 300, 1300, 1380].map((x, i) => `<g transform="translate(${x} ${(ridgeY(x, 445, 40, .012, 7) - 40 + (i % 2) * 14).toFixed(0)})" fill="#141c30"><path d="M0 -120 L40 -40 L22 -40 L54 20 L-54 20 L-22 -40 L-40 -40 Z"/><rect x="-5" y="20" width="10" height="40"/></g>`).join('');
+document.getElementById('L1').innerHTML = fuji;
+document.getElementById('L2').innerHTML = ridge(430, 70, .006, 4, '#8b9ab8') ;
+document.getElementById('L3').innerHTML = ridge(470, 60, .008, 9, '#5e7096');
+document.getElementById('L4').innerHTML = ridge(500, 55, .01, 2, '#33416a', pagoda(360, ridgeY(360, 500, 55, .01, 2) + 14, .9));
+document.getElementById('L5').innerHTML = ridge(445, 40, .012, 7, '#1f2a44').replace('</svg>', torii + pines + '</svg>');
+// soft mist band between layers
+document.getElementById('L3').insertAdjacentHTML('afterbegin', '<div style="position:absolute;left:0;right:0;bottom:30%;height:140px;background:linear-gradient(transparent,rgba(255,255,255,.55),transparent);filter:blur(10px)"></div>');
+
+/* ================= SCROLL ENGINE ================= */
+const hero = document.getElementById('hero'), nav = document.getElementById('nav');
+const pars = [...hero.querySelectorAll('[data-speed]')];
+const htitle = document.getElementById('htitle');
+const dawn = [[247, 198, 163], [246, 227, 207]], day = [[169, 212, 236], [242, 236, 224]];
+const mix = (a, b, k) => a.map((v, i) => Math.round(v + (b[i] - v) * k));
+
+// ensō brush circle: a filled ring whose width swells like a brush stroke, revealed by a stroked mask
+(function buildEnso() {
+  const cx = 400, cy = 400, r = 290, start = -1.9, sweep = Math.PI * 1.86, N = 220;
+  const outer = [], inner = [];
+  for (let i = 0; i <= N; i++) {
+    const t = i / N, a = start + sweep * t;
+    const w = (8 + 46 * Math.pow(Math.sin(Math.PI * Math.min(1, t * 1.15)), .6)) * (1 - t * .35) + Math.sin(t * 60) * 1.6;
+    const rr = r + Math.sin(t * 9) * 6;
+    outer.push([cx + Math.cos(a) * (rr + w / 2), cy + Math.sin(a) * (rr + w / 2)]);
+    inner.push([cx + Math.cos(a) * (rr - w / 2), cy + Math.sin(a) * (rr - w / 2)]);
+  }
+  const pts = [...outer, ...inner.reverse()];
+  document.getElementById('ensoShape').setAttribute('d', 'M' + pts.map(p => p.map(v => v.toFixed(1)).join(' ')).join(' L') + ' Z');
+  let trace = '';
+  for (let i = 0; i <= N; i++) { const a = start + sweep * i / N, rr = r + Math.sin(i / N * 9) * 6; trace += (i ? ' L' : 'M') + (cx + Math.cos(a) * rr).toFixed(1) + ' ' + (cy + Math.sin(a) * rr).toFixed(1); }
+  document.getElementById('ensoTrace').setAttribute('d', trace);
+})();
+const ensoTrace = document.getElementById('ensoTrace');
+const ensoLen = ensoTrace.getTotalLength();
+ensoTrace.style.strokeDasharray = ensoLen;
+const quote = document.getElementById('quote');
+
+const trail = document.getElementById('trail'), daysEl = document.getElementById('days');
+const trailLen = trail.getTotalLength();
+trail.style.strokeDasharray = trailLen;
+
+function onScroll() {
+  const y = scrollY, vh = innerHeight;
+  // parallax: far layers lag behind (move down while the page moves up)
+  pars.forEach(el => { el.style.transform = `translate3d(0,${y * +el.dataset.speed}px,0)`; });
+  const hp = Math.min(1, y / (hero.offsetHeight - vh * .2));
+  htitle.style.opacity = 1 - hp * 1.6;
+  const [s1, s2] = [mix(dawn[0], day[0], hp), mix(dawn[1], day[1], hp)];
+  hero.style.setProperty('--sky1', `rgb(${s1})`); hero.style.setProperty('--sky2', `rgb(${s2})`);
+  document.getElementById('sun').style.transform = `translate3d(0,${y * .75 - hp * 260}px,0) scale(${1 - hp * .25})`;
+  // nav turns light over the dark sections, and gets a paper backing over the light ones
+  const probe = y + 40, qTop = quote.offsetTop, qBot = qTop + quote.offsetHeight, bTop = document.getElementById('book').offsetTop;
+  const overDark = (probe >= qTop && probe < qBot) || probe >= bTop;
+  nav.style.color = overDark ? 'var(--washi)' : '';
+  nav.classList.toggle('solid', !overDark && probe >= qBot);
+
+  // ensō draws itself while the quote section passes
+  const qr = quote.getBoundingClientRect();
+  const qp = Math.min(1, Math.max(0, (vh - qr.top) / (qr.height + vh * .2)));
+  ensoTrace.style.strokeDashoffset = ensoLen * (1 - Math.min(1, qp * 1.5));
+
+  // red trail grows through the itinerary
+  const dr = daysEl.getBoundingClientRect();
+  const dp = Math.min(1, Math.max(0, (vh * .6 - dr.top) / dr.height));
+  trail.style.strokeDashoffset = trailLen * (1 - dp);
+  windGust = Math.min(6, windGust + Math.abs(y - lastY) * .02); lastY = y;
+}
+let lastY = scrollY, windGust = 0;
+addEventListener('scroll', onScroll, { passive: true });
+
+const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && e.target.classList.add('in')), { threshold: .25, rootMargin: '0px 0px -10% 0px' });
+document.querySelectorAll('.reveal, .day').forEach(el => io.observe(el));
+
+/* ================= SEASONS ================= */
+const seasons = [...document.querySelectorAll('.season')];
+seasons.forEach(s => {
+  const on = () => seasons.forEach(o => o.classList.toggle('on', o === s));
+  s.addEventListener('mouseenter', on); s.addEventListener('click', on);
+});
+document.querySelectorAll('.season .art[data-fall]').forEach(art => {
+  for (let i = 0; i < +art.dataset.fall; i++) {
+    const p = document.createElement('i');
+    p.style.cssText = `left:${Math.random() * 100}%;top:${-Math.random() * 20}%;animation-duration:${5 + Math.random() * 6}s;animation-delay:${-Math.random() * 10}s;scale:${.6 + Math.random() * .8}`;
+    art.appendChild(p);
+  }
+});
+
+/* ================= LANTERNS (CSS 3D cylinders) ================= */
+const lanternBox = document.getElementById('lanterns');
+[[5, 7, .85], [30, 11, .55], [49, 4, .6], [95, 32, .6], [44, 80, .5], [12, 79, .6]].forEach(([x, y, s], k) => {
+  const L = document.createElement('div'); L.className = 'lantern';
+  L.style.cssText = `left:${x}%;top:${y}%;scale:${s};animation-delay:${-k * 1.3}s;animation-duration:${4 + k}s`;
+  let faces = '';
+  for (let i = 0; i < 12; i++) faces += `<i style="transform:rotateY(${i * 30}deg) translateZ(34px)"></i>`;
+  L.innerHTML = `<div class="string"></div><div class="glow"></div><div class="cap"></div><div class="body" style="animation-delay:${-k * 3}s">${faces}</div><div class="cap2"></div>`;
+  lanternBox.appendChild(L);
+});
+
+/* ================= BOOKING ================= */
+let n = 2; const nEl = document.getElementById('n');
+document.getElementById('minus').onclick = () => nEl.textContent = n = Math.max(1, n - 1);
+document.getElementById('plus').onclick = () => nEl.textContent = n = Math.min(8, n + 1);
+document.getElementById('form').addEventListener('submit', e => {
+  e.preventDefault();
+  const st = document.getElementById('stamp'); st.classList.remove('go'); void st.offsetWidth; st.classList.add('go');
+  document.getElementById('thanks').textContent = `ありがとう — ${n} place${n > 1 ? 's' : ''} held for 48 hours.`;
+});
+
+/* ================= SAKURA PETALS (canvas) ================= */
+const cv = document.getElementById('petals'), ctx = cv.getContext('2d');
+let W, H, dpr = Math.min(devicePixelRatio, 2), mouseX = .5;
+function size() { W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
+addEventListener('resize', size); size();
+addEventListener('pointermove', e => mouseX = e.clientX / W);
+const petals = Array.from({ length: innerWidth < 700 ? 22 : 40 }, () => ({
+  x: Math.random() * innerWidth, y: Math.random() * innerHeight, s: 6 + Math.random() * 8,
+  vy: .5 + Math.random() * .9, rot: Math.random() * 6, vr: (Math.random() - .5) * .04, flip: Math.random() * 6, sw: Math.random() * 6
+}));
+(function draw(t) {
+  ctx.clearRect(0, 0, W, H);
+  windGust *= .96;
+  const wind = (mouseX - .5) * 1.4 + windGust;
+  petals.forEach(p => {
+    p.y += p.vy + windGust * .2; p.x += Math.sin(t / 1400 + p.sw) * .6 + wind * .6;
+    p.rot += p.vr; p.flip += .03;
+    if (p.y > H + 20) { p.y = -20; p.x = Math.random() * W; }
+    if (p.x > W + 20) p.x = -20; if (p.x < -20) p.x = W + 20;
+    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.scale(1, Math.abs(Math.cos(p.flip)) * .7 + .3);
+    ctx.beginPath();                                       // petal: two curves with a little notch at the tip
+    ctx.moveTo(0, -p.s); ctx.bezierCurveTo(p.s * .9, -p.s * .6, p.s * .7, p.s * .6, 0, p.s);
+    ctx.bezierCurveTo(-p.s * .7, p.s * .6, -p.s * .9, -p.s * .6, -p.s * .18, -p.s * .85); ctx.lineTo(0, -p.s * .7); ctx.closePath();
+    ctx.fillStyle = 'rgba(244,182,194,.9)'; ctx.fill();
+    ctx.restore();
+  });
+  requestAnimationFrame(draw);
+})(0);
+
+onScroll();
+</script>
+</body>
+</html>

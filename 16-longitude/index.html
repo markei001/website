@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Slow Light — an essay on why starlight is old</title>
+<meta name="description" content="A long-form essay in five distances: why every star you see is already history, and how astronomers read the past in old light.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f5efe2">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f5efe2'/%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%23963a1a' stroke-opacity='.35' stroke-width='1.4'/%3E%3Ccircle cx='16' cy='16' r='6' fill='none' stroke='%23963a1a' stroke-opacity='.6' stroke-width='1.4'/%3E%3Ccircle cx='16' cy='16' r='2.6' fill='%23963a1a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+/* set the theme before first paint so there is no flash */
+(function(){try{var t=localStorage.getItem('slowlight-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
+</script>
+<style>
+/* Literata (Google Fonts, OFL), subset to Latin and re-hosted so the OpenType
+   features Google's CDN strips (onum, smcp, c2sc) are still there. */
+@font-face{font-family:"Literata";src:url("fonts/Literata.woff2") format("woff2");font-weight:200 900;font-style:normal;font-display:swap}
+@font-face{font-family:"Literata";src:url("fonts/Literata-Italic.woff2") format("woff2");font-weight:200 900;font-style:italic;font-display:swap}
+
+:root{
+  --paper:#f5efe2; --paper-2:#ece3d0; --ink:#2a241e; --ink-2:#625648; --rule:#d5c9b2;
+  --accent:#963a1a; --hl:rgba(190,110,40,.22); --veil:rgba(245,239,226,.96);
+  --w:400; --ls:0em; --lh:1.62; --grain:.05;
+  --serif:"Literata",Charter,"Iowan Old Style",Georgia,serif;
+  --ui:"Hanken Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+/* night reading: light letters on a dark ground bloom, so the weight drops,
+   tracking and leading open up, and the ink is a warm grey rather than white */
+:root[data-theme="dark"]{
+  --paper:#14110e; --paper-2:#1d1914; --ink:#dcd3c3; --ink-2:#a69c8c; --rule:#3b342a;
+  --accent:#e8a176; --hl:rgba(232,161,118,.2); --veil:rgba(20,17,14,.96);
+  --w:350; --ls:.009em; --lh:1.74; --grain:.02;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#14110e; --paper-2:#1d1914; --ink:#dcd3c3; --ink-2:#a69c8c; --rule:#3b342a;
+    --accent:#e8a176; --hl:rgba(232,161,118,.2); --veil:rgba(20,17,14,.96);
+    --w:350; --ls:.009em; --lh:1.74; --grain:.02;
+    color-scheme:dark;
+  }
+}
+
+*{box-sizing:border-box}
+html{font-size:100%;-webkit-text-size-adjust:100%;scroll-padding-top:5rem}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--serif);font-weight:var(--w);letter-spacing:var(--ls);
+  font-size:clamp(1.0625rem,1rem + .32vw,1.25rem);line-height:var(--lh);
+  font-optical-sizing:auto;font-kerning:normal;
+  font-variant-ligatures:common-ligatures contextual;
+  font-variant-numeric:oldstyle-nums proportional-nums;
+  font-synthesis:none;hyphens:auto;hyphenate-limit-chars:8 4 4;-webkit-hyphens:auto;hanging-punctuation:first last;
+  text-rendering:optimizeLegibility;overflow-x:hidden;
+}
+@media (prefers-reduced-motion:no-preference){body{transition:background-color .4s,color .4s}}
+body::before{ /* paper tooth, barely there */
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:var(--grain);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .3 0 0 0 0 .2 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+::selection{background:var(--accent);color:var(--paper)}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- top bar ---------- */
+.bar{position:fixed;inset:0 0 auto 0;z-index:20;background:var(--veil);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.bar-in{display:flex;align-items:center;gap:.9rem;height:3rem;padding:0 1rem;max-width:78rem;margin:0 auto;
+  font-family:var(--ui);font-size:.78rem;letter-spacing:.01em;font-weight:500;font-variant-numeric:lining-nums tabular-nums;color:var(--ink-2)}
+.brand{font-variant-caps:all-small-caps;letter-spacing:.12em;font-size:.95rem;text-decoration:none;color:var(--ink);font-family:var(--serif);font-weight:500;margin-right:auto;white-space:nowrap}
+.bar-r{display:flex;align-items:center;gap:1rem;margin-left:auto}
+.lb{white-space:nowrap}
+.lb-k{font-variant-caps:all-small-caps;letter-spacing:.1em;margin-right:.4em;color:var(--ink-2)}
+#lb{color:var(--accent);font-weight:600}
+.left{white-space:nowrap;min-width:5.2em;text-align:right}
+.btn{font:inherit;color:var(--ink);background:none;border:1px solid var(--rule);border-radius:2rem;height:2rem;padding:0 .8rem;display:inline-flex;align-items:center;gap:.45rem;cursor:pointer}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn svg{width:1rem;height:1rem;flex:none}
+.prog{position:absolute;left:0;right:0;bottom:0;height:2px}
+.prog i{display:block;height:100%;background:var(--accent);transform-origin:0 50%;transform:scaleX(0)}
+.bar::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--rule);z-index:-1}
+html:not(.js) #theme,html:not(.js) .toc-btn,html:not(.js) .lb,html:not(.js) .left{display:none}
+#theme .moon{display:block}#theme .sun{display:none}
+:root[data-theme="dark"] #theme .moon{display:none}:root[data-theme="dark"] #theme .sun{display:block}
+
+/* ---------- layout ---------- */
+.page{position:relative;z-index:1;padding:5.5rem 1.25rem 4rem;max-width:40rem;margin:0 auto}
+.toc{display:none;position:fixed;z-index:19;top:3rem;left:0;right:0;padding:1rem 1.25rem 1.4rem;background:var(--paper);border-bottom:1px solid var(--rule);
+  font-family:var(--ui);box-shadow:0 20px 30px -24px rgba(0,0,0,.35)}
+.toc.open{display:block}
+.toc h2{font:500 .72rem/1 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);margin:0 0 .8rem}
+.toc ol{list-style:none;margin:0;padding:0}
+.toc a{hyphens:none;display:grid;grid-template-columns:2.2rem 1fr;gap:0 .2rem;padding:.38rem 0 .38rem .7rem;text-decoration:none;border-left:2px solid var(--rule);color:var(--ink-2);font-size:.88rem;line-height:1.3}
+.toc a b{font:500 .95rem/1.2 var(--serif);font-variant-caps:all-small-caps;letter-spacing:.06em;color:var(--ink-2);grid-row:1/3;padding-top:.05rem}
+.toc a span{color:var(--ink);font-size:.95rem;font-family:var(--serif);font-weight:var(--w)}
+.toc a em{font-style:normal;font-size:.74rem;letter-spacing:.02em;font-variant-numeric:lining-nums;color:var(--ink-2)}
+.toc a:hover span,.toc a[aria-current="true"] span{color:var(--accent)}
+.toc a[aria-current="true"]{border-left-color:var(--accent)}
+.toc a[aria-current="true"] b{color:var(--accent)}
+@media (min-width:1180px){
+  .page{display:grid;grid-template-columns:11.5rem 34rem 16rem;column-gap:2.5rem;justify-content:center;max-width:none;padding:6.5rem 2rem 5rem}
+  .toc{display:block;position:sticky;top:6rem;left:auto;right:auto;grid-column:1;grid-row:1;align-self:start;padding:0;background:none;border:0;box-shadow:none;z-index:1}
+  #essay{grid-column:2;grid-row:1;min-width:0}
+  .toc-btn{display:none!important}
+}
+
+/* ---------- title block ---------- */
+#essay p.kick{font-family:var(--ui);font-size:.74rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 1.4rem;text-indent:0}
+h1{font-weight:300;font-size:clamp(3.1rem,11vw,5.6rem);line-height:.98;letter-spacing:-.028em;margin:0 0 1.5rem;text-wrap:balance;hyphens:none}
+:root[data-theme="dark"] h1{font-weight:270}
+#essay p.deck{font-style:italic;font-size:1.18em;line-height:1.45;color:var(--ink-2);margin:0 0 1.3rem;text-wrap:pretty;max-width:30em}
+#essay p.meta{font-family:var(--ui);font-size:.8rem;color:var(--ink-2);margin:0 0 3.2rem;padding-bottom:1.4rem;border-bottom:1px solid var(--rule);font-variant-numeric:lining-nums;letter-spacing:.01em}
+.meta i{font-style:normal;color:var(--rule);margin:0 .5em}
+#essay p.noscript-note{font-family:var(--ui);font-size:.82rem;color:var(--ink-2);border-left:2px solid var(--accent);padding:.2rem 0 .2rem .8rem;margin:0 0 2rem}
+
+/* ---------- text ---------- */
+#essay p{margin:0;text-wrap:pretty;text-indent:1.45em}
+.ch-head+p,.lede,.noindent{text-indent:0!important}
+.sc{font-variant-caps:all-small-caps;letter-spacing:.055em;font-weight:calc(var(--w) + 40)}
+.lede::first-letter{
+  float:left;font-variant-caps:normal;font-weight:500;color:var(--accent);
+  font-size:4.15em;line-height:.74;padding:.075em .09em 0 0;margin-left:-.02em;letter-spacing:0;
+}
+@supports (initial-letter:3){
+  .lede::first-letter{float:none;initial-letter:3;font-size:inherit;line-height:inherit;padding:0 .1em 0 0;margin:0}
+}
+.hq{display:inline-block;width:0;position:relative;left:-.42em;white-space:nowrap}
+
+.ch-head{margin:5.2rem 0 1.4rem;position:relative}
+.ch-head .kicker{display:block;font-family:var(--ui);font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 .7rem;font-variant-numeric:lining-nums}
+.ch-head .kicker i{font-style:normal;color:var(--ink-2);font-weight:500;letter-spacing:.06em;text-transform:none;font-size:.8rem}
+.ch-head h2{font-weight:360;font-size:clamp(1.9rem,1.5rem + 1.6vw,2.55rem);line-height:1.1;letter-spacing:-.016em;margin:0;text-wrap:balance;hyphens:none}
+:root[data-theme="dark"] .ch-head h2{font-weight:320}
+
+/* ---------- sidenotes ---------- */
+.sn-t{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.sn-n{cursor:pointer;font-family:var(--ui);font-weight:600;font-size:.66em;line-height:1;color:var(--accent);vertical-align:.52em;padding:.16em .12em .12em;margin:0 0 0 .04em;border-radius:3px;font-variant-numeric:lining-nums;text-indent:0;-webkit-tap-highlight-color:transparent}
+.sn-t:focus-visible+.sn-n{outline:2px solid var(--accent);outline-offset:2px}
+.sn-body{display:none;font-size:.83em;line-height:1.46;color:var(--ink-2);text-indent:0;letter-spacing:.004em;text-wrap:pretty}
+.sn-body b{font-family:var(--ui);font-weight:600;font-size:.82em;color:var(--accent);margin-right:.35em;font-variant-numeric:lining-nums}
+.sn-body svg{display:block;width:100%;max-width:20rem;height:auto;margin:.55rem 0 .15rem;color:var(--ink-2);overflow:visible}
+.sn-body svg text{font-family:var(--ui);font-size:8.6px;fill:currentColor;letter-spacing:.02em}
+.sn-t:checked~.sn-body{display:block;margin:.65rem 0 .9rem;padding:.1rem 0 .1rem .9rem;border-left:2px solid var(--accent)}
+.sn-t:checked+.sn-n{background:var(--accent);color:var(--paper)}
+.sn-n:hover{background:var(--hl)}
+.sn-t:checked+.sn-n:hover{background:var(--accent)}
+@media (min-width:1180px){
+  .sn-t{display:none}
+  .sn-n{cursor:default}
+  .sn-body,.sn-t:checked~.sn-body{display:block;float:right;clear:right;width:16rem;margin:.28rem -18.5rem .9rem 0;padding:0 0 0 .75rem;border-left:1px solid var(--rule);position:relative}
+  .sn:hover .sn-body{border-left:2px solid var(--accent);padding-left:calc(.75rem - 1px);color:var(--ink)}
+  .sn-t:checked+.sn-n{background:none;color:var(--accent)}
+  .sn:hover .sn-n{background:var(--hl)}
+}
+
+/* ---------- endnotes ---------- */
+.enref{font-family:var(--ui);font-weight:600;font-size:.64em;vertical-align:.58em;line-height:1;color:var(--accent);text-decoration:none;padding:.16em .14em;border-radius:3px;margin-left:.04em;text-indent:0}
+.enref:hover,.enref.hl{background:var(--hl);outline:1px solid var(--accent)}
+.notes{margin-top:4.5rem;padding-top:1.5rem;border-top:1px solid var(--rule)}
+.notes h2{font:600 .72rem/1 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 1.1rem}
+.notes ol{list-style:none;margin:0;padding:0;font-size:.86em;line-height:1.5;color:var(--ink-2)}
+.notes li{display:grid;grid-template-columns:1.7rem 1fr;padding:.45rem .6rem .45rem 0;margin:0 0 .15rem;border-radius:3px;scroll-margin-top:6rem;text-indent:0}
+.notes li>b{font-family:var(--ui);font-weight:600;font-size:.8em;color:var(--accent);padding:.2rem 0 0 .5rem}
+.notes li:target,.notes li.hl{background:var(--hl);color:var(--ink)}
+.notes a.back{font-family:var(--ui);font-size:.74em;letter-spacing:.04em;margin-left:.4em;color:var(--accent);white-space:nowrap}
+
+.fleuron{display:block;margin:4rem auto 0;width:2.2rem;color:var(--ink-2)}
+.colophon{margin-top:2.6rem;font-size:.8em;line-height:1.55;color:var(--ink-2)}
+.colophon p{text-indent:0!important;margin:0 0 .8em!important}
+.colophon .sc{font-weight:var(--w)}
+.sig{font-style:italic}
+
+@media (max-width:640px){
+  .bar-in{gap:.6rem;font-size:.72rem}
+  .brand{display:none}
+  .toc-btn{margin-right:auto}
+  .toc-btn span,#theme span{display:none}
+  .btn{padding:0;width:2rem;justify-content:center}
+  .lb-k{display:none}
+  .bar-r{gap:.6rem}
+  .left{min-width:4.6em}
+}
+@media (max-width:400px){ .page{padding-left:1rem;padding-right:1rem} }
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media print{.bar,.toc{display:none!important}.sn-body{display:block!important;float:none;margin:.4rem 0 .4rem 1rem}.page{padding-top:0}}
+</style>
+</head>
+<body id="top">
+
+<header class="bar">
+  <div class="bar-in">
+    <button class="btn toc-btn" id="tocbtn" type="button" aria-expanded="false" aria-controls="toc" aria-label="Contents">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h7"/></svg><span>Contents</span>
+    </button>
+    <a class="brand" href="#top">The Slow Light</a>
+    <div class="bar-r">
+      <span class="lb" aria-hidden="true"><span class="lb-k">Lookback</span><span id="lb">now</span></span>
+      <span class="left" id="left">about 8 min</span>
+      <button class="btn" id="theme" type="button" aria-pressed="false" aria-label="Night reading">
+        <svg class="moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M13.2 9.6A5.6 5.6 0 0 1 6.4 2.8a5.6 5.6 0 1 0 6.8 6.8z"/></svg>
+        <svg class="sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="2.8"/><path d="M8 1.5v1.6M8 12.9v1.6M1.5 8h1.6M12.9 8h1.6M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1"/></svg>
+        <span>Night</span>
+      </button>
+    </div>
+  </div>
+  <div class="prog" aria-hidden="true"><i id="prog"></i></div>
+</header>
+
+<div class="page">
+  <nav class="toc" id="toc" aria-label="Chapters">
+    <h2>Five distances</h2>
+    <ol>
+      <li><a href="#p0"><b>&ndash;</b><span>Looking up</span><em>now</em></a></li>
+      <li><a href="#c1"><b>i</b><span>The Moon</span><em>1.3 seconds ago</em></a></li>
+      <li><a href="#c2"><b>ii</b><span>The Sun</span><em>8 min 19 s ago</em></a></li>
+      <li><a href="#c3"><b>iii</b><span>The neighbours</span><em>4.2 years ago</em></a></li>
+      <li><a href="#c4"><b>iv</b><span>Andromeda</span><em>2.5 million years ago</em></a></li>
+      <li><a href="#c5"><b>v</b><span>Reading it</span><em>13.5 billion years ago</em></a></li>
+      <li><a href="#c6"><b>vi</b><span>Back to now</span><em>now, or whatever that is</em></a></li>
+      <li><a href="#notes"><b>&ndash;</b><span>Notes &amp; typesetting</span><em>sources, colophon</em></a></li>
+    </ol>
+  </nav>
+
+  <main id="essay">
+    <p class="kick">An essay in five distances</p>
+    <h1>The Slow Light</h1>
+    <p class="deck noindent">Everything overhead is a postcard, and some of the postcards are very old. A short walk outward, with a return ticket.</p>
+    <p class="meta noindent"><span id="wc">about 1,800 words</span><i>/</i><span id="rt">about 8 minutes</span><i>/</i>Notes in the margin</p>
+    <noscript><p class="noscript-note noindent">The reading aids here (progress line, night mode, lookback counter) need JavaScript. The essay doesn’t. Your system’s light or dark setting is followed, and margin notes open when you tap their numbers.</p></noscript>
+
+    <section id="p0" data-l="-1" data-e="0">
+      <p class="lede"><span class="sc">Step outside on a clear night</span> and let your eye settle on whatever it likes. Wherever it lands, you are not looking at the thing itself. You are reading a letter about it, and the letter has been in the post.</p>
+      <p>This is not a figure of speech. Light travels at 299,792,458 metres per second,<span class="sn"><input type="checkbox" id="s1" class="sn-t"><label for="s1" class="sn-n"><span class="vh">Note 1</span>1</label><span class="sn-body"><b>1</b>The number is that exact because it is a definition. Since 1983 the metre has been <em>defined</em> as the distance light covers in 1/299,792,458 of a second. The speed of light is a decree now; the metre is what gets adjusted.</span></span> which sounds like plenty until you try to cross anything astronomical with it. Then it is slow the way a ferry is slow: dependable, finite, and a nuisance if you were hoping to arrive. Every glint overhead set out some time ago, and how long ago depends on how far away it sits. So the sky is not one picture. It is a stack of pictures of different ages, pinned to the same black sheet.</p>
+    </section>
+
+    <section id="c1" data-l="0.107" data-e="0.4">
+      <header class="ch-head">
+        <span class="kicker">I <i>&middot; 1.3 seconds ago</i></span>
+        <h2>The Moon, or: light has a speed</h2>
+      </header>
+      <p><span class="sc">For most of history</span> nobody thought light travelled at all. It simply was, everywhere at once. Galileo doubted this enough to test it, with an assistant, two shuttered lanterns and a pair of hills a mile apart.<span class="sn"><input type="checkbox" id="s2" class="sn-t"><label for="s2" class="sn-n"><span class="vh">Note 2</span>2</label><span class="sn-body"><b>2</b>Light crosses a mile in about five microseconds. A person’s reaction time is around a fifth of a second, forty thousand times longer. The experiment measured the assistant.</span></span> He found nothing, and said so: if light was not instantaneous, it was at least very quick.</p>
+      <p>The break came in Paris in 1676, from a Dane named Ole Rømer who was timing eclipses of Io, the innermost of Jupiter’s big moons. Io makes a good clock, slipping into Jupiter’s shadow every forty-two hours or so. Rømer saw that the eclipses ran early while the Earth swung toward Jupiter and late while it swung away. The clock wasn’t wrong; the signal was taking longer because the road was longer. Light had a speed, and his rough figure of 220,000 kilometres per second was only a quarter short, which is rather good for 1676<a class="enref" id="r-a" href="#n-a" aria-label="Endnote a">a</a>.</p>
+      <p>The Moon is the gentlest introduction. At its average distance of 384,400 kilometres, its light reaches you in 1.28 seconds. Apollo crews left reflectors there, and observatories still fire lasers at them; the photons return about two and a half seconds later, and from many such trips we know the Moon is leaving us at 3.8 centimetres a year, the speed of a fingernail. You would never notice a lag that small, but it is the first rung of an argument: what you see is not happening in the tense you see it. The Moon is a second old, which makes it close to the youngest thing in the night sky. A satellite is younger by a few thousandths of a second and will not be interested.</p>
+    </section>
+
+    <section id="c2" data-l="2.7" data-e="11.5">
+      <header class="ch-head">
+        <span class="kicker">II <i>&middot; 8 minutes 19 seconds ago</i></span>
+        <h2>The Sun, and a longer trip than it looks</h2>
+      </header>
+      <p><span class="sc">Sunlight takes 499 seconds</span> to cross 149.6 million kilometres. That is eight minutes and nineteen seconds. If the Sun were switched off, you would go on sitting in daylight for those eight minutes, and then in the dark. The Earth would also go on orbiting a Sun that was no longer there for exactly as long, because changes in gravity travel at the speed of light too.<span class="sn"><input type="checkbox" id="s3" class="sn-t"><label for="s3" class="sn-n"><span class="vh">Note 3</span>3</label><span class="sn-body"><b>3</b>General relativity predicts it, and in 2017 two neutron stars merging gave a test. Gravitational waves and gamma rays set out together from some 130 million light-years away and arrived within about two seconds of each other.</span></span> The news simply takes that long to travel.</p>
+      <p>That is the cheap part of the journey, though. Sunlight is made by fusion in the core, and from there it cannot leave in a straight line. The interior is so dense that a photon is absorbed and re-emitted countless times, shoved in a random direction each time, and it staggers outward like someone looking for the exit in the dark. Published estimates of how long this takes run from about ten thousand years to well over a hundred thousand. So the warmth on your face left the Sun’s surface eight minutes ago, but the energy in it was set loose around when people began to farm, by the low estimate, or long before anyone painted a cave, by the high one. It is the oldest light most of us will ever feel, and it feels like an afternoon.</p>
+    </section>
+
+    <section id="c3" data-l="8.13" data-e="10.4">
+      <header class="ch-head">
+        <span class="kicker">III <i>&middot; 4.2 years ago</i></span>
+        <h2>The neighbours, and a unit that isn’t about time</h2>
+      </header>
+      <p><span class="hq">&ldquo;</span><span class="sc">Light-year</span>” is the most misused word in popular astronomy. It is a distance, not a duration: 9.46 trillion kilometres, the road light covers in a year.</p>
+      <p>The nearest star beyond the Sun, Proxima Centauri, sits 4.24 light-years away. It is a faint red dwarf, invisible to the naked eye, and the light you would see left about four years and three months ago. Sirius is 8.6 years behind. Vega is about 25: if you are reading this in the 2020s, the Vega overhead tonight is the Vega of the turn of the millennium.</p>
+      <p>Distances like these were first won by parallax. In 1838 Friedrich Bessel watched a faint, fast-moving star in Cygnus swing against the background as the Earth went round the Sun,<span class="sn"><input type="checkbox" id="s4" class="sn-t"><label for="s4" class="sn-n"><span class="vh">Note 4</span>4</label><span class="sn-body"><b>4</b>Close one eye, hold up a finger, switch eyes: the finger jumps against the wall. Same trick, with a baseline of 300 million kilometres.<svg viewBox="0 0 240 118" role="img" aria-label="Diagram: a star seen from two sides of Earth's orbit shifts slightly against distant background stars; the shift is the parallax angle"><g fill="none" stroke="currentColor" stroke-width="1"><ellipse cx="120" cy="96" rx="64" ry="9" stroke-dasharray="2 3" opacity=".6"/><path d="M120 14 56 96M120 14l64 82" opacity=".8"/><path d="M104 40a24 24 0 0 0 32 0" stroke="var(--accent)" stroke-width="1.3"/></g><circle cx="120" cy="12" r="3.6" fill="currentColor"/><circle cx="120" cy="96" r="4.2" fill="var(--accent)"/><circle cx="56" cy="96" r="2.2" fill="currentColor"/><circle cx="184" cy="96" r="2.2" fill="currentColor"/><text x="128" y="14">star</text><text x="120" y="113" text-anchor="middle">Sun</text><text x="50" y="113" text-anchor="middle">Jan</text><text x="190" y="113" text-anchor="middle">Jul</text><text x="120" y="58" text-anchor="middle" style="fill:var(--accent)">p</text></svg></span></span> and from the swing he got roughly ten light-years, against the 11.4 we accept today. It was the first measured gap to a star, and larger than anyone had dared guess.</p>
+      <p>Then there is Betelgeuse, the red shoulder of Orion, 550 to 700 light-years away depending on whose measurement you prefer. In late 2019 it dimmed to its faintest in the modern record and a minor panic went round that it was about to explode. What we were watching had set off in the thirteen- or fourteen-hundreds. (It turned out the star had coughed out a cloud of dust that veiled it from the front<a class="enref" id="r-b" href="#n-b" aria-label="Endnote b">b</a>. No explosion.) Whether it has done anything since, nobody alive can say; the news is on the road, though a few centuries are a rounding error in the life of a red supergiant.</p>
+      <p>This is worth saying plainly, since the popular version has gone a little too far: the stars you see are almost all still there. Nearly everything with a name is within a few thousand light-years,<span class="sn"><input type="checkbox" id="s5" class="sn-t"><label for="s5" class="sn-n"><span class="vh">Note 5</span>5</label><span class="sn-body"><b>5</b>The farthest of the bright naked-eye stars is probably Deneb, in Cygnus: somewhere between 1,400 and 2,600 light-years off, depending on whose parallax you trust. Even its lower figure is older than most countries.</span></span> and stars die slowly. You are not mostly looking at ghosts. You are looking at a set of portraits, each painted at a different time, hung in the same room.</p>
+    </section>
+
+    <section id="c4" data-l="13.9" data-e="13.9">
+      <header class="ch-head">
+        <span class="kicker">IV <i>&middot; 2.5 million years ago</i></span>
+        <h2>Andromeda, the farthest you can see unaided</h2>
+      </header>
+      <p><span class="sc">The farthest thing most people</span> will ever see without help is a smudge. From somewhere properly dark, on an autumn evening in the northern hemisphere, find the zigzag of Cassiopeia and follow its arrow toward the south, and you may catch a faint, elongated blur: the Andromeda galaxy, a trillion stars blended into the glow of a thin cloud. Its light left about 2.5 million years ago, when someone in East Africa was learning to knock an edge onto a stone. If our eyes were better the galaxy would cover six full Moons.<span class="sn"><input type="checkbox" id="s6" class="sn-t"><label for="s6" class="sn-n"><span class="vh">Note 6</span>6</label><span class="sn-body"><b>6</b>Six Moons, drawn to scale. Its neighbour, the Triangulum galaxy, is a little farther at 2.7 million light-years, and is supposed to be visible too, under a very dark sky. People report it the way they report sea monsters.<svg viewBox="0 0 240 90" role="img" aria-label="Diagram: the Andromeda galaxy drawn as an ellipse about six Moon-diameters long and two wide, with six circles representing full Moons laid across it"><ellipse cx="120" cy="43" rx="102" ry="30" fill="var(--accent)" opacity=".16"/><ellipse cx="120" cy="43" rx="102" ry="30" fill="none" stroke="var(--accent)" stroke-width=".8" opacity=".7"/><g fill="none" stroke="currentColor" stroke-width="1"><circle cx="34" cy="43" r="17"/><circle cx="68" cy="43" r="17"/><circle cx="102" cy="43" r="17"/><circle cx="136" cy="43" r="17"/><circle cx="170" cy="43" r="17"/><circle cx="204" cy="43" r="17"/></g><text x="120" y="86" text-anchor="middle">six Moons wide, two tall</text></svg></span></span></p>
+      <p>How do we know how far away it is? You need a candle whose wattage you know: compare its true brightness with how dim it looks, and the dimming is a ruler. In 1912 Henrietta Leavitt, who spent her days at Harvard measuring other people’s photographic plates, noticed that among the pulsing Cepheid stars of the Small Magellanic Cloud, the slower a star pulses the brighter it really is<a class="enref" id="r-c" href="#n-c" aria-label="Endnote c">c</a>. In 1923 Edwin Hubble found one in photographs of Andromeda, still often thought of as a “nebula” inside our own galaxy, and the distance that dropped out put it far beyond the Milky Way’s edge<a class="enref" id="r-d" href="#n-d" aria-label="Endnote d">d</a>. His number was about a third of today’s, which hardly mattered. There were other galaxies, and the universe had just got very much bigger across a few photographic plates.</p>
+    </section>
+
+    <section id="c5" data-l="17.55" data-e="17.64">
+      <header class="ch-head">
+        <span class="kicker">V <i>&middot; 13.5 billion years ago</i></span>
+        <h2>Reading it</h2>
+      </header>
+      <p><span class="sc">The trouble with starlight</span> is that it arrives with no return address. A faint galaxy delivers a few photons a minute to a mirror the size of a lorry. Pass sunlight through a prism and the rainbow is crossed by dark lines, hundreds of them. In 1859 Gustav Kirchhoff and Robert Bunsen showed that each line belongs to a chemical element, which meant the Sun’s composition could be read from 150 million kilometres away. Helium was spotted in the solar spectrum in 1868 and named for Helios; it was not found on Earth for nearly thirty years. An element had been discovered in the sky before anyone looked in a cupboard.</p>
+      <p>The lines also move. Light from something receding is stretched toward the red, and in the 1910s Vesto Slipher found that nearly every spiral “nebula” he measured had its lines shifted that way. By the end of the 1920s Georges Lemaître and Hubble had the pattern: the farther the galaxy, the bigger the shift, because space itself grows while the light is crossing it and stretches the waves along with it.<span class="sn"><input type="checkbox" id="s7" class="sn-t"><label for="s7" class="sn-n"><span class="vh">Note 7</span>7</label><span class="sn-body"><b>7</b>Hydrogen’s lines, as emitted and as received after the light’s wavelengths have grown by 15 per cent. Every line moves, and the longer ones move farthest.<svg viewBox="0 0 240 96" role="img" aria-label="Diagram: two spectrum strips. The upper strip shows four dark hydrogen lines as emitted; the lower strip shows the same four lines shifted toward the red end"><defs><linearGradient id="spec" x1="0" x2="1"><stop offset="0" stop-color="#6a4fa8"/><stop offset=".25" stop-color="#3f7fb0"/><stop offset=".5" stop-color="#5fa86a"/><stop offset=".72" stop-color="#d6b24a"/><stop offset="1" stop-color="#b8442c"/></linearGradient></defs><rect x="10" y="14" width="220" height="20" fill="url(#spec)" opacity=".75"/><rect x="10" y="56" width="220" height="20" fill="url(#spec)" opacity=".75"/><g stroke="#14110e" stroke-width="1.6"><path d="M36 14v20M50 14v20M82 14v20M180 14v20"/><path d="M68 56v20M84 56v20M118 56v20M223 56v20"/></g><g fill="none" stroke="currentColor" stroke-width=".8" stroke-dasharray="2 2" opacity=".7"><path d="M36 36 68 54M50 36 84 54M82 36 118 54M180 36l43 18"/></g><text x="10" y="9">emitted</text><text x="10" y="90">received, z&#8239;=&#8239;0.15</text><text x="230" y="9" text-anchor="end">blue &rarr; red</text></svg></span></span> Redshift is therefore a speed and a clock at once. Wavelengths are stretched by a factor of one plus the redshift, <em>z</em>.</p>
+      <p>The record keeps being broken, but as I write, galaxies with <em>z</em> beyond fourteen have been confirmed by the James Webb Space Telescope<a class="enref" id="r-e" href="#n-e" aria-label="Endnote e">e</a>. Take one: its ultraviolet hydrogen line, 121.6 nanometres when it left, has been pulled out fifteenfold to about 1.9 micrometres. That is infrared, which is why the telescope was built to see infrared. The galaxy’s light has travelled for about 13.5 billion years, setting out when the universe was some 290 million years old..<span class="sn"><input type="checkbox" id="s8" class="sn-t"><label for="s8" class="sn-n"><span class="vh">Note 8</span>8</label><span class="sn-body"><b>8</b>The galaxy itself is now far farther off than 13.5 billion light-years, since the space between us kept growing while the light crossed it. Travel time and distance are different questions, and the universe is not obliged to make them agree.</span></span></p>
+      <p>Behind all the galaxies lies the oldest light there is, the cosmic microwave background, released about 380,000 years after the Big Bang when the universe first cooled enough to turn transparent. It set out as a glow at roughly 3,000 kelvin, and has been stretched about eleven-hundredfold into microwaves at 2.7 kelvin. A small fraction of the hiss between channels on an old analogue television was that light.</p>
+      <p>Nobody here has a time machine. What astronomers have is an archive filed by distance. To see how galaxies grow up you cannot watch one for a billion years, so you collect one at each age, like a school hall’s photographs of six-year-olds and sixteen-year-olds, and assume, with some argument, that they are all the same kind of child.</p>
+    </section>
+
+    <section id="c6" data-l="17.64" data-e="-1">
+      <header class="ch-head">
+        <span class="kicker">VI <i>&middot; Now, or whatever that is</i></span>
+        <h2>Back to now</h2>
+      </header>
+      <p><span class="sc">Here is the awkward part.</span> All this talk of lateness assumes an “on time” to be late against: a shared <em>now</em> across the universe, in which Andromeda is up to something at this moment and the report is delayed. Relativity says there is no such thing. Two people in the same room, one sitting still and the other walking across it, will disagree about which events in Andromeda happened “at the same time” as their lunch, by several days<span class="sn"><input type="checkbox" id="s9" class="sn-t"><label for="s9" class="sn-n"><span class="vh">Note 9</span>9</label><span class="sn-body"><b>9</b>The log-scaled ladder this essay has just climbed. Each step is a thousand times or so further down than the last, which is why the ticker in the header goes quickly and then not at all.<svg viewBox="0 0 240 84" role="img" aria-label="Diagram: a logarithmic scale of light travel time from one second to one billion years, with marks for the Moon, the Sun, Proxima Centauri, Andromeda and the most distant galaxies"><path d="M10 52h222" fill="none" stroke="currentColor" stroke-width="1"/><g stroke="currentColor" stroke-width="1"><path d="M10 49v6M53 49v6M101 49v6M175 49v6M211 49v6"/></g><g text-anchor="middle"><text x="12" y="68">1&#8239;s</text><text x="53" y="68">1&#8239;h</text><text x="101" y="68">1&#8239;yr</text><text x="175" y="68">1&#8239;Myr</text><text x="211" y="68">1&#8239;Gyr</text></g><g fill="var(--accent)"><circle cx="11.3" cy="52" r="2.6"/><circle cx="43" cy="52" r="2.6"/><circle cx="109" cy="52" r="2.6"/><circle cx="180" cy="52" r="2.6"/><circle cx="225" cy="52" r="2.6"/></g><g style="fill:var(--accent)"><text x="11" y="40">Moon</text><text x="43" y="30" text-anchor="middle">Sun</text><text x="109" y="40" text-anchor="middle">Proxima</text><text x="180" y="40" text-anchor="middle">M31</text><text x="232" y="30" text-anchor="end">z&#8239;14</text></g><g stroke="var(--accent)" stroke-width=".6" opacity=".6"><path d="M43 34v13M225 34v13"/></g></svg></span></span> Neither is wrong. There is no fact for either of them to be wrong about.</p>
+      <p>That is Roger Penrose’s puzzle<a class="enref" id="r-f" href="#n-f" aria-label="Endnote f">f</a>, and it loosens the idea of delay. The sky is not a late broadcast of some live event out of sight. Whatever “is happening now” in Andromeda cannot touch you until its light, or something slower, arrives; for every purpose that matters to a person, that arrival <em>is</em> when it happens. The light is not behind the event. It is the event, reaching you.</p>
+      <p>I find this steadying rather than sad. Go back out and look up. The Moon a second old, the Sun’s long gold detour, Vega from the year 2000, Betelgeuse from the age of manuscripts, the smudge from before our species had a name for itself. All of it at different ages and all of it accurate, hung in one dark room by a very slow lamp. Nothing you can see tonight is current. All of it is true.</p>
+    </section>
+
+    <svg class="fleuron" viewBox="0 0 36 32" fill="currentColor" aria-hidden="true"><circle cx="18" cy="6" r="2.4"/><circle cx="7" cy="25" r="2.4"/><circle cx="29" cy="25" r="2.4"/></svg>
+
+    <section class="notes" id="notes" data-l="-1" data-e="-1">
+      <h2>Notes</h2>
+      <ol>
+        <li id="n-a"><b>a</b><span>Rømer’s Io timings were presented to the Académie Royale des Sciences in 1676. The figure usually quoted, about 220,000&#8239;km/s, follows from his estimate of 22 minutes for light to cross the Earth’s orbit; the real crossing takes about 16½ minutes. <a class="back" href="#r-a">Back to text</a></span></li>
+        <li id="n-b"><b>b</b><span>M. Montargès et al., “A dusty veil shading Betelgeuse during its Great Dimming,” <em>Nature</em> 594 (2021), 365–368. <a class="back" href="#r-b">Back to text</a></span></li>
+        <li id="n-c"><b>c</b><span>Henrietta S. Leavitt and Edward C. Pickering, “Periods of 25 Variable Stars in the Small Magellanic Cloud,” <em>Harvard College Observatory Circular</em> 173 (1912). <a class="back" href="#r-c">Back to text</a></span></li>
+        <li id="n-d"><b>d</b><span>Edwin Hubble, “Cepheids in Spiral Nebulae,” <em>The Observatory</em> 48 (1925), 139–142. The plate was exposed in 1923. <a class="back" href="#r-d">Back to text</a></span></li>
+        <li id="n-e"><b>e</b><span>S. Carniani et al., “Spectroscopic confirmation of two luminous galaxies at a redshift of 14,” <em>Nature</em> 633 (2024), 318–322. <a class="back" href="#r-e">Back to text</a></span></li>
+        <li id="n-f"><b>f</b><span>Roger Penrose, <em>The Emperor’s New Mind</em> (Oxford University Press, 1989). Distances and ages throughout are rounded; sources disagree by a few per cent, and I have preferred the cautious figure. <a class="back" href="#r-f">Back to text</a></span></li>
+      </ol>
+      <div class="colophon">
+        <p><span class="sc">Set in Literata</span> at its optical size for the reading size, with real small capitals and old-style figures. Google’s own CDN strips those features from the files it serves, so the font is subset and hosted here with them kept. Labels and numerals in the bar are Hanken Grotesk. There are no photographs, no illustrations and no libraries: only type, a few small diagrams, and a hundred-odd lines of script.</p>
+        <p>Night reading is not an inversion. Light letters on a dark ground look heavier than they are, so the weight falls from 400 to 350, tracking opens by a hair, leading goes from 1.62 to 1.74, and the ink stops short of white. Text clears 4.5:1 contrast in both themes.</p>
+        <p class="sig">The lookback counter in the bar is a log-scale convenience: it moves smoothly as you scroll between the figures in the chapter headings, and heads home to now in the last section.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+(function(){
+  var d=document,root=d.documentElement,win=window;
+  root.classList.add('js');
+  var $=function(s,c){return (c||d).querySelector(s)}, $$=function(s,c){return Array.prototype.slice.call((c||d).querySelectorAll(s))};
+
+  /* ---- theme ---- */
+  var tbtn=$('#theme'), meta=$('meta[name="theme-color"]');
+  function isDark(){var a=root.getAttribute('data-theme');return a?a==='dark':win.matchMedia('(prefers-color-scheme: dark)').matches}
+  function paintTheme(){var dk=isDark();tbtn.setAttribute('aria-pressed',dk);meta.setAttribute('content',dk?'#14110e':'#f5efe2')}
+  tbtn.addEventListener('click',function(){
+    var next=isDark()?'light':'dark';root.setAttribute('data-theme',next);
+    try{localStorage.setItem('slowlight-theme',next)}catch(e){}
+    paintTheme();
+  });
+  paintTheme();
+
+  /* ---- contents panel (narrow screens) ---- */
+  var toc=$('#toc'), tocbtn=$('#tocbtn');
+  function setToc(o){toc.classList.toggle('open',o);tocbtn.setAttribute('aria-expanded',o)}
+  tocbtn.addEventListener('click',function(){setToc(!toc.classList.contains('open'))});
+  toc.addEventListener('click',function(e){if(e.target.closest('a'))setToc(false)});
+  d.addEventListener('keydown',function(e){if(e.key==='Escape')setToc(false)});
+
+  /* ---- measure: words per paragraph, chapter offsets ---- */
+  var paras=[],secs=[],links=$$('.toc a'),total=0,ready=false;
+  function countWords(p){var c=p.cloneNode(true);$$('.sn-body,.vh,.sn-n',c).forEach(function(n){n.remove()});return (c.textContent.match(/\S+/g)||[]).length}
+  function measure(){
+    var y=win.pageYOffset;total=0;paras=[];
+    $$('#essay section:not(.notes) > p').forEach(function(p){
+      var r=p.getBoundingClientRect(),w=countWords(p);total+=w;
+      paras.push({t:r.top+y,b:r.bottom+y,w:w});
+    });
+    secs=$$('#essay section[data-l]').map(function(s){var r=s.getBoundingClientRect();return{id:s.id,t:r.top+y,b:r.bottom+y,l:parseFloat(s.dataset.l),e:parseFloat(s.dataset.e)}});
+    $('#wc').textContent=total.toLocaleString('en-GB')+' words';
+    $('#rt').textContent='about '+Math.round(total/230)+' minutes';
+    ready=true;update();
+  }
+
+  /* ---- lookback readout: L is log10 of seconds ---- */
+  function human(L){
+    var s=Math.pow(10,L);
+    if(s<0.6)return 'now';
+    if(s<59.5)return (s<10?s.toFixed(1):Math.round(s))+' s ago';
+    if(s<3600)return Math.round(s/60)+' min ago';
+    if(s<86400*2)return Math.round(s/3600)+' hours ago';
+    var y=s/31557600;
+    if(y<1.5)return Math.round(s/86400)+' days ago';
+    if(y<10)return y.toFixed(1)+' years ago';
+    if(y<1e4)return Math.round(y).toLocaleString('en-GB')+' years ago';
+    if(y<1e6)return Math.round(y/1000).toLocaleString('en-GB')+',000 years ago';
+    if(y<1e9)return (y/1e6<10?(y/1e6).toFixed(1):Math.round(y/1e6))+' million years ago';
+    return (y/1e9).toFixed(1)+' billion years ago';
+  }
+
+  /* ---- scroll update ---- */
+  var prog=$('#prog'),left=$('#left'),lb=$('#lb'),ticking=false,lastActive='';
+  function update(){
+    ticking=false;if(!ready)return;
+    var y=win.pageYOffset,vh=win.innerHeight,docH=root.scrollHeight;
+    var p=Math.max(0,Math.min(1,y/Math.max(1,docH-vh)));
+    prog.style.transform='scaleX('+p.toFixed(4)+')';
+
+    var probe=y+vh*0.4,remaining=0;
+    for(var i=0;i<paras.length;i++){
+      var q=paras[i];
+      if(q.b<=probe)continue;
+      remaining+= q.t>=probe? q.w : q.w*(q.b-probe)/(q.b-q.t);
+    }
+    left.textContent= y<60 ? 'about '+Math.round(total/230)+' min' : (remaining<20 ? 'finished' : Math.ceil(remaining/230)+' min left');
+
+    var cur=secs[0];
+    for(var j=0;j<secs.length;j++){if(secs[j].t<=probe)cur=secs[j]}
+    var t=Math.max(0,Math.min(1,(probe-cur.t)/Math.max(1,cur.b-cur.t)));
+    var L=cur.l+(cur.e-cur.l)*t;
+    if(y<40||y+vh>=docH-4)L=-1;
+    lb.textContent=human(L);
+
+    if(cur.id!==lastActive){
+      lastActive=cur.id;
+      links.forEach(function(a){if(a.getAttribute('href')==='#'+cur.id)a.setAttribute('aria-current','true');else a.removeAttribute('aria-current')});
+    }
+  }
+  function onScroll(){if(!ticking){ticking=true;requestAnimationFrame(update)}}
+  win.addEventListener('scroll',onScroll,{passive:true});
+  win.addEventListener('resize',measure);
+  win.addEventListener('load',measure);
+  if(d.fonts&&d.fonts.ready)d.fonts.ready.then(measure);
+  measure();
+
+  /* ---- endnotes: hovering or arriving at a note lights its anchor in the text ---- */
+  function flash(a){if(!a)return;a.classList.add('hl');setTimeout(function(){a.classList.remove('hl')},2600)}
+  $$('.notes li').forEach(function(li){
+    var back=$('.back',li),a=back&&$(back.getAttribute('href'));
+    if(!a)return;
+    li.addEventListener('mouseenter',function(){a.classList.add('hl')});
+    li.addEventListener('mouseleave',function(){a.classList.remove('hl')});
+    li.addEventListener('focusin',function(){a.classList.add('hl')});
+    li.addEventListener('focusout',function(){a.classList.remove('hl')});
+    back.addEventListener('click',function(){flash(a)});
+  });
+  win.addEventListener('hashchange',function(){
+    var h=location.hash,li=h.length>1&&$(h);
+    if(li&&li.matches('.notes li')){var back=$('.back',li);flash(back&&$(back.getAttribute('href')))}
+  });
+})();
+</script>
+</body>
+</html>

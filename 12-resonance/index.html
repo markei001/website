@@ -1,0 +1,726 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RESONANCE — a gallery that only exists while it is heard</title>
+<meta name="description" content="Resonance is a sound-reactive gallery of five rooms. An ambient synth built live in your browser drives an FFT drawn five ways: halo, ridgeline, bloom, figure, sediment. Silent by default, microphone optional.">
+<meta name="theme-color" content="#07060a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2307060a'/%3E%3Ccircle cx='32' cy='32' r='11' fill='none' stroke='%23c8ff5a' stroke-width='3'/%3E%3Cg stroke='%23c8ff5a' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M32 6v9M32 49v9M6 32h9M49 32h9' opacity='.9'/%3E%3Cpath d='M13.6 13.6l5 5M45.4 45.4l5 5M13.6 50.4l5-5M45.4 18.6l5-5' opacity='.5'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..800;1,6..96,400..800&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#07060a; --ink:#ece9f2; --soft:#cfccda; --mute:#a7a4b5;
+    --line:rgba(236,233,242,.17); --acc:#c8ff5a; --panel:rgba(10,9,14,.8);
+    --serif:'Bodoni Moda','Bodoni 72',Didot,'Times New Roman',serif;
+    --mono:'Fragment Mono',ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{background:var(--bg);color-scheme:dark;scroll-behavior:smooth}
+  html.rm{scroll-behavior:auto}
+  body{background:var(--bg);color:var(--ink);font:400 14px/1.7 var(--mono);overflow-x:hidden;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  ::selection{background:var(--acc);color:#07060a}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  a{color:inherit}
+  :focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+  /* a whisper of grain so the black isn't flat */
+  body::after{content:"";position:fixed;inset:0;z-index:60;pointer-events:none;opacity:.05;mix-blend-mode:screen;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .skip{position:fixed;left:12px;top:-60px;z-index:100;background:var(--acc);color:#07060a;padding:8px 12px;text-decoration:none}
+  .skip:focus{top:12px}
+
+  /* ---------- bar ---------- */
+  .bar{position:fixed;inset:0 0 auto 0;height:64px;display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:0 16px 0 clamp(16px,3vw,36px);z-index:30;background:linear-gradient(var(--bg) 20%,rgba(7,6,10,0))}
+  .mark{display:flex;align-items:center;gap:10px;text-decoration:none;font:italic 600 22px/1 var(--serif);letter-spacing:.01em}
+  .mark svg{width:22px;height:22px;flex:none}
+  .ctl{display:flex;gap:8px}
+  .tog{display:inline-flex;align-items:center;gap:8px;min-height:38px;padding:0 13px;border:1px solid var(--line);background:var(--panel);
+    font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;transition:border-color .2s,background .2s}
+  .tog:hover{border-color:var(--acc)}
+  .tog i{width:8px;height:8px;border-radius:50%;border:1px solid var(--mute);transition:.25s}
+  .tog[aria-pressed="true"]{border-color:rgba(200,255,90,.55)}
+  .tog[aria-pressed="true"] i{background:var(--acc);border-color:var(--acc);box-shadow:0 0 10px var(--acc)}
+  .tog[data-k="mic"][aria-pressed="true"] i{background:#ff8f3a;border-color:#ff8f3a;box-shadow:0 0 10px #ff8f3a}
+
+  .rail{position:fixed;right:12px;top:50%;transform:translateY(-50%);z-index:30;display:flex;flex-direction:column;gap:6px}
+  .rail button{width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--line);border-radius:50%;background:var(--panel);
+    font:italic 500 14px/1 var(--serif);color:var(--soft);transition:.25s}
+  .rail button:hover{border-color:var(--acc);color:#fff}
+  .rail button[aria-current="true"]{background:var(--acc);border-color:var(--acc);color:#07060a}
+
+  #msg{position:fixed;left:50%;top:70px;transform:translate(-50%,-8px);z-index:40;max-width:min(92vw,520px);padding:10px 16px;background:var(--panel);
+    border:1px solid var(--line);border-left:3px solid var(--acc);font-size:12.5px;line-height:1.55;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s}
+  #msg.on{opacity:1;transform:translate(-50%,0)}
+
+  /* ---------- rooms ---------- */
+  .room{position:relative;min-height:100svh;border-top:1px solid var(--line)}
+  .stage{position:absolute;inset:0;overflow:hidden;background:var(--bg)}
+  .stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .ring{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border:1px solid currentColor;border-radius:50%;pointer-events:none;animation:ring 1.2s cubic-bezier(.1,.6,.2,1) forwards}
+  @keyframes ring{to{transform:scale(16);opacity:0}}
+  html.rm .ring{display:none}
+
+  .hero{border-top:0;display:flex;align-items:flex-end}
+  .copy{position:relative;z-index:2;padding:110px 76px clamp(84px,13vh,128px) clamp(18px,5vw,72px);max-width:1180px;pointer-events:none}
+  .copy>*{pointer-events:auto}
+  .kick{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--acc);margin-bottom:18px}
+  h1{font:italic 500 clamp(44px,10.4vw,140px)/.88 var(--serif);font-variation-settings:'opsz' 96;letter-spacing:-.015em;margin-left:-.04em}
+  h1 .l{display:inline-block;transform-origin:50% 100%;will-change:transform}
+  .lede{margin-top:26px;max-width:46ch;color:var(--soft);font-size:14.5px}
+  .cta{margin-top:30px;display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .btn{display:inline-flex;align-items:center;gap:12px;min-height:50px;padding:0 24px;border:1px solid var(--acc);background:var(--acc);color:#07060a;
+    font-size:13px;letter-spacing:.14em;text-transform:uppercase;transition:.2s}
+  .btn b{font:italic 600 21px/1 var(--serif);letter-spacing:0;text-transform:none}
+  .btn:hover{background:transparent;color:var(--acc)}
+  .ghost{background:transparent;color:var(--soft);border-color:var(--line)}
+  .ghost:hover{color:#fff;border-color:var(--soft);background:transparent}
+  .hint{margin-top:30px;max-width:46ch;color:var(--mute);font-size:12.5px;border-left:2px solid var(--acc);padding-left:14px}
+  .hint[hidden],.cta[hidden]{display:none}
+
+  .plate{position:absolute;right:68px;bottom:56px;width:min(372px,34vw);padding:20px 22px 18px;background:var(--panel);
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid var(--line);z-index:3}
+  .plate .no{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--acc)}
+  .plate h2{font:italic 500 38px/1 var(--serif);margin:8px 0 12px;font-variation-settings:'opsz' 72}
+  .plate p{font-size:12.8px;line-height:1.7;color:var(--soft)}
+  .plate dl{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);display:grid;grid-template-columns:auto 1fr;gap:3px 14px;font-size:11.5px}
+  .plate dt{color:var(--mute);text-transform:uppercase;letter-spacing:.1em}
+  .plate dd{color:var(--ink)}
+  .plate .live{color:var(--acc);font-variant-numeric:tabular-nums}
+  .plate.left{right:auto;left:clamp(18px,3vw,36px);bottom:104px}
+
+  .rl{position:absolute;left:0;right:0;height:0;border-top:1px dotted rgba(236,233,242,.13);pointer-events:none;z-index:1}
+  .rl span{position:absolute;left:clamp(12px,2vw,24px);top:-9px;font-size:10.5px;color:var(--mute);background:var(--bg);padding:0 6px;font-style:normal}
+
+  /* ---------- hud ---------- */
+  .hud{position:fixed;left:clamp(12px,2vw,24px);bottom:14px;z-index:30;display:flex;align-items:center;gap:12px;padding:8px 14px 8px 10px;
+    background:var(--panel);border:1px solid var(--line);font-size:11.5px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+  .hud canvas{width:84px;height:26px;display:block}
+  .hud .src{display:flex;align-items:center;gap:7px;letter-spacing:.12em;font-weight:400;min-width:92px}
+  .hud .src i{width:7px;height:7px;border-radius:50%;background:var(--mute)}
+  .hud[data-src="SYNTH"] .src i{background:var(--acc);box-shadow:0 0 8px var(--acc)}
+  .hud[data-src="MIC"] .src i{background:#ff8f3a;box-shadow:0 0 8px #ff8f3a}
+  .hud .t{display:flex;flex-direction:column;line-height:1.35;color:var(--soft)}
+  .hud .t span:last-child{color:var(--mute)}
+
+  /* ---------- colophon ---------- */
+  .colo{border-top:1px solid var(--line);padding:clamp(56px,9vw,120px) 76px 130px clamp(18px,5vw,72px);display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:clamp(28px,5vw,72px)}
+  .colo h3{font:italic 500 30px/1.05 var(--serif);margin-bottom:16px}
+  .colo p,.colo li{font-size:12.8px;color:var(--soft);line-height:1.75}
+  .colo ul{list-style:none}
+  .colo li{padding:7px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px}
+  .colo li span{color:var(--mute)}
+  kbd{font:inherit;border:1px solid var(--line);padding:0 6px;color:var(--acc)}
+  .path{display:flex;flex-wrap:wrap;gap:6px 0;margin-top:16px;font-size:11.5px}
+  .path span{border:1px solid var(--line);padding:3px 9px;color:var(--soft)}
+  .path span+span::before{content:"→";position:relative;left:-14px;margin-right:-8px;color:var(--acc)}
+  .path span+span{margin-left:16px}
+  .sign{grid-column:1/-1;color:var(--mute);font-size:11.5px;border-top:1px solid var(--line);padding-top:18px}
+  noscript div{position:fixed;inset:0;z-index:200;display:grid;place-items:center;text-align:center;padding:30px;background:radial-gradient(circle at 50% 40%,#2a1d3a,#07060a 60%)}
+  noscript h1{font-size:44px;line-height:1;margin:0 0 14px}
+
+  @media(max-width:760px){
+    body{font-size:13.5px}
+    .bar{height:58px}.mark{font-size:19px}
+    .tog{padding:0 10px;font-size:10.5px;min-height:40px}
+    .rail{right:6px;gap:4px}.rail button{width:32px;height:32px;font-size:13px}
+    .copy{padding:92px 50px 130px 18px}
+    .lede{font-size:13.5px}
+    .btn{width:100%;justify-content:space-between}.ghost{width:100%;justify-content:center}
+    .room:not(.hero){display:flex;flex-direction:column;min-height:0}
+    .room:not(.hero) .stage{position:relative;inset:auto;height:64svh;min-height:340px;flex:none}
+    .plate,.plate.left{position:relative;right:auto;left:auto;bottom:auto;width:auto;margin:0 50px 0 0;border-width:1px 0 0 0;padding:20px 18px 80px;background:var(--bg)}
+    .plate h2{font-size:34px}
+    .hud{left:8px;right:8px;bottom:8px;gap:10px;padding:6px 10px 6px 8px;font-size:10.5px;justify-content:space-between}
+    .hud canvas{width:56px}.hud .src{min-width:0}
+    .colo{grid-template-columns:1fr;padding:56px 50px 120px 18px}
+    #msg{top:64px}
+  }
+  @media(min-width:761px) and (max-width:1100px){.plate{width:min(340px,40vw)}}
+</style>
+</head>
+<body>
+<noscript><div><section><h1 style="font-family:Georgia,serif;font-style:italic">RESONANCE</h1><p style="font-family:monospace;max-width:44ch;margin:auto;color:#cfccda">This gallery is made of live sound and drawn on a canvas, so it needs JavaScript. Without it there is only this: a very dark room with a faint violet light on.</p></section></div></noscript>
+<a class="skip" href="#room-1">Skip to the first room</a>
+
+<header class="bar">
+  <a class="mark" href="#room-1" aria-label="Resonance, back to the first room">
+    <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="11" fill="none" stroke="#c8ff5a" stroke-width="4"/><g stroke="#c8ff5a" stroke-width="4" stroke-linecap="round"><path d="M32 4v10M32 50v10M4 32h10M50 32h10"/><path d="M12 12l6 6M46 46l6 6M12 52l6-6M46 18l6-6" opacity=".55"/></g></svg>
+    Resonance
+  </a>
+  <div class="ctl">
+    <button class="tog" id="snd" data-k="snd" aria-pressed="false" title="Toggle sound (S)"><i></i><span>Sound off</span></button>
+    <button class="tog" id="mic" data-k="mic" aria-pressed="false" title="Toggle microphone (M)"><i></i><span>Mic off</span></button>
+  </div>
+</header>
+
+<nav class="rail" aria-label="Rooms">
+  <button data-go="0" aria-label="Room I, Halo" aria-current="true">I</button>
+  <button data-go="1" aria-label="Room II, Ridgeline">II</button>
+  <button data-go="2" aria-label="Room III, Bloom">III</button>
+  <button data-go="3" aria-label="Room IV, Figure">IV</button>
+  <button data-go="4" aria-label="Room V, Sediment">V</button>
+</nav>
+
+<div id="msg" role="status" aria-live="polite"></div>
+
+<main id="rooms">
+  <section class="room hero" id="room-1" data-room="0" aria-labelledby="t0">
+    <div class="stage"><canvas aria-hidden="true"></canvas></div>
+    <div class="copy">
+      <p class="kick">A gallery that only exists while it is heard</p>
+      <h1 id="t0" aria-label="Resonance"><span aria-hidden="true" id="word"></span></h1>
+      <p class="lede">Five rooms, one slow chord progression, no recordings. Everything on screen is the sound's own shadow: a Fourier transform, drawn five different ways.</p>
+      <div class="cta" id="cta">
+        <button class="btn" id="enter"><b>Enter</b> with sound</button>
+        <button class="btn ghost" id="quiet">Look without sound</button>
+      </div>
+      <p class="hint" id="hint" hidden></p>
+    </div>
+  </section>
+
+  <section class="room" id="room-2" data-room="1" aria-labelledby="t1">
+    <div class="stage"><canvas aria-hidden="true"></canvas></div>
+    <aside class="plate">
+      <div class="no">Room II &middot; 2026</div>
+      <h2 id="t1">Ridgeline</h2>
+      <p>The last forty-four slices of the spectrum, stacked and hiding one another, after Harold Craft's 1970 pulsar plot, the drawing every record sleeve has since borrowed. Newest at the back; it walks toward you.</p>
+      <dl><dt>Band</dt><dd>30 Hz &ndash; 16 kHz, log</dd><dt>Reads</dt><dd>FFT, 4096 points</dd><dt>Live</dt><dd class="live" data-live>&nbsp;</dd></dl>
+    </aside>
+  </section>
+
+  <section class="room" id="room-3" data-room="2" aria-labelledby="t2">
+    <div class="stage"><canvas aria-hidden="true"></canvas></div>
+    <aside class="plate left">
+      <div class="no">Room III &middot; 2026</div>
+      <h2 id="t2">Bloom</h2>
+      <p>Every grain is born carrying the colour of a frequency that is sounding right now. Loud passages throw more. A plucked note throws a handful in its own hue. The pointer has a weak gravity.</p>
+      <dl><dt>Band</dt><dd>whole spectrum, by ear</dd><dt>Reads</dt><dd>energy + onsets</dd><dt>Live</dt><dd class="live" data-live>&nbsp;</dd></dl>
+    </aside>
+  </section>
+
+  <section class="room" id="room-4" data-room="3" aria-labelledby="t3">
+    <div class="stage"><canvas aria-hidden="true"></canvas></div>
+    <aside class="plate">
+      <div class="no">Room IV &middot; 2026</div>
+      <h2 id="t3">Figure</h2>
+      <p>The waveform plotted against itself a quarter-period later: x = s(t), y = s(t &minus; T/4). One pure tone draws a circle; add a fifth and it ties itself in a knot. The only room that reads the wave, not the spectrum.</p>
+      <dl><dt>Band</dt><dd>follows the loudest pitch</dd><dt>Reads</dt><dd>time domain, 1024 samples</dd><dt>Live</dt><dd class="live" data-live>&nbsp;</dd></dl>
+    </aside>
+  </section>
+
+  <section class="room" id="room-5" data-room="4" aria-labelledby="t4">
+    <div class="stage"><canvas aria-hidden="true"></canvas><div class="rl-wrap" id="rulers" aria-hidden="true"></div></div>
+    <aside class="plate">
+      <div class="no">Room V &middot; 2026</div>
+      <h2 id="t4">Sediment</h2>
+      <p>A spectrogram: time runs right to left, pitch climbs. Level bars are held notes; the labels along the top are chord changes. Hum into the microphone and you leave a line in the silt.</p>
+      <dl><dt>Band</dt><dd>30 Hz &ndash; 16 kHz, log</dd><dt>Reads</dt><dd>FFT, one column per frame</dd><dt>Live</dt><dd class="live" data-live>&nbsp;</dd></dl>
+    </aside>
+  </section>
+</main>
+
+<footer class="colo">
+  <div>
+    <h3>How the room is built</h3>
+    <p>There are no audio files. A tiny score walks between six chords every twelve to eighteen seconds, keeping the notes two chords share so the voices lead instead of jump. Pads are paired detuned sawtooths under a slowly breathing low-pass; bells are a sine plus an inharmonic partial. All of it runs through a delay and a four-second convolution reverb we generated from decaying noise.</p>
+    <div class="path" aria-label="Signal path"><span>score</span><span>pad / bass / bell</span><span>bus</span><span>dry + delay + convolver</span><span>compressor</span><span>analyser</span><span>speakers</span></div>
+  </div>
+  <div>
+    <h3>Silence is a signal too</h3>
+    <p>With sound off, the rooms listen to a simulation that runs the <em>same score</em>: the same notes, the same harmonics, the same bell echoes, computed as a spectrum instead of heard. The microphone, if you allow it, is analysed in the browser and is never recorded or played back; the synth steps aside while it listens.</p>
+  </div>
+  <div>
+    <h3>Keys</h3>
+    <ul>
+      <li><span>Rooms</span><span><kbd>1</kbd>&ndash;<kbd>5</kbd></span></li>
+      <li><span>Sound</span><kbd>S</kbd></li>
+      <li><span>Microphone</span><kbd>M</kbd></li>
+      <li><span>Play a note</span><span>click any room</span></li>
+    </ul>
+    <p style="margin-top:14px">Notes you play are always in D dorian. Left plays low, right plays high.</p>
+  </div>
+  <p class="sign">Type: Bodoni Moda and Fragment Mono. Made of oscillators, a canvas and a free afternoon. Rooms I&ndash;V, no. 12 in the series.</p>
+</footer>
+
+<div class="hud" id="hud" data-src="SIM">
+  <canvas id="meter" width="168" height="52" aria-hidden="true"></canvas>
+  <div class="src"><i></i><b id="hSrc" style="font-weight:400">SIMULATED</b></div>
+  <div class="t"><span id="hChord">Dm9</span><span id="hNote">&mdash;</span></div>
+</div>
+
+<script>
+(()=>{
+'use strict';
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const clamp=(v,a,b)=>v<a?a:v>b?b:v, rnd=(a,b)=>a+Math.random()*(b-a);
+const BG='#07060a';
+const rmq=matchMedia('(prefers-reduced-motion: reduce)');
+let RM=rmq.matches; const setRM=()=>{RM=rmq.matches;document.documentElement.classList.toggle('rm',RM)};
+setRM(); (rmq.addEventListener?rmq.addEventListener('change',setRM):rmq.addListener(setRM));
+
+/* ---------- spectral colour: low = rose, middle = lime (the accent), high = violet ---------- */
+const STOPS=[[0,[255,46,99]],[.22,[255,143,58]],[.42,[200,255,90]],[.62,[44,240,180]],[.8,[61,155,255]],[1,[154,92,255]]];
+const LUTV=[],LUT=[];
+for(let i=0;i<256;i++){const t=i/255;let k=0;while(k<STOPS.length-2&&t>STOPS[k+1][0])k++;
+  const [t0,a]=STOPS[k],[t1,b]=STOPS[k+1],f=clamp((t-t0)/(t1-t0),0,1);
+  const c=a.map((x,j)=>Math.round(x+(b[j]-x)*f));LUTV.push(c);LUT.push(`rgb(${c})`)}
+const cIdx=t=>clamp(Math.round(t*255),0,255);
+
+/* ---------- constants ---------- */
+const NB=128,FFT=4096,NBIN=FFT/2,FMIN=30,FMAX=16000;
+let SR=48000;
+const fE=new Float32Array(NB+1);for(let i=0;i<=NB;i++)fE[i]=FMIN*Math.pow(FMAX/FMIN,i/NB);
+const bandOf=f=>clamp(Math.log(f/FMIN)/Math.log(FMAX/FMIN)*NB,0,NB-1);
+const mtof=m=>440*Math.pow(2,(m-69)/12);
+const NN=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const noteName=f=>{const m=Math.round(69+12*Math.log2(f/440));return NN[(m%12+12)%12]+(Math.floor(m/12)-1)};
+const fmtHz=f=>f>=1000?(f/1000).toFixed(2)+' kHz':f.toFixed(1)+' Hz';
+
+/* ---------- the score ---------- */
+const CH=[
+ {n:'Dm9',r:38,v:[53,57,60,64,69]},
+ {n:'Bbmaj7#11',r:34,v:[50,57,62,64,65]},
+ {n:'Fmaj7',r:29,v:[57,60,64,65,72]},
+ {n:'Am11',r:33,v:[52,55,60,62,67]},
+ {n:'G6/9',r:31,v:[59,62,64,69,71]},
+ {n:'Cmaj9',r:36,v:[55,59,62,64,67]}
+];
+const PLUCK=[];for(let m=62;m<=88;m++)if([2,4,5,7,9,11,0].includes(m%12))PLUCK.push(m);
+const score={chord:CH[0],next:CH[1],prev:null,at:performance.now(),dur:15000,bellAt:performance.now()+2500,rate:1,L:{chord:[],bell:[]},
+  on(e,f){this.L[e].push(f)}, emit(e,p){this.L[e].forEach(f=>f(p))},
+  tick(now){
+    if(now-this.at>=this.dur){
+      const pool=CH.filter(c=>c!==this.next&&c!==this.chord);
+      this.prev=this.chord;this.chord=this.next;this.next=pool[Math.floor(Math.random()*pool.length)];
+      this.at=now;this.dur=rnd(12000,18000);this.emit('chord',this.chord);
+    }
+    if(now>=this.bellAt){
+      const hi=PLUCK.filter(m=>m>=74);this.bellAt=now+rnd(1800,4800)/this.rate;
+      this.emit('bell',{midi:hi[Math.floor(Math.random()*hi.length)],vel:rnd(.45,.9)});
+    }
+  }};
+
+/* ---------- analysis state ---------- */
+const S={t:0,B:new Float32Array(NB),level:0,bass:0,mid:0,high:0,beat:0,peakF:0,peakFs:110,src:'SIM',
+  freq:new Uint8Array(NBIN),wave:new Uint8Array(1024),needWave:false};
+const freqR=new Uint8Array(NBIN),waveR=new Uint8Array(FFT);
+const mood={cut:1400,rev:.5,fb:.38,rate:1};
+const MOODS=[{cut:1500,rev:.5,fb:.38,rate:1},{cut:720,rev:.45,fb:.34,rate:.7},{cut:2800,rev:.62,fb:.46,rate:1.8},{cut:1100,rev:.28,fb:.22,rate:.8},{cut:1900,rev:.55,fb:.4,rate:1.1}];
+
+/* ---------- simulated signal: same score, drawn instead of heard ---------- */
+const sim={v:new Map(),bells:[],t:0,F:new Float32Array(NBIN),pf:[],pa:[],cut:1400,
+  setChord(ch,instant){
+    const want=new Set([...ch.v,ch.r]);
+    this.v.forEach((o,m)=>{if(!want.has(m))o.tg=0});
+    want.forEach(m=>{const tg=m===ch.r?.85:.5;const o=this.v.get(m);if(o)o.tg=tg;else this.v.set(m,{f:mtof(m),a:instant?tg:0,tg,bass:m===ch.r})});
+  },
+  bell(m,vel){this.bells.push({f:mtof(m),v:vel,t0:this.t})},
+  update(dt){
+    this.t+=dt;this.cut=mood.cut*(1+.3*Math.sin(this.t*.28));
+    this.v.forEach((o,m)=>{const k=1-Math.exp(-dt/(o.tg>o.a?1.6:2.2));o.a+=(o.tg-o.a)*k;if(o.tg===0&&o.a<.004)this.v.delete(m)});
+    this.bells=this.bells.filter(b=>this.t-b.t0<7);
+    const pf=this.pf,pa=this.pa;pf.length=0;pa.length=0;
+    this.v.forEach(o=>{
+      if(o.bass){pf.push(o.f,o.f*2);pa.push(o.a,o.a*.22);return}
+      for(let n=1;n<=24;n++){const fn=o.f*n;if(fn>9000)break;
+        const a=o.a/n/Math.sqrt(1+Math.pow(fn/this.cut,4));if(a>.003){pf.push(fn);pa.push(a)}}
+    });
+    for(const b of this.bells){let e=0;for(let k=0;k<3;k++){const x=this.t-b.t0-k*.43;if(x>0)e+=Math.pow(.5,k)*Math.exp(-x/.9)}
+      const a=b.v*e*.9;if(a>.004){pf.push(b.f,b.f*2.7568);pa.push(a,a*.3)}}
+  },
+  fill(out){
+    const bh=SR/FFT,F=this.F,pf=this.pf,pa=this.pa;
+    // base floor in dB with a little shimmer, then add each partial as a ~2 bin lobe
+    for(let k=0;k<NBIN;k++){const f=k*bh+20;const db=-90-8*Math.log10(1+f/300)+Math.random()*3;F[k]=Math.pow(10,db/10)}
+    for(let i=0;i<pf.length;i++){
+      const pos=pf[i]/bh,p=Math.pow(10,(-34+20*Math.log10(pa[i]))/10),k0=Math.floor(pos);
+      for(let k=k0-2;k<=k0+3;k++){if(k<0||k>=NBIN)continue;const d=k-pos;F[k]+=p*Math.exp(-d*d/.98)}
+    }
+    for(let k=0;k<NBIN;k++){const b=clamp((10*Math.log10(F[k])+100)/70*255,0,255);out[k]+= (b-out[k])*.3}
+  },
+  wave(out){
+    const n=out.length,pf=this.pf,pa=this.pa,t0=this.t;let tot=0;const idx=[];
+    for(let i=0;i<pf.length;i++)if(pf[i]<1000&&pa[i]>.012){idx.push(i);tot+=pa[i]}
+    const norm=1/Math.max(tot*.95,.001);
+    for(let j=0;j<n;j++){let s=0;const tt=t0+j/SR;for(let q=0;q<idx.length;q++){const i=idx[q];s+=pa[i]*Math.sin(6.2831853*pf[i]*tt)}
+      out[j]=128+127*clamp(s*norm,-1,1)}
+  }};
+const simF=new Float32Array(NBIN);
+
+/* ---------- real audio ---------- */
+const A={ctx:null,on:false,voices:new Map(),an:null,micAn:null};
+const mic={on:false,stream:null,node:null,peak:1};
+let soundWanted=false;
+function ensureAudio(){
+  if(A.ctx)return;
+  const AC=window.AudioContext||window.webkitAudioContext;if(!AC)throw new Error('noaudio');
+  const ctx=A.ctx=new AC({latencyHint:'playback'});SR=ctx.sampleRate;
+  A.master=ctx.createGain();A.master.gain.value=0;
+  const comp=ctx.createDynamicsCompressor();comp.threshold.value=-20;comp.knee.value=20;comp.ratio.value=3;comp.attack.value=.02;comp.release.value=.4;
+  const an=A.an=ctx.createAnalyser();an.fftSize=FFT;an.smoothingTimeConstant=.82;an.minDecibels=-100;an.maxDecibels=-30;
+  const mn=A.micAn=ctx.createAnalyser();mn.fftSize=FFT;mn.smoothingTimeConstant=.7;mn.minDecibels=-100;mn.maxDecibels=-20;
+  const bus=A.bus=ctx.createGain();
+  const dry=ctx.createGain();dry.gain.value=.62;bus.connect(dry);dry.connect(comp);
+  // pad filter with a slow breathing LFO
+  const padF=A.padF=ctx.createBiquadFilter();padF.type='lowpass';padF.Q.value=.6;padF.frequency.value=mood.cut;padF.connect(bus);
+  const lfo=ctx.createOscillator(),lg=ctx.createGain();lfo.frequency.value=.045;lg.gain.value=320;lfo.connect(lg);lg.connect(padF.frequency);lfo.start();
+  // delay with a darkening feedback loop
+  const dl=ctx.createDelay(2);dl.delayTime.value=.43;const fb=A.fb=ctx.createGain();fb.gain.value=mood.fb;
+  const dlp=ctx.createBiquadFilter();dlp.type='lowpass';dlp.frequency.value=2200;
+  const dout=ctx.createGain();dout.gain.value=.38;
+  bus.connect(dl);dl.connect(dlp);dlp.connect(fb);fb.connect(dl);dl.connect(dout);dout.connect(comp);
+  // convolver: 4 s of noise that gets darker as it decays
+  const len=Math.floor(ctx.sampleRate*4),ir=ctx.createBuffer(2,len,ctx.sampleRate);
+  for(let c=0;c<2;c++){const d=ir.getChannelData(c);let s=0;for(let i=0;i<len;i++){const t=i/len;const k=.65*Math.pow(1-t,1.6)+.04;s+=((Math.random()*2-1)-s)*k;d[i]=s*Math.pow(1-t,3.2)*1.9}}
+  const cv=ctx.createConvolver();cv.buffer=ir;const rev=A.rev=ctx.createGain();rev.gain.value=mood.rev;
+  bus.connect(cv);dout.connect(cv);cv.connect(rev);rev.connect(comp);
+  comp.connect(an);comp.connect(A.master);A.master.connect(ctx.destination);
+}
+function applyMood(){
+  if(!A.ctx)return;const t=A.ctx.currentTime;
+  A.padF.frequency.setTargetAtTime(mood.cut,t,1.5);A.rev.gain.setTargetAtTime(mood.rev,t,1.5);A.fb.gain.setTargetAtTime(mood.fb,t,1.5);
+}
+const synth={
+  setChord(ch,fresh){
+    if(!A.ctx||!A.on)return;const ctx=A.ctx,t=ctx.currentTime,want=new Set([...ch.v,ch.r]);
+    A.voices.forEach((v,m)=>{if(!want.has(m)){v.g.gain.cancelScheduledValues(t);v.g.gain.setTargetAtTime(0,t,2.2);v.o.forEach(o=>o.stop(t+11));A.voices.delete(m)}});
+    want.forEach(m=>{if(A.voices.has(m))return;const f=mtof(m),bass=m===ch.r,g=ctx.createGain(),o=[];
+      g.gain.setValueAtTime(0,t);g.gain.setTargetAtTime(bass?.17:.032,t,fresh?.5:1.7);
+      if(bass){const a=ctx.createOscillator();a.type='sine';a.frequency.value=f;const b=ctx.createOscillator();b.type='triangle';b.frequency.value=f*2;
+        const bg=ctx.createGain();bg.gain.value=.22;a.connect(g);b.connect(bg);bg.connect(g);g.connect(A.bus);o.push(a,b)}
+      else{for(const d of[-6,6]){const a=ctx.createOscillator();a.type='sawtooth';a.frequency.value=f;a.detune.value=d;a.connect(g);o.push(a)}
+        const p=ctx.createStereoPanner?ctx.createStereoPanner():null;if(p){p.pan.value=rnd(-.6,.6);g.connect(p);p.connect(A.padF)}else g.connect(A.padF)}
+      o.forEach(x=>x.start(t));A.voices.set(m,{g,o});});
+  },
+  release(){if(!A.ctx)return;const t=A.ctx.currentTime;A.voices.forEach(v=>{v.g.gain.cancelScheduledValues(t);v.g.gain.setTargetAtTime(0,t,.25);v.o.forEach(o=>o.stop(t+1.5))});A.voices.clear()},
+  bell(m,vel){
+    if(!A.ctx||!A.on)return;const ctx=A.ctx,t=ctx.currentTime,f=mtof(m);
+    const g=ctx.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vel*.11,t+.008);g.gain.setTargetAtTime(0,t+.01,.9);
+    const a=ctx.createOscillator(),b=ctx.createOscillator(),bg=ctx.createGain();a.frequency.value=f;b.frequency.value=f*2.7568;bg.gain.value=.3;
+    a.connect(g);b.connect(bg);bg.connect(g);
+    if(ctx.createStereoPanner){const p=ctx.createStereoPanner();p.pan.value=rnd(-.7,.7);g.connect(p);p.connect(A.bus)}else g.connect(A.bus);
+    a.start(t);b.start(t);a.stop(t+6);b.stop(t+6);
+  }};
+score.on('chord',ch=>{sim.setChord(ch);synth.setChord(ch);if(sed.r)sed.mark(ch.n)});
+score.on('bell',b=>{sim.bell(b.midi,b.vel);synth.bell(b.midi,b.vel);S.beat=Math.max(S.beat,.6);if(bloom.r)bloom.burst(bandOf(mtof(b.midi)),26)});
+
+const msgEl=$('#msg');let msgT=0;
+function say(t,ms=5200){msgEl.textContent=t;msgEl.classList.add('on');clearTimeout(msgT);msgT=setTimeout(()=>msgEl.classList.remove('on'),ms)}
+const levelTarget=()=>mic.on?0:(soundWanted?.85:0);
+function refreshUI(){
+  const s=$('#snd'),m=$('#mic');
+  s.setAttribute('aria-pressed',String(soundWanted));s.lastElementChild.textContent=soundWanted?'Sound on':'Sound off';
+  m.setAttribute('aria-pressed',String(mic.on));m.lastElementChild.textContent=mic.on?'Mic on':'Mic off';
+}
+async function setSound(on){
+  if(on){
+    try{ensureAudio();await A.ctx.resume()}catch(e){say('Sound is not available in this browser. The simulated signal keeps playing.');return false}
+    soundWanted=true;A.on=true;applyMood();synth.setChord(score.chord,true);
+    A.master.gain.setTargetAtTime(levelTarget(),A.ctx.currentTime,.4);
+  }else{
+    soundWanted=false;A.on=false;
+    if(A.ctx){synth.release();A.master.gain.setTargetAtTime(0,A.ctx.currentTime,.25);
+      setTimeout(()=>{if(!A.on&&!mic.on&&A.ctx.state==='running')A.ctx.suspend()},2600)}
+  }
+  refreshUI();return true;
+}
+async function setMic(on){
+  if(on){
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){say('This browser cannot open a microphone here. The room keeps its own synth.');return}
+    try{
+      ensureAudio();A.ctx.resume();
+      const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+      mic.stream=st;mic.node=A.ctx.createMediaStreamSource(st);mic.node.connect(A.micAn);mic.on=true;mic.peak=1;
+      A.master.gain.setTargetAtTime(0,A.ctx.currentTime,.2);
+      say('Listening. Clap, hum or whistle. The synth steps aside while you do.');
+    }catch(e){
+      const n=e&&e.name;
+      say(n==='NotAllowedError'||n==='SecurityError'?'Microphone access was declined. The room carries on listening to itself.':
+          n==='NotFoundError'||n==='OverconstrainedError'?'No microphone was found. The room carries on listening to itself.':
+          'The microphone could not be opened. The room carries on listening to itself.',6500);
+      mic.on=false;
+    }
+  }else{
+    if(mic.stream)mic.stream.getTracks().forEach(t=>t.stop());
+    try{mic.node&&mic.node.disconnect()}catch(e){}
+    mic.stream=null;mic.node=null;mic.on=false;
+    if(A.ctx){A.master.gain.setTargetAtTime(levelTarget(),A.ctx.currentTime,.4)}
+    if(soundWanted&&A.ctx&&A.ctx.state!=='running')A.ctx.resume();
+  }
+  refreshUI();
+}
+
+/* ---------- analysis per frame ---------- */
+let alpha=0,peakHold=.3,fluxAvg=.01,lastBeat=0;
+const raw=new Float32Array(NB);
+function analyse(dt){
+  const real=mic.on?'MIC':(A.on&&A.ctx&&A.ctx.state==='running')?'SYNTH':'SIM';S.src=real;
+  alpha+=clamp((real==='SYNTH'?1:0)-alpha,-dt*.6,dt*.5);
+  const freq=S.freq;
+  if(real==='MIC'){A.micAn.getByteFrequencyData(freqR);freq.set(freqR);if(S.needWave){A.micAn.getByteTimeDomainData(waveR);S.wave.set(waveR.subarray(FFT-1024))}}
+  else{
+    sim.update(dt);
+    if(alpha<.999){sim.fill(simF)}
+    if(alpha>.001&&A.an){A.an.getByteFrequencyData(freqR)}
+    const a=alpha>.001&&A.an?alpha:0;
+    for(let k=0;k<NBIN;k++)freq[k]=a?freqR[k]*a+simF[k]*(1-a):simF[k];
+    if(S.needWave){
+      const ws=new Uint8Array(1024);sim.wave(ws);
+      if(a>0){A.an.getByteTimeDomainData(waveR);for(let j=0;j<1024;j++)S.wave[j]=waveR[FFT-1024+j]*a+ws[j]*(1-a)}else S.wave.set(ws);
+    }
+  }
+  const bh=SR/FFT;let mx=0;
+  for(let i=0;i<NB;i++){
+    const lo=fE[i]/bh,hi=fE[i+1]/bh;let v;
+    if(hi-lo<1){const m=(lo+hi)/2,k=m|0,f=m-k;v=freq[k]*(1-f)+freq[k+1]*f}
+    else{v=0;for(let k=lo|0,e=Math.min(NBIN-1,Math.ceil(hi));k<=e;k++)if(freq[k]>v)v=freq[k]}
+    v=Math.max(0,(v/255-.2)/.8);v=Math.pow(v,1.35)*(.9+.45*i/NB);raw[i]=v;if(v>mx)mx=v;
+  }
+  peakHold=Math.max(mx,peakHold-dt*.06,.12);
+  const g=clamp(.95/peakHold,.9,real==='MIC'?8:3.5);
+  const ku=1-Math.exp(-dt/.035),kd=1-Math.exp(-dt/.2);let fl=0,sum=0,b=0,m=0,h=0;
+  for(let i=0;i<NB;i++){const t=Math.min(1,raw[i]*g),p=S.B[i];if(t>p)fl+=t-p;S.B[i]=p+(t-p)*(t>p?ku:kd);const q=S.B[i];sum+=q;if(i<33)b+=q;else if(i<80)m+=q;else h+=q}
+  S.level=sum/NB;S.bass=b/33;S.mid=m/47;S.high=h/48;
+  fl/=NB;fluxAvg+=(fl-fluxAvg)*.05;S.beat*=Math.exp(-dt*5);
+  const now=S.t;if(fl>fluxAvg*2.4+.012&&now-lastBeat>.22){lastBeat=now;S.beat=Math.max(S.beat,Math.min(1,fl*14))}
+  // loudest pitch between 50 Hz and 2 kHz
+  let km=0,kv=0;for(let k=Math.ceil(50/bh),e=Math.floor(2000/bh);k<=e;k++)if(freq[k]>kv){kv=freq[k];km=k}
+  if(kv>85&&km>1){const a=freq[km-1],bb=freq[km],c=freq[km+1],d=a-2*bb+c,p=d?.5*(a-c)/d:0;S.peakF=(km+p)*bh;S.peakFs*=Math.pow(S.peakF/S.peakFs,.12)}else S.peakF=0;
+}
+
+/* ---------- rooms ---------- */
+const rooms=$$('.room').map((el,i)=>({el,i,stage:$('.stage',el),cv:$('canvas',el),vis:i===0,fresh:true,w:1,h:1,d:1,px:null,py:null,live:$('[data-live]',el)}));
+rooms.forEach(r=>{r.c=r.cv.getContext('2d')});
+
+/* 0 · Halo */
+const halo={ripples:[],
+  draw(r,dt){
+    const c=r.c,w=r.w,h=r.h,wide=w>760;
+    c.globalCompositeOperation='source-over';c.fillStyle=RM?BG:'rgba(7,6,10,.26)';c.fillRect(0,0,w,h);
+    const cx=wide?w*.77:w*.5,cy=wide?h*.5:h*.28,m=wide?Math.min(w*.42,h*.9):Math.min(w*.95,h*.52),R0=m*.2*(1+S.bass*.1),LM=m*.2*1.0;
+    const rot=S.t*.035,B=S.B,lw=Math.max(1,Math.PI*2*R0/256*.62);
+    if(S.beat>.35&&this.ripples.length<6&&!RM)this.ripples.push({r:R0,a:.55,i:bandOf(S.peakFs)});
+    c.globalCompositeOperation='lighter';c.lineWidth=1;
+    for(let q=this.ripples.length-1;q>=0;q--){const p=this.ripples[q];p.r+=dt*(150+S.level*180);p.a-=dt*.45;if(p.a<=0){this.ripples.splice(q,1);continue}
+      c.strokeStyle=LUT[cIdx(p.i/NB)];c.globalAlpha=p.a*.6;c.beginPath();c.arc(cx,cy,p.r,0,6.2832);c.stroke()}
+    c.lineWidth=lw;c.lineCap='round';
+    for(let k=0;k<256;k++){
+      const i=k<128?k:255-k,v=B[i],a=(k+.5)/256*6.2832-1.5708+rot,co=Math.cos(a),si=Math.sin(a),len=3+Math.pow(v,1.05)*LM*1.15;
+      c.strokeStyle=LUT[cIdx(i/127)];c.globalAlpha=.3+.7*v;
+      c.beginPath();c.moveTo(cx+co*R0,cy+si*R0);c.lineTo(cx+co*(R0+len),cy+si*(R0+len));c.stroke();
+    }
+    c.globalAlpha=.4;c.strokeStyle='#c8ff5a';c.lineWidth=1;c.beginPath();
+    for(let k=0;k<=256;k++){const i=(k<128?k:255-k)%128,a=k/256*6.2832-1.5708+rot,rr=R0*.84-B[i]*R0*.14;c[k?'lineTo':'moveTo'](cx+Math.cos(a)*rr,cy+Math.sin(a)*rr)}
+    c.stroke();
+    c.globalCompositeOperation='source-over';c.globalAlpha=.07;c.strokeStyle='#fff';c.beginPath();c.arc(cx,cy,R0,0,6.2832);c.stroke();
+    // frequency labels inside the wheel
+    c.globalAlpha=.85;c.fillStyle='#a7a4b5';c.font='10px "Fragment Mono",monospace';c.textAlign='center';c.textBaseline='middle';
+    for(const [f,t] of[[55,'55'],[220,'220'],[880,'880'],[3520,'3.5k']]){const a=bandOf(f)/256*6.2832-1.5708+rot,rr=R0*.5;c.fillText(t,cx+Math.cos(a)*rr,cy+Math.sin(a)*rr)}
+    c.globalAlpha=1;
+    r.liveT='level '+Math.round(S.level*100)+'%  bass '+Math.round(S.bass*100)+'%';
+  }};
+rooms[0].draw=halo.draw.bind(halo);
+
+/* 1 · Ridgeline */
+const ridge={hist:[],acc:0,grad:null,
+  init(r){const g=r.c.createLinearGradient(r.w*.08,0,r.w*.92,0);STOPS.forEach(([t,c])=>g.addColorStop(t,`rgb(${c})`));this.grad=g},
+  draw(r,dt){
+    const c=r.c,w=r.w,h=r.h,ROWS=44,wide=w>760;
+    this.acc+=dt;if(this.acc>(RM?.2:.11)||!this.hist.length){this.acc=0;this.hist.unshift(Float32Array.from(S.B));if(this.hist.length>ROWS)this.hist.pop()}
+    c.globalCompositeOperation='source-over';c.globalAlpha=1;c.fillStyle=BG;c.fillRect(0,0,w,h);
+    const yB=h*(wide?.3:.26),yF=h*(wide?.8:.82),x0=w*(wide?.1:.04),x1=w*(wide?.9:.96),cx=w/2;
+    const hl=c.createRadialGradient(cx,yB,0,cx,yB,w*.5);hl.addColorStop(0,'rgba(154,92,255,.14)');hl.addColorStop(1,'rgba(7,6,10,0)');c.fillStyle=hl;c.fillRect(0,0,w,h);
+    c.lineJoin='round';c.strokeStyle=this.grad||'#c8ff5a';
+    const n=this.hist.length;
+    for(let q=0;q<ROWS;q++){
+      const hi=Math.max(0,n-1-(ROWS-1-q)); // q=0 is the back row (newest)
+      const row=this.hist[Math.min(q,n-1)];if(!row)continue;
+      const u=q/(ROWS-1),sc=.5+.5*u,base=yB+(yF-yB)*Math.pow(u,1.15),wd=(x1-x0)*sc,L=cx-wd/2,amp=h*.22*(.55+.45*u);
+      const top=new Path2D();let px=L,py=base;top.moveTo(L,base);
+      for(let j=0;j<NB;j++){
+        const x=L+j/(NB-1)*wd,e=.45+.55*Math.pow(Math.sin(Math.PI*(j+.5)/NB),.6),y=base-row[j]*e*amp-Math.sin(j*1.7+q)*.6*sc;
+        if(j===0)top.lineTo(x,y);else top.quadraticCurveTo(px,py,(px+x)/2,(py+y)/2);px=x;py=y;
+      }
+      top.lineTo(L+wd,base);
+      const fill=new Path2D(top);fill.lineTo(L+wd,h);fill.lineTo(L,h);fill.closePath();
+      c.fillStyle=BG;c.fill(fill);c.globalAlpha=.22+.78*u;c.lineWidth=.8+1.1*u;c.stroke(top);c.globalAlpha=1;
+    }
+    c.fillStyle='#a7a4b5';c.font='10.5px "Fragment Mono",monospace';c.textBaseline='alphabetic';
+    c.textAlign='left';c.fillText('30 Hz',x0,yF+34);c.textAlign='right';c.fillText('16 kHz',x1,yF+34);c.textAlign='center';c.fillText('log frequency',cx,yF+34);
+    r.liveT=S.peakF?'peak '+noteName(S.peakF)+' / '+fmtHz(S.peakF):'listening';
+  }};
+rooms[1].init=r=>ridge.init(r);rooms[1].draw=ridge.draw.bind(ridge);
+
+/* 2 · Bloom */
+const NP=1500;
+const bloom={r:null,x:new Float32Array(NP),y:new Float32Array(NP),vx:new Float32Array(NP),vy:new Float32Array(NP),l:new Float32Array(NP),m:new Float32Array(NP),ci:new Uint8Array(NP),s:new Float32Array(NP),ptr:0,carry:0,alive:0,
+  spawn(cx,cy,idx,sp){const i=this.ptr;this.ptr=(this.ptr+1)%NP;const a=Math.random()*6.2832,s=sp*rnd(.3,1);
+    this.x[i]=cx+Math.cos(a)*rnd(0,16);this.y[i]=cy+Math.sin(a)*rnd(0,16);this.vx[i]=Math.cos(a)*s;this.vy[i]=Math.sin(a)*s;
+    this.m[i]=this.l[i]=rnd(2,4.2);this.ci[i]=cIdx(idx/(NB-1));this.s[i]=rnd(1.2,2.8)},
+  pick(){for(let t=0;t<8;t++){const i=Math.floor(Math.random()*NB);if(Math.random()<Math.pow(S.B[i],.8)+.02)return i}return bandOf(S.peakFs)},
+  burst(idx,n){const r=this.r;if(!r||RM)return;const cx=r.w*.46,cy=r.h*.5;for(let k=0;k<n;k++)this.spawn(cx,cy,idx+rnd(-3,3),rnd(120,300))},
+  draw(r,dt){
+    this.r=r;const c=r.c,w=r.w,h=r.h,cx=w*.46,cy=h*.5;
+    c.globalCompositeOperation='source-over';c.globalAlpha=1;c.fillStyle=RM?BG:'rgba(7,6,10,.17)';c.fillRect(0,0,w,h);
+    this.carry+=(1+S.level*8)*dt*60*(RM?.4:1);while(this.carry>=1){this.carry--;this.spawn(cx,cy,this.pick(),(40+S.level*220)*(1+S.bass))}
+    if(S.beat>.4&&!RM&&Math.random()<.5)for(let k=0;k<Math.round(S.beat*30);k++)this.spawn(cx,cy,this.pick(),rnd(100,260));
+    c.globalCompositeOperation='lighter';
+    const gr=70+S.bass*170,pc=LUTV[cIdx(bandOf(S.peakFs)/NB)],g=c.createRadialGradient(cx,cy,0,cx,cy,gr);
+    g.addColorStop(0,`rgba(${pc},${.08+S.bass*.15})`);g.addColorStop(1,`rgba(${pc},0)`);c.fillStyle=g;c.fillRect(cx-gr,cy-gr,gr*2,gr*2);
+    const drag=Math.pow(.42,dt),pxx=r.px,pyy=r.py;let alive=0,last=-1;
+    for(let i=0;i<NP;i++){
+      if(this.l[i]<=0)continue;this.l[i]-=dt;if(this.l[i]<=0)continue;alive++;
+      let dx=this.x[i]-cx,dy=this.y[i]-cy;const d=Math.hypot(dx,dy)+.001;
+      this.vx[i]+=-dy/d*22*dt;this.vy[i]+=dx/d*22*dt;
+      if(pxx!==null){const ax=pxx-this.x[i],ay=pyy-this.y[i],ad=Math.hypot(ax,ay)+30;this.vx[i]+=ax/ad*70*dt;this.vy[i]+=ay/ad*70*dt}
+      this.vx[i]*=drag;this.vy[i]*=drag;this.x[i]+=this.vx[i]*dt;this.y[i]+=this.vy[i]*dt;
+      const a=Math.pow(this.l[i]/this.m[i],.8),s=this.s[i];
+      if(this.ci[i]!==last){c.fillStyle=LUT[this.ci[i]];last=this.ci[i]}
+      c.globalAlpha=a;c.fillRect(this.x[i]-s/2,this.y[i]-s/2,s,s);
+    }
+    c.globalAlpha=1;this.alive=alive;r.liveT=alive+' grains in the air';
+  }};
+rooms[2].draw=bloom.draw.bind(bloom);bloom.r=null;
+
+/* 3 · Figure (lissajous of the waveform) */
+const fig={amp:.3,
+  draw(r,dt){
+    const c=r.c,w=r.w,h=r.h,wide=w>760,cx=wide?w*.4:w/2,cy=h/2,sz=Math.min(wide?w*.6:w*.9,h*.9)*.46;
+    c.globalCompositeOperation='source-over';c.globalAlpha=1;c.fillStyle=RM?BG:'rgba(7,6,10,.2)';c.fillRect(0,0,w,h);
+    c.strokeStyle='rgba(236,233,242,.07)';c.lineWidth=1;c.beginPath();
+    for(let k=-4;k<=4;k++){const o=k*sz/4;c.moveTo(cx+o,cy-sz);c.lineTo(cx+o,cy+sz);c.moveTo(cx-sz,cy+o);c.lineTo(cx+sz,cy+o)}c.stroke();
+    c.strokeStyle='rgba(236,233,242,.2)';c.strokeRect(cx-sz,cy-sz,sz*2,sz*2);
+    const wv=S.wave,N=wv.length;let mx=0;for(let i=0;i<N;i++){const a=Math.abs(wv[i]-128);if(a>mx)mx=a}
+    this.amp=Math.max(mx/128,this.amp*(1-dt*.4));const sc=sz/Math.max(this.amp,.14);
+    const f0=S.peakFs||110,lag=clamp(Math.round(SR/f0/4),3,240),ci=cIdx(bandOf(f0)/NB);
+    c.globalCompositeOperation='lighter';c.lineJoin='round';
+    for(const [lg,al,lw,col] of[[lag*2,.2,1,LUT[cIdx((ci/255+.25)%1)]],[lag,.14,5,LUT[ci]],[lag,.9,1.3,LUT[ci]]]){
+      c.strokeStyle=col;c.globalAlpha=al;c.lineWidth=lw;c.beginPath();
+      for(let i=0;i<N-lg;i++){const x=cx+(wv[i]-128)/128*sc,y=cy+(wv[i+lg]-128)/128*sc;i?c.lineTo(x,y):c.moveTo(x,y)}c.stroke();
+    }
+    c.globalAlpha=1;
+    r.liveT='lag '+lag+' smp / f0 '+f0.toFixed(1)+' Hz';
+  }};
+rooms[3].draw=fig.draw.bind(fig);
+
+/* 4 · Sediment (spectrogram) */
+const SEDSPEED=62;
+const sed={r:rooms[4],acc:0,pend:null,
+  mark(name){this.pend={name,px:0,first:true}},
+  rulers(r){
+    const box=$('#rulers'),h=r.h,top=34,bot=20;box.innerHTML='';
+    for(const [f,t] of[[110,'110 Hz'],[220,'220'],[440,'440'],[880,'880'],[1760,'1.76k'],[3520,'3.5k'],[7040,'7k']]){
+      const y=h-bot-(bandOf(f)+.5)/NB*(h-top-bot),d=document.createElement('div');d.className='rl';d.style.top=y+'px';d.innerHTML='<span>'+t+'</span>';box.appendChild(d)}
+  },
+  init(r){this.rulers(r);this.acc=0;this.pend=null},
+  draw(r,dt){
+    const c=r.c,cv=r.cv,W=cv.width,H=cv.height,d=r.d;c.setTransform(1,0,0,1,0,0);
+    const top=Math.round(34*d),bot=H-Math.round(20*d),rowH=(bot-top)/NB;
+    if(r.fresh){r.fresh=false;c.globalCompositeOperation='source-over';c.globalAlpha=1;c.fillStyle=BG;c.fillRect(0,0,W,H);
+      const st=Math.round(3*d);for(let x=0;x<W;x+=st){const f=Math.pow(x/W,1.7);for(let i=0;i<NB;i++){const v=Math.pow(S.B[i],1.8)*(.55+.45*Math.sin(x*.004/d+i*1.3))*f;if(v<.08)continue;
+        c.globalAlpha=Math.min(1,v*1.1);c.fillStyle=LUT[cIdx(i/(NB-1))];c.fillRect(x,bot-(i+1)*rowH,st,rowH+1)}}c.globalAlpha=1}
+    this.acc+=dt*SEDSPEED*d;const sh=Math.floor(this.acc);if(sh<1){return}this.acc-=sh;
+    c.globalCompositeOperation='copy';c.drawImage(cv,-sh,0);c.globalCompositeOperation='source-over';
+    const x=W-sh;c.globalAlpha=1;c.fillStyle=BG;c.fillRect(x,0,sh,H);
+    for(let i=0;i<NB;i++){const v=Math.pow(S.B[i],1.8);if(v<.08)continue;c.globalAlpha=Math.min(1,v*1.2);c.fillStyle=LUT[cIdx(i/(NB-1))];c.fillRect(x,bot-(i+1)*rowH,sh,rowH+1)}
+    c.globalAlpha=1;
+    const p=this.pend;
+    if(p){
+      if(p.first){p.first=false;c.fillStyle='rgba(236,233,242,.3)';c.fillRect(W-Math.max(1,Math.round(d)),Math.round(8*d),Math.max(1,Math.round(d)),H)}
+      p.px+=sh;
+      if(p.px>=90*d){c.fillStyle='#cfccda';c.font=Math.round(11.5*d)+'px "Fragment Mono",monospace';c.textAlign='left';c.textBaseline='middle';c.fillText(p.name,W-90*d+6*d,Math.round(20*d));this.pend=null}
+    }
+    r.liveT='chord '+score.chord.n+'  +'+Math.round((performance.now()-score.at)/1000)+' s';
+  }};
+sed.r=null;
+rooms[4].init=r=>{sed.r=r;sed.init(r)};rooms[4].draw=sed.draw.bind(sed);
+
+/* ---------- sizing ---------- */
+function fit(r){
+  const b=r.stage.getBoundingClientRect();r.w=Math.max(1,b.width);r.h=Math.max(1,b.height);
+  const d=r.d=Math.min(window.devicePixelRatio||1,innerWidth<760?1.5:2);
+  r.cv.width=Math.round(r.w*d);r.cv.height=Math.round(r.h*d);r.c.setTransform(d,0,0,d,0,0);
+  r.c.fillStyle=BG;r.c.fillRect(0,0,r.w,r.h);r.fresh=true;r.init&&r.init(r);
+}
+const ro=new ResizeObserver(es=>{es.forEach(e=>{const r=rooms.find(q=>q.stage===e.target);if(r)fit(r)})});
+rooms.forEach(r=>ro.observe(r.stage));
+const io=new IntersectionObserver(es=>es.forEach(e=>{const r=rooms.find(q=>q.el===e.target);if(r){r.vis=e.isIntersecting;if(r.i===2&&!e.isIntersecting)r.px=r.py=null}}),{rootMargin:'80px'});
+rooms.forEach(r=>io.observe(r.el));
+
+/* ---------- active room, mood, rail ---------- */
+let active=-1;
+function pickActive(){
+  const mid=innerHeight/2;let best=0,bd=1e9;
+  rooms.forEach(r=>{const b=r.el.getBoundingClientRect(),d=Math.abs((b.top+b.bottom)/2-mid)-(b.top<mid&&b.bottom>mid?1e5:0);if(d<bd){bd=d;best=r.i}});
+  if(best!==active){active=best;Object.assign(mood,MOODS[best]);score.rate=mood.rate;applyMood();
+    $$('.rail button').forEach((b,i)=>b.setAttribute('aria-current',String(i===best)))}
+}
+let st=0;addEventListener('scroll',()=>{if(!st)st=requestAnimationFrame(()=>{st=0;pickActive()})},{passive:true});
+const go=i=>rooms[i].el.scrollIntoView({behavior:RM?'auto':'smooth',block:'start'});
+$$('.rail button').forEach(b=>b.addEventListener('click',()=>go(+b.dataset.go)));
+
+/* ---------- interaction ---------- */
+$('#snd').addEventListener('click',()=>setSound(!soundWanted));
+$('#mic').addEventListener('click',()=>setMic(!mic.on));
+const cta=$('#cta'),hint=$('#hint');
+$('#enter').addEventListener('click',async()=>{const ok=await setSound(true);cta.hidden=true;hint.hidden=false;
+  hint.textContent=ok?'The room is playing. Scroll, press 1–5, or click anywhere to add a note of your own. Sound and mic live at the top right.':'Sound could not start here, so the rooms run on the simulated signal. Nothing is lost: it follows the same score.'});
+$('#quiet').addEventListener('click',()=>{cta.hidden=true;hint.hidden=false;
+  hint.textContent='Silent, but not empty. The rooms are following a simulation of the same score the synth would play. Press S for sound whenever you like, or click a room to pluck a note.'});
+addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey)return;const k=e.key.toLowerCase();
+  if(k>='1'&&k<='5')go(+k-1);else if(k==='s')setSound(!soundWanted);else if(k==='m')setMic(!mic.on);
+});
+rooms.forEach(r=>{
+  r.el.addEventListener('pointermove',e=>{if(r.i!==2||e.pointerType==='touch')return;const b=r.stage.getBoundingClientRect();
+    if(e.clientY>=b.top&&e.clientY<=b.bottom){r.px=e.clientX-b.left;r.py=e.clientY-b.top}else r.px=r.py=null});
+  r.el.addEventListener('pointerleave',()=>{r.px=r.py=null});
+  r.el.addEventListener('pointerdown',e=>{
+    if(e.target.closest('button,a,.plate'))return;
+    const b=r.stage.getBoundingClientRect();if(e.clientY<b.top||e.clientY>b.bottom)return;
+    const fx=clamp((e.clientX-b.left)/b.width,0,.999),m=PLUCK[Math.floor(fx*PLUCK.length)];
+    score.emit('bell',{midi:m,vel:.9-.4*clamp((e.clientY-b.top)/b.height,0,1)});
+    const el=document.createElement('div'),ci=cIdx(bandOf(mtof(m))/NB);el.className='ring';el.style.cssText=`left:${e.clientX-b.left}px;top:${e.clientY-b.top}px;color:${LUT[ci]}`;
+    r.stage.appendChild(el);setTimeout(()=>el.remove(),1300);
+  });
+});
+
+/* ---------- hero lettering and hud ---------- */
+const word=$('#word'),letters=[];
+'RESONANCE'.split('').forEach((ch,i)=>{const s=document.createElement('span');s.className='l';s.textContent=ch;s.dataset.b=Math.round(8+i*(100/8));word.appendChild(s);letters.push(s)});
+const mc=$('#meter'),mx=mc.getContext('2d'),hud=$('#hud'),hSrc=$('#hSrc'),hChord=$('#hChord'),hNote=$('#hNote');
+const SRCN={SIM:'SIMULATED',SYNTH:'SYNTH',MIC:'MICROPHONE'};
+function drawHud(){
+  mx.clearRect(0,0,168,52);const n=28;
+  for(let i=0;i<n;i++){const v=S.B[Math.floor(i/n*NB)];const hh=Math.max(2,v*50);mx.fillStyle=LUT[cIdx(i/(n-1))];mx.globalAlpha=.4+.6*v;mx.fillRect(i*6,52-hh,4,hh)}mx.globalAlpha=1;
+  hud.dataset.src=S.src;hSrc.textContent=SRCN[S.src];
+  hChord.textContent=mic.on?'room is listening':score.chord.n+'  →  '+score.next.n;
+  hNote.textContent=S.peakF?noteName(S.peakF)+'  '+fmtHz(S.peakF):'—';
+}
+
+/* ---------- main loop ---------- */
+sim.setChord(score.chord,true);
+let last=performance.now(),fr=0,hudT=0,liveT=0;
+function loop(now){
+  requestAnimationFrame(loop);
+  if(document.hidden){last=now;return}
+  if(RM&&now-last<250)return;
+  const dt=Math.min((now-last)/1000,.05);last=now;S.t+=dt;fr++;
+  S.needWave=rooms[3].vis;
+  analyse(dt);
+  for(const r of rooms)if(r.vis&&r.draw)r.draw(r,dt);
+  if(rooms[0].vis&&!RM&&fr%3===0)letters.forEach(s=>{const v=S.B[+s.dataset.b];s.style.transform=`scaleY(${(1+v*.13).toFixed(3)})`;s.style.textShadow=`0 0 ${(v*30)|0}px ${LUT[cIdx(+s.dataset.b/NB)]}`});
+  hudT+=dt;if(hudT>.2){hudT=0;drawHud()}
+  liveT+=dt;if(liveT>.25){liveT=0;rooms.forEach(r=>{if(r.vis&&r.live&&r.liveT)r.live.textContent=r.liveT})}
+}
+setInterval(()=>score.tick(performance.now()),200);
+requestAnimationFrame(loop);
+pickActive();refreshUI();
+window.RES={S,A,mic,score,sim,setSound,setMic};
+})();
+</script>
+</body>
+</html>

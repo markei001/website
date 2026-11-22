@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEON DRIVE — Synthwave Festival 2027</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Mr+Dafoe&family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0018; --ink:#f6e9ff; --muted:#b39ccc;
+    --pink:#ff2bd6; --hot:#ff2975; --cyan:#00f0ff; --sun:#ffd319; --violet:#7b2bff;
+    --line:rgba(255,43,214,.35);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:"Chakra Petch",monospace;overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+  /* sky gradient sits behind the transparent WebGL canvas */
+  .sky{position:fixed;inset:0;z-index:0;background:linear-gradient(#05000f 0%,#1a0033 38%,#4a0b5e 52%,#a3166e 60%,#1a0033 61%,#0b0018 100%)}
+  .night{position:fixed;inset:0;z-index:0;background:linear-gradient(#000 0%,#020024 50%,#0b0018);opacity:0;pointer-events:none}
+  #gl{position:fixed;inset:0;width:100%;height:100%;z-index:1}
+  /* VHS feel: scanlines + vignette */
+  .scan{position:fixed;inset:0;z-index:90;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px);mix-blend-mode:multiply}
+  .vig{position:fixed;inset:0;z-index:89;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.65))}
+  main{position:relative;z-index:5}
+
+  nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:20px clamp(16px,4vw,44px)}
+  .logo{font-family:Audiowide;font-size:18px;letter-spacing:.12em;text-shadow:0 0 12px var(--pink)}
+  .logo span{color:var(--cyan);text-shadow:0 0 12px var(--cyan)}
+  .nlinks{display:flex;gap:28px;font-size:14px;text-transform:uppercase;letter-spacing:.15em}
+  .nlinks a{opacity:.75;transition:all .2s}
+  .nlinks a:hover{opacity:1;color:var(--cyan);text-shadow:0 0 10px var(--cyan)}
+  @media(max-width:760px){.nlinks{display:none}}
+  .neon-btn{display:inline-block;padding:14px 26px;border:2px solid var(--pink);color:#fff;font-family:Audiowide;font-size:14px;letter-spacing:.12em;text-transform:uppercase;
+    box-shadow:0 0 12px var(--pink),inset 0 0 12px rgba(255,43,214,.5);text-shadow:0 0 8px var(--pink);transition:all .25s;background:rgba(255,43,214,.08);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+  .neon-btn:hover{background:var(--pink);color:#12001f;text-shadow:none;box-shadow:0 0 40px var(--pink)}
+  .neon-btn.cyan{border-color:var(--cyan);box-shadow:0 0 12px var(--cyan),inset 0 0 12px rgba(0,240,255,.4);text-shadow:0 0 8px var(--cyan);background:rgba(0,240,255,.06)}
+  .neon-btn.cyan:hover{background:var(--cyan);color:#001;box-shadow:0 0 40px var(--cyan)}
+
+  section{position:relative;padding:120px clamp(16px,6vw,90px)}
+  .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:16vh;text-align:center}
+  .date{font-size:clamp(13px,1.3vw,16px);letter-spacing:.45em;text-transform:uppercase;color:var(--cyan);text-shadow:0 0 10px var(--cyan);margin-bottom:18px}
+  /* 80s chrome lettering */
+  .chrome{font-family:Audiowide;font-size:clamp(58px,12.5vw,200px);line-height:.9;letter-spacing:.02em;position:relative;
+    background:linear-gradient(180deg,#fff 0%,#d6f9ff 30%,#4ad7ff 47%,#1a0638 50%,#ff5bd8 56%,#ffd1f4 75%,#fff 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.35);
+    filter:drop-shadow(0 0 18px rgba(255,43,214,.55)) drop-shadow(0 6px 0 #3a0a5c)}
+  .script{font-family:"Mr Dafoe",cursive;color:var(--hot);font-size:clamp(48px,7vw,110px);transform:rotate(-8deg);margin-top:-.5em;line-height:1;
+    text-shadow:0 0 6px #fff,0 0 18px var(--hot),0 0 40px var(--hot);animation:flicker 4s infinite}
+  @keyframes flicker{0%,19%,21%,62%,64%,100%{opacity:1}20%,63%{opacity:.35}}
+  .countdown{display:flex;gap:clamp(10px,2vw,22px);margin:46px 0 36px}
+  .countdown div{min-width:clamp(64px,8vw,96px);padding:14px 8px;border:1px solid var(--line);background:rgba(20,0,40,.55);backdrop-filter:blur(6px)}
+  .countdown b{display:block;font-family:Audiowide;font-size:clamp(26px,3.4vw,44px);color:#fff;text-shadow:0 0 12px var(--pink);font-variant-numeric:tabular-nums}
+  .countdown span{font-size:11px;letter-spacing:.3em;color:var(--muted)}
+  .hero .row{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+  .speed{position:fixed;right:clamp(16px,3vw,40px);bottom:24px;z-index:60;text-align:right;font-family:Audiowide;color:var(--cyan);text-shadow:0 0 10px var(--cyan)}
+  .speed b{font-size:34px;font-variant-numeric:tabular-nums}
+  .speed span{display:block;font-size:10px;letter-spacing:.3em;color:var(--muted);text-shadow:none}
+
+  /* marquee tape */
+  .tape-wrap{overflow:hidden;padding:24px 0;position:relative;z-index:6}
+  .tape{overflow:hidden;background:var(--sun);color:#1a0033;transform:rotate(-2deg) scale(1.05);padding:14px 0;box-shadow:0 0 40px rgba(255,211,25,.4);position:relative;z-index:6}
+  .tape .t{display:flex;width:max-content;animation:marq 22s linear infinite;font-family:Audiowide;font-size:clamp(18px,2.2vw,28px);gap:40px;white-space:nowrap}
+  @keyframes marq{to{transform:translateX(-50%)}}
+
+  /* panels sit on glassy dark so the road shows through faintly */
+  .panel{background:linear-gradient(rgba(11,0,24,.82),rgba(11,0,24,.92));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .title{font-family:Audiowide;font-size:clamp(38px,6vw,86px);line-height:1;margin-bottom:44px;text-transform:uppercase}
+  .title small{display:block;font-family:"Chakra Petch";font-size:14px;letter-spacing:.4em;color:var(--cyan);margin-bottom:14px;text-shadow:0 0 10px var(--cyan)}
+  .title i{font-style:normal;color:var(--pink);text-shadow:0 0 20px var(--pink)}
+
+  .tabs{display:flex;gap:10px;margin-bottom:30px;flex-wrap:wrap}
+  .tab{padding:10px 20px;border:1px solid var(--line);font-family:Audiowide;letter-spacing:.1em;font-size:14px;transition:all .2s}
+  .tab.on{background:var(--pink);border-color:var(--pink);color:#12001f;box-shadow:0 0 20px var(--pink)}
+  .lineup{list-style:none;border-top:1px solid var(--line)}
+  .lineup li{display:grid;grid-template-columns:80px 1fr auto;gap:20px;align-items:center;padding:22px 0;border-bottom:1px solid var(--line);cursor:default;transition:padding .3s,background .3s;animation:slide .6s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--i) * 60ms)}
+  @keyframes slide{from{opacity:0;transform:translateX(-40px)}}
+  .lineup li:hover{padding-left:16px;background:linear-gradient(90deg,rgba(255,43,214,.15),transparent)}
+  .lineup .time{color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums}
+  .lineup .name{font-family:Audiowide;font-size:clamp(24px,4vw,56px);line-height:1}
+  .lineup li:hover .name{animation:glitch .35s steps(2) infinite;color:#fff}
+  @keyframes glitch{0%{text-shadow:3px 0 var(--cyan),-3px 0 var(--pink);transform:translate(0)}50%{text-shadow:-4px 1px var(--cyan),4px -1px var(--pink);transform:translate(2px,-1px)}100%{text-shadow:2px -1px var(--cyan),-2px 1px var(--pink);transform:translate(-1px,1px)}}
+  .lineup .stage{font-size:12px;letter-spacing:.2em;padding:6px 12px;border:1px solid currentColor;text-transform:uppercase}
+  .s-sun{color:var(--sun)} .s-grid{color:var(--cyan)} .s-palm{color:var(--pink)}
+  @media(max-width:600px){.lineup li{grid-template-columns:1fr auto}.lineup .time{grid-column:1/-1}}
+
+  /* stages: cards tilt up like road signs as they enter */
+  .stages{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;perspective:900px}
+  @media(max-width:900px){.stages{grid-template-columns:1fr}}
+  .stage-card{position:relative;padding:30px;min-height:360px;border:2px solid var(--c);background:linear-gradient(180deg,rgba(0,0,0,.2),rgba(0,0,0,.6)),var(--bgc);
+    box-shadow:0 0 24px color-mix(in srgb,var(--c) 60%,transparent),inset 0 0 30px color-mix(in srgb,var(--c) 25%,transparent);display:flex;flex-direction:column;overflow:hidden;
+    transform:rotateX(65deg) translateY(120px);opacity:0;transform-origin:50% 100%;transition:transform 1.1s cubic-bezier(.2,.8,.2,1),opacity 1.1s;transition-delay:var(--d)}
+  .stage-card.in{transform:none;opacity:1}
+  .stage-card::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 2px,transparent 2px 4px);pointer-events:none}
+  .stage-card .ico{font-size:64px;margin-bottom:auto;filter:drop-shadow(0 0 14px var(--c))}
+  .stage-card h3{font-family:Audiowide;font-size:30px;color:var(--c);text-shadow:0 0 14px var(--c)}
+  .stage-card p{color:var(--muted);margin-top:10px;line-height:1.5}
+  .stage-card .cap{position:absolute;top:24px;right:24px;font-size:12px;letter-spacing:.2em;color:var(--c)}
+
+  /* tickets */
+  .tickets{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+  @media(max-width:900px){.tickets{grid-template-columns:1fr}}
+  .ticket{position:relative;background:linear-gradient(135deg,#25003f,#13002a);border:1px solid var(--line);padding:30px 30px 26px;transition:transform .4s cubic-bezier(.3,1.4,.5,1),box-shadow .4s}
+  .ticket:hover{transform:translateY(-10px) rotate(-1deg);box-shadow:0 20px 60px rgba(255,43,214,.35)}
+  .ticket.vip{background:linear-gradient(135deg,#ff2bd6,#7b2bff);border:0}
+  .ticket .kind{font-size:12px;letter-spacing:.35em;color:var(--cyan)}
+  .ticket.vip .kind{color:#fff}
+  .ticket h3{font-family:Audiowide;font-size:34px;margin:12px 0}
+  .ticket .price{font-family:Audiowide;font-size:58px;color:var(--sun);text-shadow:0 0 18px rgba(255,211,25,.6)}
+  .ticket.vip .price{color:#fff;text-shadow:0 0 20px rgba(255,255,255,.6)}
+  .ticket .perf{position:relative;border-top:2px dashed rgba(255,255,255,.25);margin:26px -30px 20px}
+  /* punched notches on each side of the tear line */
+  .ticket .perf::before,.ticket .perf::after{content:"";position:absolute;top:-15px;width:28px;height:28px;border-radius:50%;background:#0b0018}
+  .ticket .perf::before{left:-15px}.ticket .perf::after{right:-15px}
+  .ticket ul{list-style:none;display:grid;gap:8px;color:var(--muted);font-size:15px;margin-bottom:22px}
+  .ticket.vip ul{color:#fde8ff}
+  .ticket li::before{content:"▸ ";color:var(--pink)}
+  .ticket.vip li::before{color:var(--sun)}
+  .ticket .neon-btn{width:100%;text-align:center}
+  .ticket.vip .neon-btn{border-color:#fff;box-shadow:0 0 14px #fff;text-shadow:none}
+  .barcode{height:34px;margin-top:18px;background:repeating-linear-gradient(90deg,#fff 0 2px,transparent 2px 4px,#fff 4px 5px,transparent 5px 9px,#fff 9px 12px,transparent 12px 14px);opacity:.5}
+
+  .finale{min-height:90vh;display:grid;place-items:center;text-align:center}
+  .insert{font-family:Audiowide;font-size:clamp(40px,8vw,120px);color:var(--sun);text-shadow:0 0 30px rgba(255,211,25,.8);animation:blink 1.1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .finale p{color:var(--muted);margin:20px 0 34px;letter-spacing:.2em;text-transform:uppercase}
+
+  .rise{opacity:0;transform:translateY(50px);transition:all 1s cubic-bezier(.2,.8,.2,1)}
+  .rise.in{opacity:1;transform:none}
+
+  footer{position:relative;z-index:5;padding:30px clamp(16px,6vw,90px) 84px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:13px;color:var(--muted);border-top:1px solid var(--line);background:#07000f}
+  .back{position:fixed;left:18px;bottom:18px;z-index:95;font-size:12px;padding:8px 14px;border:1px solid var(--line);color:var(--muted);background:rgba(11,0,24,.8)}
+  .back:hover{color:var(--cyan)}
+</style>
+</head>
+<body>
+<div class="sky"></div>
+<div class="night" id="night"></div>
+<canvas id="gl"></canvas>
+<div class="vig"></div>
+<div class="scan"></div>
+<a class="back" href="../index.html">◂ all sites</a>
+<div class="speed"><b id="kmh">88</b> <small>MPH</small><span>scroll to accelerate</span></div>
+
+<nav>
+  <a class="logo" href="#">NEON<span>DRIVE</span></a>
+  <div class="nlinks"><a href="#lineup">Lineup</a><a href="#stages">Stages</a><a href="#tickets">Tickets</a></div>
+  <a class="neon-btn cyan" href="#tickets" style="padding:10px 18px;font-size:12px">Tickets</a>
+</nav>
+
+<main>
+  <section class="hero">
+    <div class="date">12—14 Aug 2027 · Mojave Desert</div>
+    <h1 class="chrome">NEON<br>DRIVE</h1>
+    <div class="script">festival</div>
+    <div class="countdown" id="cd">
+      <div><b id="d">000</b><span>DAYS</span></div><div><b id="h">00</b><span>HRS</span></div><div><b id="m">00</b><span>MIN</span></div><div><b id="s">00</b><span>SEC</span></div>
+    </div>
+    <div class="row"><a class="neon-btn" href="#tickets">Get tickets</a><a class="neon-btn cyan" href="#lineup">See lineup</a></div>
+  </section>
+
+  <div class="tape-wrap"><div class="tape"><div class="t" id="tape"></div></div></div>
+
+  <section id="lineup" class="panel">
+    <h2 class="title rise"><small>// 3 nights · 18 acts</small>The <i>lineup</i></h2>
+    <div class="tabs" id="tabs">
+      <button class="tab on" data-day="fri">FRI 12</button><button class="tab" data-day="sat">SAT 13</button><button class="tab" data-day="sun">SUN 14</button>
+    </div>
+    <ul class="lineup" id="list"></ul>
+  </section>
+
+  <section id="stages">
+    <h2 class="title rise"><small>// choose your exit</small>Three <i>stages</i></h2>
+    <div class="stages">
+      <div class="stage-card" style="--c:var(--sun);--bgc:linear-gradient(#3b0a2e,#120018);--d:0s"><span class="cap">CAP 20,000</span><div class="ico">☀</div><h3>SUNSET</h3><p>The main stage faces the sun that never quite sets. Headliners, lasers, and a 40-metre LED horizon.</p></div>
+      <div class="stage-card" style="--c:var(--cyan);--bgc:linear-gradient(#002a3b,#000f18);--d:.15s"><span class="cap">CAP 8,000</span><div class="ico">▦</div><h3>THE GRID</h3><p>Darkwave and outrun in a hangar wrapped in projection mapping. Bring sunglasses. At night.</p></div>
+      <div class="stage-card" style="--c:var(--pink);--bgc:linear-gradient(#3b0035,#14001a);--d:.3s"><span class="cap">CAP 3,000</span><div class="ico">🌴</div><h3>PALM ARCADE</h3><p>Chillwave by the pool, 200 free-play arcade cabinets, and the world's largest roller rink.</p></div>
+    </div>
+  </section>
+
+  <section id="tickets" class="panel">
+    <h2 class="title rise"><small>// limited release</small>Get your <i>pass</i></h2>
+    <div class="tickets">
+      <div class="ticket rise"><div class="kind">STANDARD</div><h3>Cruiser</h3><div class="price">$149</div><div class="perf"></div><ul><li>3-day festival access</li><li>All three stages</li><li>Free arcade play</li></ul><a class="neon-btn" href="#">Buy</a><div class="barcode"></div></div>
+      <div class="ticket vip rise" style="transition-delay:.12s"><div class="kind">★ MOST POPULAR</div><h3>Turbo VIP</h3><div class="price">$349</div><div class="perf"></div><ul><li>Everything in Cruiser</li><li>Fast-lane entry</li><li>Backstage lounge &amp; bar</li><li>Limited chrome jacket</li></ul><a class="neon-btn" href="#">Buy</a><div class="barcode"></div></div>
+      <div class="ticket rise" style="transition-delay:.24s"><div class="kind">ROAD TRIP</div><h3>Convoy</h3><div class="price">$599</div><div class="perf"></div><ul><li>Pass for 4 people</li><li>Car camping spot</li><li>Sunrise breakfast</li></ul><a class="neon-btn" href="#">Buy</a><div class="barcode"></div></div>
+    </div>
+  </section>
+
+  <section class="finale">
+    <div>
+      <div class="insert">INSERT COIN</div>
+      <p>Player one, the road is waiting</p>
+      <a class="neon-btn" href="#tickets">Press start</a>
+    </div>
+  </section>
+</main>
+<footer><span>© 1987—2027 Neon Drive Festival · fictional event</span><span>Three.js shader terrain · scroll-speed driving</span></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ============ countdown ============ */
+const eventDate = new Date('2027-08-12T18:00:00');
+const pad = (n, l = 2) => String(Math.max(0, n)).padStart(l, '0');
+function tickCD() {
+  let diff = Math.max(0, eventDate - new Date()) / 1000;
+  const d = Math.floor(diff / 86400); diff -= d * 86400;
+  const h = Math.floor(diff / 3600); diff -= h * 3600;
+  const m = Math.floor(diff / 60), s = Math.floor(diff - m * 60);
+  document.getElementById('d').textContent = pad(d, 3); document.getElementById('h').textContent = pad(h);
+  document.getElementById('m').textContent = pad(m); document.getElementById('s').textContent = pad(s);
+}
+tickCD(); setInterval(tickCD, 1000);
+
+document.getElementById('tape').innerHTML = ('★ 18 ARTISTS ★ 3 STAGES ★ 200 ARCADE CABINETS ★ 1 SUNSET THAT NEVER ENDS ').repeat(4).split('★').join('<span>★</span>');
+
+/* ============ lineup tabs ============ */
+const days = {
+  fri: [['19:00', 'Palm Wave', 'palm'], ['20:30', 'VHS Dreams', 'grid'], ['21:15', 'Laser Lotus', 'palm'], ['22:00', 'Chrome Heart', 'sun'], ['23:30', 'Nightcall 88', 'grid'], ['01:00', 'Midnight Arcade', 'sun']],
+  sat: [['18:30', 'Magnetic Tape', 'palm'], ['20:00', 'Pixel Princess', 'grid'], ['21:00', 'Turbo Kid', 'sun'], ['22:15', 'Delorean Soul', 'palm'], ['23:30', 'Hyperdrive', 'grid'], ['01:00', 'Sunset Riders', 'sun']],
+  sun: [['18:00', 'Cassette Club', 'palm'], ['19:30', 'Retrograde', 'grid'], ['21:00', 'Ocean Drive 86', 'palm'], ['22:00', 'Starfighter', 'grid'], ['23:00', 'Neon Samurai', 'sun'], ['00:30', 'Afterglow', 'sun']]
+};
+const stageName = { sun: 'Sunset', grid: 'The Grid', palm: 'Palm Arcade' };
+function showDay(day) {
+  document.getElementById('list').innerHTML = days[day].map(([t, n, s], i) =>
+    `<li style="--i:${i}"><span class="time">${t}</span><span class="name">${n}</span><span class="stage s-${s}">${stageName[s]}</span></li>`).join('');
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.day === day));
+}
+document.getElementById('tabs').addEventListener('click', e => { if (e.target.dataset.day) showDay(e.target.dataset.day); });
+showDay('fri');
+
+/* ============ reveal ============ */
+const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && e.target.classList.add('in')), { threshold: .2 });
+document.querySelectorAll('.rise, .stage-card').forEach(el => io.observe(el));
+
+/* ============ THREE.JS: infinite synthwave highway ============ */
+const canvas = document.getElementById('gl');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(70, 1, .1, 200);
+
+const terrainU = { uOffset: { value: 0 }, uTime: { value: 0 } };
+const terrain = new THREE.Mesh(
+  new THREE.PlaneGeometry(44, 64, 176, 256).rotateX(-Math.PI / 2),
+  new THREE.ShaderMaterial({
+    uniforms: terrainU, transparent: true, extensions: { derivatives: true },
+    vertexShader: `
+      precision highp float;
+      uniform float uOffset;
+      varying vec2 vGrid; varying float vH; varying float vDist;
+      float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+      float noise(vec2 p){
+        vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f);
+        return mix(mix(hash(i), hash(i + vec2(1, 0)), f.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x), f.y);
+      }
+      void main(){
+        vec3 p = position;
+        float z = p.z - uOffset;                       // scrolling world coordinate
+        float side = smoothstep(1.6, 7., abs(p.x));    // flat road in the middle
+        float h = noise(vec2(p.x * .32, z * .32)) * 1.6 + noise(vec2(p.x * .9, z * .9)) * .45;
+        h *= side * (1. + abs(p.x) * .22);
+        p.y += h;
+        vGrid = vec2(p.x, z); vH = h;
+        vec4 mv = modelViewMatrix * vec4(p, 1.);
+        vDist = -mv.z;
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: `
+      precision highp float;
+      varying vec2 vGrid; varying float vH; varying float vDist;
+      void main(){
+        vec2 g = vGrid * .8;
+        vec2 w = abs(fract(g - .5) - .5) / fwidth(g);
+        float line = 1. - min(min(w.x, w.y), 1.);
+        vec3 pink = vec3(1., .17, .84), cyan = vec3(0., .94, 1.), fill = vec3(.05, 0., .1);
+        float far = smoothstep(4., 34., vDist);
+        vec3 lc = mix(pink, mix(pink, cyan, .55), smoothstep(0., 3., vH));
+        vec3 col = mix(fill, lc * 1.4, line) + lc * .08 * smoothstep(.2, 3., vH);
+        // the road: two bright centre lines
+        float road = smoothstep(.07, .0, abs(abs(vGrid.x) - 1.5)) * step(abs(vGrid.x), 1.7);
+        col += vec3(1., .82, .1) * road * 1.2;
+        gl_FragColor = vec4(col, 1. - far);
+      }`
+  })
+);
+terrain.position.z = -22;
+scene.add(terrain);
+
+// retro sun with moving stripes
+const sunU = { uTime: { value: 0 } };
+const sun = new THREE.Mesh(new THREE.PlaneGeometry(26, 26), new THREE.ShaderMaterial({
+  uniforms: sunU, transparent: true, depthWrite: false,
+  vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }`,
+  fragmentShader: `
+    uniform float uTime; varying vec2 vUv;
+    void main(){
+      vec2 p = vUv * 2. - 1.;
+      float d = length(p), r = .52;
+      float disc = smoothstep(r, r - .006, d);
+      float y = (p.y + r) / (2. * r);                    // 0 bottom → 1 top of disc
+      vec3 col = mix(vec3(1., .16, .46), vec3(1., .83, .1), smoothstep(.05, .95, y));
+      float band = fract(p.y * 9. + uTime * .25);
+      float gap = mix(.0, .55, smoothstep(.55, .0, y));  // gaps widen toward the bottom
+      disc *= step(gap, band);
+      float glow = exp(-max(d - r, 0.) * 7.) * .55 * (1. - disc);
+      gl_FragColor = vec4(col * disc + vec3(1., .2, .6) * glow, disc + glow);
+    }`
+}));
+sun.position.set(0, 7, -60);
+sun.renderOrder = -1;
+scene.add(sun);
+
+// starfield
+{
+  const n = 1500, pos = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) { pos[i * 3] = (Math.random() - .5) * 220; pos[i * 3 + 1] = 6 + Math.random() * 60; pos[i * 3 + 2] = -70 - Math.random() * 30; }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: 0xffd6ff, size: .35, transparent: true, opacity: .8 })));
+}
+
+function resize() {
+  renderer.setSize(innerWidth, innerHeight, false);
+  camera.aspect = innerWidth / innerHeight;
+  camera.fov = innerWidth < innerHeight ? 85 : 70;
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize); resize();
+
+// scroll → speed + sunset
+let lastY = scrollY, boost = 0, prog = 0, progT = 0, mouseX = 0;
+addEventListener('pointermove', e => mouseX = e.clientX / innerWidth - .5);
+addEventListener('scroll', () => {
+  boost = Math.min(boost + Math.abs(scrollY - lastY) * .02, 14);
+  lastY = scrollY;
+  const max = document.documentElement.scrollHeight - innerHeight;
+  progT = max > 0 ? scrollY / max : 0;
+}, { passive: true });
+
+const kmh = document.getElementById('kmh'), night = document.getElementById('night');
+const clock = new THREE.Clock();
+let roll = 0;
+(function loop() {
+  const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
+  boost *= .95;
+  const speed = 4 + boost;
+  terrainU.uOffset.value += dt * speed;
+  sunU.uTime.value = t;
+  prog += (progT - prog) * .05;
+
+  camera.position.set(Math.sin(t * .4) * .25, 1.25 - prog * .45 + Math.sin(t * 2.2) * .02 * (1 + boost * .2), 6);
+  camera.lookAt(0, 1.1 - prog * .3, -20);
+  roll += (-mouseX * .12 - roll) * .05;
+  camera.rotation.z += roll;
+  sun.position.y = 7 - prog * 11;                    // the sun sets as you scroll down
+  night.style.opacity = Math.min(1, prog * 1.1);
+  kmh.textContent = Math.round(66 + speed * 5.5);
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
